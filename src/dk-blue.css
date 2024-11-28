@@ -1,0 +1,37 @@
+.hljs {
+    background: transparent; /* White background */
+    color: #ffffff;      /* Black text */
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace; /* Preferred monospaced font */
+    line-height: 1.5;
+  
+
+}
+.hljs-keyword,
+.hljs-built_in,
+.hljs-literal {
+    color: #1e90ff; /* Dodger blue for keywords */
+    font-weight: bold;
+}
+
+.hljs-string {
+    color: #4682b4; /* Steel blue for strings */
+}
+
+.hljs-number {
+    color: #4169e1; /* Royal blue for numbers */
+}
+
+.hljs-comment {
+    color: #708090; /* Slate gray for comments */
+    font-style: italic;
+}
+
+.hljs-title,
+.hljs-function {
+    color: #5f9ea0; /* Cadet blue for function names */
+}
+
+.hljs-attribute {
+    color: #6495ed; /* Cornflower blue for attributes */
+}

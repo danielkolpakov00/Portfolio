@@ -1,0 +1,264 @@
+{
+    "asset": {
+        "copyright": "2024 (c) Adobe Inc.",
+        "generator": "Adobe Substance 3D Stager - 3b65cae5d66550310f3fa94441098965a88f7a29",
+        "version": "2.0"
+    },
+    "accessors": [
+        {
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": 730,
+            "type": "VEC3",
+            "max": [
+                -0.0010799799347296358,
+                0.009149819612503052,
+                0.004941999912261963
+            ],
+            "min": [
+                -0.01592309959232807,
+                -0.009149819612503052,
+                -0.004941999912261963
+            ]
+        },
+        {
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 730,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 2,
+            "componentType": 5126,
+            "count": 730,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 3,
+            "componentType": 5126,
+            "count": 730,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 4,
+            "componentType": 5125,
+            "count": 2856,
+            "type": "SCALAR",
+            "max": [
+                729.0
+            ],
+            "min": [
+                0.0
+            ]
+        },
+        {
+            "bufferView": 5,
+            "componentType": 5126,
+            "count": 429,
+            "type": "VEC3",
+            "max": [
+                0.01592309959232807,
+                0.009073499590158463,
+                0.004941999912261963
+            ],
+            "min": [
+                0.0013596699573099614,
+                -0.009149719960987568,
+                -0.004941999912261963
+            ]
+        },
+        {
+            "bufferView": 6,
+            "componentType": 5126,
+            "count": 429,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 7,
+            "componentType": 5126,
+            "count": 429,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 8,
+            "componentType": 5126,
+            "count": 429,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 9,
+            "componentType": 5125,
+            "count": 1620,
+            "type": "SCALAR",
+            "max": [
+                428.0
+            ],
+            "min": [
+                0.0
+            ]
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 8760,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 8760,
+            "byteLength": 8760,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 17520,
+            "byteLength": 11680,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 29200,
+            "byteLength": 5840,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 35040,
+            "byteLength": 11424,
+            "target": 34963
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 46464,
+            "byteLength": 5148,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 51612,
+            "byteLength": 5148,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 56760,
+            "byteLength": 6864,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 63624,
+            "byteLength": 3432,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 67056,
+            "byteLength": 6480,
+            "target": 34963
+        }
+    ],
+    "buffers": [
+        {
+            "byteLength": 73536,
+            "uri": "DK_binary.bin"
+        }
+    ],
+    "materials": [
+        {
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.01089263055473566,
+                    0.14009764790534974,
+                    0.9475080966949463,
+                    1.0
+                ],
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.6000000238418579
+            },
+            "name": "material2",
+            "doubleSided": true,
+            "extensions": {
+                "KHR_materials_ior": {
+                    "ior": 1.600000023841858
+                }
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "name": "groupNumber_0_n3d",
+            "primitives": [
+                {
+                    "attributes": {
+                        "TEXCOORD_0": 3,
+                        "TANGENT": 2,
+                        "NORMAL": 1,
+                        "POSITION": 0
+                    },
+                    "indices": 4,
+                    "material": 0
+                }
+            ]
+        },
+        {
+            "name": "groupNumber_1_n3d",
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 5,
+                        "NORMAL": 6,
+                        "TANGENT": 7,
+                        "TEXCOORD_0": 8
+                    },
+                    "indices": 9,
+                    "material": 0
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "name": "working_cam_n3d"
+        },
+        {
+            "children": [
+                2,
+                3
+            ],
+            "translation": [
+                0.5565680265426636,
+                1.1930304765701295,
+                -0.007268982473760843
+            ],
+            "scale": [
+                100.0,
+                100.0,
+                100.0
+            ],
+            "name": "Asset 3_n3d"
+        },
+        {
+            "mesh": 0,
+            "name": "groupNumber_0_n3d"
+        },
+        {
+            "mesh": 1,
+            "name": "groupNumber_1_n3d"
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                1
+            ],
+            "name": "scene"
+        }
+    ],
+    "scene": 0,
+    "extensionsUsed": [
+        "KHR_materials_ior"
+    ]
+}

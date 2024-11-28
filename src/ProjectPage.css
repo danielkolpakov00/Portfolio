@@ -1,0 +1,93 @@
+/* General page layout */
+.project-page {
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  /* Navigation bar styling */
+  .navbar {
+    background-color: #4263eb;
+    color: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 1em 0;
+    font-weight: bold;
+  }
+  
+  .navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+  }
+  
+  .navbar a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Title styling */
+  .project-title {
+    text-align: center;
+    color: #4263eb;
+    font-size: 2em;
+    margin-top: 20px;
+  }
+  
+  /* Main content section */
+  .project-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+    background-color: #e8f0ff;
+    margin: 20px;
+    border-radius: 10px;
+  }
+  
+  /* Code block styling */
+  .code-block {
+    flex: 1;
+    max-width: 600px;
+    background-color: #dacdcd;
+    color: #fe0000;
+    padding: 1em;
+    border-radius: 10px;
+    
+  }
+  
+  /* Project description styling */
+  .project-description {
+    flex: 1;
+    color: white;
+    font-size: 1.1em;
+    padding: 1em;
+  }
+  
+  /* Footer text styling */
+  .footer-text {
+    text-align: center;
+    font-size: 1em;
+    color: #fcfcfc;
+    margin: 20px 0;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .project-description {
+    flex: 1;
+    color: #333; /* Adjust color if needed */
+    font-size: 1.1em;
+    padding: 1em;
+    text-align: center;
+    margin: 0 auto;
+  }
+  
+  .project-description h3 {
+    font-size: 1.75em;
+    color: #4263eb;
+    margin-bottom: 0.5em;
+  }

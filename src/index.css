@@ -1,0 +1,54 @@
+@font-face {
+  font-family: "Georama";
+  /* font-weight: 600;
+  font-style: italic; */
+  src: url('../src/assets/fonts/Georama-SemiBoldItalic.woff2') format('woff2');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* index.css */
+body {
+    background-color: #F5FDFF; /* Use the hex value of bg-offwhite */
+    margin: 0;
+    font-family: 'Georama', sans-serif; /* Add any default font styling */
+  }
+
+  #page-wrap.scale-with-border {
+    transform-origin: center;
+  }
+  
+
+
+  #outer-container, #page-wrap {
+    width: 100vw;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+
+/* index.css */
+#page-wrap {
+    transition: transform 0.3s ease, border 0.3s ease;
+  }
+  
+  #page-wrap.scale-with-border {
+    border: 4px solid #284af7; /* Adjust blue border color */
+    border-radius: 10px; /* Optional: adds rounded corners */
+  }
+  .title-area {
+    width: 100vw; /* Ensures full viewport width */
+    height: 50vh; /* Ensures 50% viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  

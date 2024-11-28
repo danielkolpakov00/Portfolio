@@ -1,0 +1,93 @@
+body { margin: 0; }
+#weatherDisplay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Abril Fatface', sans-serif;
+  letter-spacing: 4px;
+  font-size: 36px;
+  color: rgb(255, 255, 255);
+  transition: color 1s ease;
+  text-align: center;
+  width: 80%;
+  overflow: hidden;
+  height: 50px; /* Adjust height to fit one message */
+}
+.weatherMessage {
+  position: absolute;
+  width: 100%;
+}
+canvas { display: block; }
+#timeDisplay {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Abril Fatface', sans-serif;
+  letter-spacing: 9px;
+  font-size: 90px;
+  color: black;
+  transition: color 1s ease;
+}
+#gradientOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(to top, red, orange, yellow, transparent);
+  opacity: 0;
+  transition: opacity 3s ease;
+  pointer-events: none;
+}
+#timeSlider {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+}
+#debugButton {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 16px;
+  padding: 15px 20px;
+  border-radius: 100px;
+  cursor: pointer;
+  background-color: white;
+  border: none;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.5s ease;
+}
+.icon {
+  width: 2em;
+  height: 2em;
+  vertical-align: -0.125em;
+  transition: fill 0.5s ease;
+}
+#sunriseOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(to top, lightpink, orange, yellow, transparent);
+  opacity: 0;
+  transition: opacity 3s ease;
+  pointer-events: none;
+}
+#playButton {
+  position: absolute;
+  bottom: 20px;
+  left: 80px;
+  font-size: 16px;
+  padding: 15px 20px;
+  border-radius: 100px;
+  cursor: pointer;
+  background-color: white;
+  border: none;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.5s ease;
+}

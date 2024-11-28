@@ -1,0 +1,128 @@
+/*body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#scene-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+*/
+
+@font-face {
+    font-family: 'Lineal'; /* loading lineal font */
+    src: url('https://pixijs.com/assets/webfont-loader/Lineal.otf');
+    font-weight: normal; /*resetting styles*/
+    font-style: normal;
+  }
+  html, body {
+    height: 100%; /* removing unwanted default values that the dom sets */
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+  .lineal span { 
+    display: inline-block; /*to be able to manipulate the width and height of the elemet */
+  }
+  .lineal { /*setting up lineal font */
+    font-family: 'Lineal';
+    font-size: 96px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+  }
+  #scene-container { /* making the scene container half width so it fits on the right side of the page */
+    width: 50%; 
+    height: 100%;
+  }
+  .text-block span {
+    background: linear-gradient(to right, #ffa63a, #ff0000);
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Lineal';
+  }
+  .dkolp > span {
+    background: linear-gradient(to right, #ffa63a, #ed0000);
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Lineal';
+    display: inline-block;
+  }
+  .scroll-container {
+overflow-x: auto;
+overflow-y: hidden;
+scroll-snap-type: x mandatory; /* strict snap points on the containers */
+-webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS devices */
+}
+
+.container {
+display: flex; /* flexbox disply for container*/
+width: 400vw; /* Adjust based on your actual content width */
+}
+
+.section {
+flex: 0 0 100vw; /* making the section fit 100% of the vertical width*/
+scroll-snap-align: start;
+}
+
+#myroom {
+    background: linear-gradient(to right, #1eff00, #ffffff); /* Linear gradient for "this is my room" test*/
+    background-size: 200% 100%; 
+    background-position: 0% 50%;
+    -webkit-background-clip: text; /* background clip for webkit browsers (Chrome, Firefox, etc.) */
+    -webkit-text-fill-color: transparent;
+    font-family: 'Lineal'; /* setting lineal font for text */
+  }
+
+  .modal-background {
+  position: fixed; 
+  top: 0; 
+  left: 0;
+  width: 100%;  /* Cover full viewport width */
+  height: 100%; /* Cover full viewport height */
+  background-color: rgba(0, 0, 0, 0.8); /* Darker background with higher opacity */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden; /* Controlled by JavaScript */
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  display: none; /* Controlled by JavaScript */
+  flex-direction: column;
+  align-items: center;
+  max-width: 50%; /* Smaller width */
+  max-height: 50%; /* Smaller height */
+  overflow-y: auto; /* Scrollable content if it overflows */
+  margin: auto; /* Additional explicit centering */
+}
+
+
+.modal-content {
+  width: 100%; /* ensuring it takes the full width of its container */
+}
+
+.close {
+  align-self: flex-end;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%; /* ensuring images within the modal are responsive */
+}

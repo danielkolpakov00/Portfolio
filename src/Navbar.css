@@ -1,0 +1,20 @@
+/* Navbar.css */
+
+/* Targeting the burger menu's container to enforce display: flex */
+.bm-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100vh !important;
+    padding: 2rem;
+    background-color: #F5FDFF;
+  }
+  
+  /* Targeting the item list to vertically center and space items evenly */
+  .bm-item-list {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    height: 100% !important;
+  }
