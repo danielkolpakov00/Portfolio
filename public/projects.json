@@ -7,7 +7,7 @@
     "cssFile": "/projects/weatherapi.css",
     "jsFile": "/projects/weatherapi.js",
     "link": "/projects/weatherapi",
-    "demoUrl": "http://127.0.0.1:5500/three-js-scene/public/projects/weatherapi.html",
+    "demoUrl": "http://127.0.0.1:5501/three-js-scene/public/projects/weatherapi.html",
     "library": "/assets/three-js-icon.svg",
     "libraryname": "Three.js"
   },

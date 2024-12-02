@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 import { useLocation } from 'react-router-dom';
 import './index.css';
 import TypeIt from "typeit-react";
-
+import { Link } from 'react-router-dom';
 
 const DKModel = () => {
   const groupRef = useRef();
@@ -77,9 +77,7 @@ const Hero = ({ isOpen }) => {
         {/* Links and Icons Below the 3D Model */}
         <div className="mt-4 flex flex-col items-center space-y-6">
           <TypeIt className="font-georama text-3xl text-blue2 p-6">Web Developer.</TypeIt>
-          <a href="#portfolio" className="bg-blue2 mt-10 text-white py-2 px-8 rounded-lg font-semibold uppercase tracking-wide hover:bg-blue3 transition duration-300 ease-in-out shadow-lg">
-            My Portfolio
-          </a>
+          <Link to="/portfolio" className="bg-blue2 mt-10 text-white py-2 px-8 rounded-lg font-semibold uppercase tracking-wide hover:bg-blue3 transition duration-300 ease-in-out shadow-lg">My Portfolio</Link> 
         </div>
       </header>
     </div>
