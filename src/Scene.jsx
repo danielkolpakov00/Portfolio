@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'; // Import useState
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { gsap } from 'gsap';
+import tableUrl from  '@/assets/models/table2.glb'; // Import the GLTF model
 import { FaMousePointer } from 'react-icons/fa'; // Import the Font Awesome icon
 
 const Scene = ({ onComplete }) => {
@@ -40,7 +41,7 @@ const Scene = ({ onComplete }) => {
     // Load the GLTF model
     const loader = new GLTFLoader();
     loader.load(
-      '/models/table2.glb',
+      tableUrl,
       (gltf) => {
         const model = gltf.scene;
         const modelScale = 0.1;
