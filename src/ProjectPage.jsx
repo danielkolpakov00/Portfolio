@@ -6,8 +6,6 @@ import './dk-blue.css'; // Custom styles (if any)
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
 import TypeIt from 'typeit-react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -113,17 +111,17 @@ const ProjectPage = () => {
 
       {/* Display Project Icon */}
       <div className="relative text-center mb-4">
-  <img
-    src={selectedProject.library}
-    alt={`${selectedProject.title} Icon`}
-    title={selectedProject.threejs} // Optional for accessibility
-    className="inline-block h-12 w-12 fill-blue2 hover-trigger"
-    aria-label={selectedProject.libraryname}
-  />
-  <span className="tooltip hidden absolute bg-black text-white text-sm rounded px-2 py-1">
-    Three.js
-  </span>
-</div>
+        <img
+          src={selectedProject.library}
+          alt={`${selectedProject.title} Icon`}
+          title={selectedProject.threejs} // Optional for accessibility
+          className="inline-block h-12 w-12 fill-blue2 hover-trigger"
+          aria-label={selectedProject.libraryname}
+        />
+        <span className="tooltip hidden absolute bg-black text-white text-sm rounded px-2 py-1">
+          Three.js
+        </span>
+      </div>
 
       <div className="project-demo flex justify-center">
         {selectedProject.demoUrl ? (
@@ -177,20 +175,19 @@ const ProjectPage = () => {
           </div>
 
           <div className="p-4 text-white overflow-x-auto max-h-96 overflow-y-auto">
-          <TypeIt
-  key={`${activeTab}-${codeContent}`}
-  options={{
-    speed: 0.1,
-    waitUntilVisible: true,
-   
-  }}
->
-  <pre className="whitespace-pre-wrap">
-<code ref={codeBlockRef} className={`language-${activeTab} bg-gray-900`}>
-      {codeContent}
-    </code>
-  </pre>
-</TypeIt>
+            <TypeIt
+              key={`${activeTab}-${codeContent}`}
+              options={{
+                speed: 0.1,
+                waitUntilVisible: true,
+              }}
+            >
+              <pre className="whitespace-pre-wrap">
+                <code ref={codeBlockRef} className={`language-${activeTab} bg-gray-900`}>
+                  {codeContent}
+                </code>
+              </pre>
+            </TypeIt>
           </div>
         </div>
       </div>
