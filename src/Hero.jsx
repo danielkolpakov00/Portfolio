@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import dk9Url from '@/assets/models/dk9.glb'; // Import the GLTF model
+import dk9Url from '@/assets/models/DK9.glb'; // Import the GLTF model
 import { gsap } from 'gsap';
 import { useLocation } from 'react-router-dom';
 import './index.css';
