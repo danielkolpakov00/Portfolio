@@ -41,7 +41,11 @@ const PortfolioPreview = () => {
             {project.title === '3D Bedroom Scene' && <BedroomPreview />}
             <h3 className="text-2xl font-semibold mt-4">{project.title}</h3>
             <p className="text-gray-700">{project.description}</p>
-            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">{project.buttonText}</button>
+            <Link 
+              to={`/projects/${project.id}`}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded inline-block hover:bg-blue-600 transition-colors"
+            >
+              {project.buttonText}   </Link>
           </div>
         ))}
       </section>

@@ -6,6 +6,8 @@ import './dk-blue.css'; // Custom styles (if any)
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
 import TypeIt from 'typeit-react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
 
 const ProjectPage = () => {
   const { id } = useParams();

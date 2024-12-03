@@ -1,4 +1,3 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -24,6 +23,7 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.glb'],
   optimizeDeps: {
+    include: ['react-router-dom'], // Ensure react-router-dom is included
     exclude: ['three']
   },
   server: {

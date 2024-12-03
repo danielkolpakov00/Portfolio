@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { scaleRotate as Menu } from 'react-burger-menu';
 import './Navbar.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 const Navbar = ({ isOpen, setIsOpen }) => {
   const handleMenuToggle = () => setIsOpen(!isOpen);

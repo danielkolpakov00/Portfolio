@@ -7,7 +7,7 @@
     "cssFile": "/projects/weatherapi.css",
     "jsFile": "/projects/weatherapi.js",
     "link": "/projects/weatherapi",
-    "demoUrl": "http://127.0.0.1:5501/three-js-scene/dist/projects/weatherapi.html",
+    "demoUrl": "http://127.0.0.1:5501/three-js-scene/public/projects/weatherapi.html",
     "library": "/assets/three-js-icon.svg",
     "libraryname": "Three.js"
   },
@@ -37,7 +37,7 @@
   "cssFile": "/projects/3dscene.css",
   "jsFile": "/projects/scripts/main/main.js",
   "link": "projects/3dscene",
-  "demoUrl": "http://127.0.0.1:5501/three-js-scene/dist/projects/3dscene.html",
+  "demoUrl": "http://127.0.0.1:5501/three-js-scene/public/projects/3dscene.html",
   "library": "/assets/three-js-icon.svg",
   "libraryname": "Three.js"
 

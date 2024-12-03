@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import './index.css';
 import TypeIt from "typeit-react";
 import { Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 const DKModel = () => {
   const groupRef = useRef();
