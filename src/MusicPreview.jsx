@@ -18,7 +18,7 @@ const MusicPreview = () => {
 
     // Load the music note model
     const loader = new GLTFLoader();
-    loader.load('/src/assets/models/MusicNote.glb', (gltf) => {
+    loader.load(process.env.PUBLIC_URL + '/assets/models/MusicNote.glb', (gltf) => {
       const model = gltf.scene;
       model.scale.set(1000, 1000, 1000); // Scale the model up significantly
 
