@@ -79,7 +79,7 @@ const AboutMe = () => {
                   About <meta http-equiv="X-UA-Compatible" content="IE=7" />
                 </h3>
                 <p className="text-base leading-relaxed">
-                  I'm deeply passionate about blending design and development, by turning digital interfaces into digital experiences. I enjoy pushing boundaries, and learning how to create amazing web development projects that catches the eye.
+                  I'm deeply passionate about blending design and development, by turning digital interfaces into digital experiences. I enjoy pushing boundaries, and learning how to create amazing web development projects that catch the eye.
                 </p>
               </div>
               <div className="flex justify-center items-center space-x-8 mt-8">
@@ -126,7 +126,7 @@ const AboutMe = () => {
                     style={{ height: 0 }}
                   >
                     <p className="mt-2 text-base leading-relaxed bg-blue-50 p-4 rounded-lg">
-                      I create professional, industry standard website designs.
+                      I have experience in building responsive websites using HTML, CSS, and JavaScript. I am also familiar with React and Tailwind CSS. I am always learning new technologies to improve my skills.
                     </p>
                   </div>
                 </div>

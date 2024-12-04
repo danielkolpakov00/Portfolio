@@ -3,6 +3,7 @@ import React from 'react';
 import YellowSphere from './YellowSphere';
 import PlinkoPreview from './PlinkoPreview';
 import BedroomPreview from './BedroomScenePreview';
+import MusicPreview from './MusicPreview';
 import { Link } from 'react-router-dom';
 
 const projects = [
@@ -27,6 +28,13 @@ const projects = [
     buttonText: 'Check it out!',
     color: '#284af7',
   },
+  {
+    id: 4,
+    title: 'Music Visualizer',
+    description: 'I created a music visualizer using Three.js and Web Audio API. The visualizer reacts to the music and creates a unique visual experience.',
+    buttonText: 'Check it out!',
+    color: '#284af7',
+  }
 ];
 
 const PortfolioPreview = () => {
@@ -39,6 +47,7 @@ const PortfolioPreview = () => {
             {project.title === 'Weather API Project' && <YellowSphere />}
             {project.title === 'Matter.js Plinko' && <PlinkoPreview />}
             {project.title === '3D Bedroom Scene' && <BedroomPreview />}
+            {project.title === 'Music Visualizer' && <MusicPreview />}
             <h3 className="text-2xl font-semibold mt-4">{project.title}</h3>
             <p className="text-gray-700">{project.description}</p>
             <Link 

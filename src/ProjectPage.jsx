@@ -178,8 +178,8 @@ const ProjectPage = () => {
             <TypeIt
               key={`${activeTab}-${codeContent}`}
               options={{
-                speed: 0.1,
-                waitUntilVisible: true,
+                speed: 5,
+                waitUntilVisible: false,
               }}
             >
               <pre className="whitespace-pre-wrap">

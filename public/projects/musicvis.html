@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/simplex-noise@2.4.0/simplex-noise.min.js"></script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+
+</head>
+<body class="bg-black text-white font-sans">
+  <!-- Navigation Bar -->
+  <nav class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-40 p-4 rounded-full flex space-x-6 items-center z-10 shadow-xl backdrop-blur-md">
+    <!-- Settings Button with Tooltip -->
+    <div class="relative group">
+      <button id="settings-btn" class="text-gray-300 hover:text-green-400 text-xl">
+        <i class="fas fa-cog"></i>
+      </button>
+      <span
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        Settings
+      </span>
+    </div>
+
+    <!-- Volume Button with Tooltip -->
+    <div class="relative group">
+      <button id="volume-btn" class="text-gray-300 hover:text-green-400 text-xl">
+        <i class="fas fa-volume-up" id="volume-icon"></i>
+      </button>
+      <span
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        Volume
+      </span>
+    </div>
+
+    <!-- Upload Button with Tooltip -->
+    <div class="relative group">
+      <button id="upload-btn" class="text-gray-300 hover:text-green-400 text-xl">
+        <i class="fas fa-upload"></i>
+      </button>
+      <span
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        Upload
+      </span>
+    </div>
+
+    <!-- Playlist Button with Tooltip -->
+    <div class="relative group">
+      <button id="playlist-btn" class="text-gray-300 hover:text-green-400 text-xl">
+        <i class="fas fa-list"></i>
+      </button>
+      <span
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        Playlist
+      </span>
+    </div>
+
+    <!-- Replace Spotify Button with Audius Button -->
+    <div class="relative group">
+      <button id="audius-btn" class="text-gray-300 hover:text-green-400 text-xl">
+        <i class="fas fa-music"></i>
+      </button>
+      <span class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        Audius Music
+      </span>
+    </div>
+  </nav>
+
+  <!-- Visualizer Canvas -->
+  <div id="visualizer" class="fixed inset-0">
+    <!-- The Three.js canvas will be appended here -->
+  </div>
+
+  <!-- Now Playing Section -->
+  <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-30 p-6 rounded-lg shadow-xl backdrop-blur-md flex items-center justify-between w-190">
+    <div class="flex items-center space-x-4">
+      <!-- Play/Pause Button -->
+      <button id="play-btn" class="text-gray-300 hover:text-green-400 text-2xl p-3 focus:outline-none">
+        <i class="fas fa-play" id="play-icon"></i>
+      </button>
+      <div>
+        <div class="p-4">
+          <p class="text-sm text-gray-400">Now Playing</p>
+          <p class="font-bold text-lg" id="song-title">Demo</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span id="current-time" class="text-gray-300">0:00</span>
+      <input type="range" id="progress-slider" min="0" max="100" value="0" class="w-40 h-1 bg-gray-600 rounded-full" />
+      <span id="total-time" class="text-gray-300">0:00</span>
+    </div>
+  </div>
+
+  <!-- Playlist Panel -->
+  <div id="playlist-panel" class="fixed right-8 top-24 bg-black bg-opacity-30 p-6 rounded-lg shadow-xl backdrop-blur-md w-96 opacity-0 pointer-events-none transition-opacity duration-300">
+    <h2 class="text-xl font-bold mb-6 text-white border-b border-gray-500 pb-2">Playlist</h2>
+    <ul id="playlist-items" class="space-y-3 max-h-[70vh] overflow-y-auto">
+      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/scruz x t.o - HARLEM SHAKE BOOTLEG.mp3">
+        scruz x t.o - HARLEM SHAKE BOOTLEG
+      </li>
+      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/HUTCHER - CALABRIA DUB.mp3">
+        HUTCHER - CALABRIA DUB
+      </li
+    </ul>
+  </div>
+
+  <!-- Upload Input -->
+  <input type="file" id="music-upload" accept="audio/*" class="hidden">
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-black bg-opacity-40 p-6 rounded-lg w-96 text-center shadow-xl">
+      <h2 class="text-xl font-bold mb-4 text-white">Settings</h2>
+      <div class="mb-4">
+        <label for="color-picker" class="block text-sm mb-2 text-gray-300">Visualizer Color</label>
+        <input type="color" id="color-picker" class="w-16 h-16 rounded-full shadow-inner" value="#ffff00" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Audius Tracks Modal -->
+  <div id="audius-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-black bg-opacity-40 p-6 rounded-lg w-96 max-h-[80vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-white flex items-center">
+        <i class="fas fa-music mr-2"></i> Audius Tracks
+      </h2>
+      <div id="audius-tracks" class="space-y-2">
+        <!-- Tracks will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Map for Three.js -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <!-- Include main.js -->
+  <script type="module" src="musicvis.js"></script>
+</body>
+</html>
