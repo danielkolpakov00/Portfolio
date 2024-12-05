@@ -39,9 +39,10 @@ const projects = [
 
 const PortfolioPreview = () => {
   return (
-    <div className="px-4 lg:px-8 py-12 bg-offwhite">
+    <div className="px-4 lg:px-8 py-12 bg-offwhite">  
+    <h2 className="-mb-8 text-white text-center text-5xl font-georama font-semibold italic" style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>My Work</h2>
       <section className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-4xl font-bold text-center text-blue-700 italic -mt-12">My Portfolio</h2>
+      
         {projects.map(project => (
           <div key={project.id} className="my-8">
             {project.title === 'Weather API Project' && <YellowSphere />}

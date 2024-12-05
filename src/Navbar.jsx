@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { scaleRotate as Menu } from 'react-burger-menu';
-import './Navbar.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 const Navbar = ({ isOpen, setIsOpen }) => {
   const handleMenuToggle = () => setIsOpen(!isOpen);
@@ -39,7 +37,7 @@ const Navbar = ({ isOpen, setIsOpen }) => {
           bmItemList: {
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-evenly', // Evenly space out the items
+            justifyContent: 'center', // Center the items
             alignItems: 'center',
             height: '100%',
           },
@@ -55,17 +53,18 @@ const Navbar = ({ isOpen, setIsOpen }) => {
         </button>
 
         {/* Navbar Links */}
-        <div className="flex flex-col items-center justify-evenly h-full">
-          <Link to="/" className="text-blue2 text-xl font-georama block font-semibold italic hover:text-blue3 transition duration-300 ease-in-out" onClick={handleMenuToggle}>
-            Home
-          </Link>
-          <Link to="/about" className="text-blue2 text-xl font-georama block font-semibold italic hover:text-blue3 transition duration-300 ease-in-out" onClick={handleMenuToggle}>
+        <div className="flex flex-col justify-center h-full">
+        <Link to="/" className="my-12 text-white text-5xl font-georama block font-semibold italic hover:text-blue2 transition duration-300 ease-in-out" onClick={handleMenuToggle} style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>
+  Home
+</Link>
+     
+          <Link to="/about" className="my-12 text-white text-5xl font-georama block font-semibold italic hover:text-blue2 transition duration-300 ease-in-out" onClick={handleMenuToggle} style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>
             About
           </Link>
-          <Link to="/portfolio" className="text-blue2 text-xl font-georama block font-semibold italic hover:text-blue3 transition duration-300 ease-in-out" onClick={handleMenuToggle}>
+          <Link to="/portfolio" className="my-12 text-white text-5xl font-georama block font-semibold italic hover:text-blue2 transition duration-300 ease-in-out" onClick={handleMenuToggle} style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>
             Portfolio
           </Link>
-          <Link to="/contact" className="text-blue2 text-xl font-georama block font-semibold italic hover:text-blue3 transition duration-300 ease-in-out" onClick={handleMenuToggle}>
+          <Link to="/contact" className="my-12 text-white text-5xl font-georama block font-semibold italic hover:text-blue2 transition duration-300 ease-in-out" onClick={handleMenuToggle} style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>
             Contact
           </Link>
         </div>

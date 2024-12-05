@@ -13,10 +13,29 @@ export default {
         blue1: "#1B69FA",
         blue2: "#1B44FA",
         offwhite: "#f5fdff",
-        },
-
-
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.nav-link::before': {
+          content: '""',
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          bottom: '0',
+          left: '0',
+          background: '#1B69FA',
+          zIndex: '-1',
+          transform: 'scaleX(0)',
+          transformOrigin: 'right',
+          transition: 'transform 0.3s ease-in-out',
+        },
+        '.nav-link:hover::before': {
+          transform: 'scaleX(1)',
+        },
+      });
+    },
+  ],
 }
