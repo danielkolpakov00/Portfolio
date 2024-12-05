@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import MusicNote from '../src/assets/models/MusicNote.glb';
 
 const MusicPreview = () => {
   const mountRef = useRef(null);
@@ -18,7 +19,7 @@ const MusicPreview = () => {
 
     // Load the music note model
     const loader = new GLTFLoader();
-    loader.load('/src/assets/models/MusicNote.glb', (gltf) => {
+    loader.load(MusicNote, (gltf) => {
       const model = gltf.scene;
       model.scale.set(1000, 1000, 1000); // Scale the model up significantly
 
