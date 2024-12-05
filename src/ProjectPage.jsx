@@ -1,4 +1,3 @@
-// src/ProjectPage.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import hljs from 'highlight.js';
@@ -140,7 +139,7 @@ const ProjectPage = () => {
         )}
       </div>
 
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-center mt-0">
         <div className="code-block w-full max-w-4xl bg-gray-900 shadow-lg overflow-hidden">
           <div className="flex">
             {['html', 'css', 'js'].map((tab) => {
@@ -174,12 +173,17 @@ const ProjectPage = () => {
             })}
           </div>
 
-          <div className="p-4 text-white overflow-x-auto max-h-96 overflow-y-auto">
+          <div className="p-4 text-white overflow-x-auto min-h-96 max-h-96 overflow-y-auto">
             <TypeIt
               key={`${activeTab}-${codeContent}`}
               options={{
                 speed: 5,
                 waitUntilVisible: false,
+                afterStep: () => {
+                  if (codeBlockRef.current) {
+                    hljs.highlightElement(codeBlockRef.current);
+                  }
+                },
               }}
             >
               <pre className="whitespace-pre-wrap">
