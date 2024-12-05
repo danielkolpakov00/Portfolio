@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import hljs from 'highlight.js';
-import './dk-blue.css'; // Custom styles (if any)
+import './dk-blue.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
 import TypeIt from 'typeit-react';
