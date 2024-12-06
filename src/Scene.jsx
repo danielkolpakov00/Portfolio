@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { gsap } from 'gsap';
 import tableUrl from  '@/assets/models/table2.glb'; // Import the GLTF model
 import { FaMousePointer } from 'react-icons/fa'; // Import the Font Awesome icon
+import './transitions.css';
 
 const Scene = ({ onComplete }) => {
   const mountRef = useRef(null);
@@ -14,13 +15,30 @@ const Scene = ({ onComplete }) => {
 
   // Add state for the click indicator visibility
   const [showClickIndicator, setShowClickIndicator] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     if (!mountRef.current) return;
 
     // Scene, Camera, and Renderer setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xF5FDFF);
+
+    // Create a canvas and draw a gradient on it
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const context = canvas.getContext('2d');
+    const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#f5fdff');
+    gradient.addColorStop(1, '#a1c4fd');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Create a texture from the canvas
+    const texture = new THREE.CanvasTexture(canvas);
+
+    // Set the scene background to the texture
+    scene.background = texture;
 
     const isMobile = window.innerWidth <= 768;
     const cameraDistance = isMobile ? 12 : 9.46;
@@ -225,11 +243,31 @@ const Scene = ({ onComplete }) => {
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // Animation function to update the gradient
+    let gradientOffset = 0;
+    const animateGradient = () => {
+      gradientOffset += 0.02; // Increase the speed of the gradient change
+      if (gradientOffset > canvas.height) gradientOffset = 0;
+
+      const gradient = context.createLinearGradient(0, gradientOffset, 0, canvas.height + gradientOffset);
+      gradient.addColorStop(0, '#f5fdff');
+      gradient.addColorStop(1, '#a1c4fd');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      texture.needsUpdate = true;
+
+      requestAnimationFrame(animateGradient);
+    };
+
+    animateGradient();
+
     return () => {
       disposeScene();
       renderer.domElement.removeEventListener('mousemove', handleMouseMove);
       renderer.domElement.removeEventListener('mouseout', handleMouseOut);
       renderer.domElement.removeEventListener('click', handleClick);
+      cancelAnimationFrame(animateGradient);
     };
   }, [onComplete]);
 
