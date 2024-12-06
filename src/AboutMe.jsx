@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import './index.css';
-import DanielImage from './daniel.webp';
+import DanielImage from './daniel.png';
 import { FaChevronDown, FaChevronUp, FaReact } from 'react-icons/fa';
 import { FaCube } from 'react-icons/fa6'; // Import the light cube from FA6
 
@@ -73,18 +73,18 @@ const AboutMe = () => {
         >
           {/* Content */}
           <div className="flex flex-col md:flex-row justify-center items-stretch space-y-8 md:space-y-0 md:space-x-8">
-            <div className="relative w-full flex-1 bg-blue1 text-white p-8 rounded-lg shadow-lg text-left flex flex-col z-10">
+            <div className="relative w-full flex-1 bg-blue1 text-white p-8 rounded-lg shadow-lg flex flex-col items-center z-10">
               <img
                 src={DanielImage}
                 alt="Daniel"
-                className="w-full h-80 object-cover rounded-t-lg shadow-lg mb-4"
+                className="w-60 h-50 object-contain rounded-t-lg shadow-lg mb-4"
               />
-              <div className="relative z-10 p-4 flex-1">
+              <div className="relative z-10 p-4 flex-1 text-center">
                 <h3
                   className="text-5xl font-georama italic font-semibold mb-4 -mt-14"
                   style={{ textShadow: '5px 0px 0px #1B69FA' }}
                 >
-                  About <meta http-equiv="X-UA-Compatible" content="IE=7" />
+                  About
                 </h3>
                 <p className="text-base leading-relaxed">
                   I'm deeply passionate about blending design and development, by turning digital interfaces into digital experiences. I enjoy pushing boundaries, and learning how to create amazing web development projects that catch the eye.
