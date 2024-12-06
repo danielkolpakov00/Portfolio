@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import './index.css';
-import DanielImage from './daniel.png';
+import DanielImage from './daniel2.png';
 import { FaChevronDown, FaChevronUp, FaReact } from 'react-icons/fa';
 import { FaCube } from 'react-icons/fa6'; // Import the light cube from FA6
 
