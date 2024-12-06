@@ -63,15 +63,8 @@
       </span>
     </div>
 
-    <!-- Replace Spotify Button with Audius Button -->
-    <div class="relative group">
-      <button id="audius-btn" class="text-gray-300 hover:text-green-400 text-xl">
-        <i class="fas fa-music"></i>
-      </button>
-      <span class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        Audius Music
-      </span>
-    </div>
+
+
   </nav>
 
   <!-- Visualizer Canvas -->
@@ -104,11 +97,11 @@
   <div id="playlist-panel" class="fixed right-8 top-24 bg-black bg-opacity-30 p-6 rounded-lg shadow-xl backdrop-blur-md w-96 opacity-0 pointer-events-none transition-opacity duration-300">
     <h2 class="text-xl font-bold mb-6 text-white border-b border-gray-500 pb-2">Playlist</h2>
     <ul id="playlist-items" class="space-y-3 max-h-[70vh] overflow-y-auto">
-      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/scruz x t.o - HARLEM SHAKE BOOTLEG.mp3">
-        scruz x t.o - HARLEM SHAKE BOOTLEG
+      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/1 Hope This Time V2.mp3">
+        1 Hop This Time
       </li>
-      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/HUTCHER - CALABRIA DUB.mp3">
-        HUTCHER - CALABRIA DUB
+      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/scruz work! MIX V3.mp3">
+        Work!
       </li
     </ul>
   </div>
@@ -127,17 +120,7 @@
     </div>
   </div>
 
-  <!-- Audius Tracks Modal -->
-  <div id="audius-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-black bg-opacity-40 p-6 rounded-lg w-96 max-h-[80vh] overflow-y-auto">
-      <h2 class="text-xl font-bold mb-4 text-white flex items-center">
-        <i class="fas fa-music mr-2"></i> Audius Tracks
-      </h2>
-      <div id="audius-tracks" class="space-y-2">
-        <!-- Tracks will be loaded here -->
-      </div>
-    </div>
-  </div>
+ 
 
   <!-- Import Map for Three.js -->
   <script type="importmap">

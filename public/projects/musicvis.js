@@ -17,9 +17,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const volumeIcon = document.getElementById('volume-icon');
   const playlistBtn = document.getElementById('playlist-btn');
   const playlistPanel = document.getElementById('playlist-panel');
-  const audiusBtn = document.getElementById('audius-btn');
-  const audiusModal = document.getElementById('audius-modal');
-  const audiusTracks = document.getElementById('audius-tracks');
 
   // variables for three.js stuff and audio
   let scene, camera, renderer, sphere, particlesMaterial, audioContext, analyser, dataArray, audioSource, audio;
@@ -100,143 +97,20 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  audiusBtn.addEventListener('click', () => {
-    if (audiusModal.classList.contains('opacity-0')) {
-      // Show modal
-      audiusModal.classList.remove('opacity-0', 'pointer-events-none');
-      audiusModal.classList.add('opacity-100');
-      loadAudiusTracks();
-    } else {
-      // Hide modal
-      audiusModal.classList.remove('opacity-100');
-      audiusModal.classList.add('opacity-0', 'pointer-events-none');
-    }
-  });
+  // Add event listeners to playlist items
+  const playlistItems = document.querySelectorAll('#playlist-items li');
 
-  async function loadAudiusTracks() {
-    try {
-      audiusTracks.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
-
-      const response = await fetch('https://discoveryprovider.audius.co/v1/tracks/trending?app_name=YOUR_APP_NAME&limit=50');
-      const data = await response.json();
-
-      const tracksHtml = data.data.map(track => `
-        <div class="p-3 rounded bg-white bg-opacity-5 hover:bg-opacity-10 cursor-pointer transition-colors flex items-center"
-             data-track-url="${track.stream_url}?app_name=YOUR_APP_NAME">
-          <img src="${track.artwork['150x150'] || ''}" class="w-12 h-12 rounded mr-3" 
-               onerror="this.parentElement.querySelector('.default-icon').style.display='block';this.style.display='none'">
-          <div class="default-icon" style="display:none">
-            <div class="w-12 h-12 rounded mr-3 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
-              <i class="fas fa-music text-gray-400"></i>
-            </div>
-          </div>
-          <div>          // Add this function to handle playlist item clicks
-          function setupPlaylist() {
-            const playlistItems = document.querySelectorAll('.playlist-item');
-            playlistItems.forEach(item => {
-              item.addEventListener('click', () => {
-                const fileUrl = item.getAttribute('data-file-url');
-                if (fileUrl) {
-                  switchToSong(fileUrl, item.textContent);
-                }
-              });
-            });
-          }
-          
-          // Function to switch to the selected song
-          function switchToSong(fileUrl, songName) {
-            // Disconnect old audio source if it exists
-            if (audioSource) {
-           // Function to switch to the selected song
-            }
-          
-            // Load the new song into the audio element
-            audio.src = fileUrl;
-            audio.crossOrigin = 'anonymous';
-            audio.load();
-            audio.play();
-          
-            // Reconnect the audio nodes
-            audioSource = audioContext.createMediaElementSource(audio);
-            audioSource.connect(analyser);
-            analyser.connect(audioContext.destination);
-          
-            // Update UI
-            songTitle.textContent = songName;
-            playIcon.classList.remove('fa-play');
-            playIcon.classList.add('fa-pause');
-          }
-          
-          // Call setupPlaylist after the DOM is loaded
-          window.addEventListener('DOMContentLoaded', () => {
-           // Call  after the DOM is loaded
-          window.addEventListener('DOMContentLoaded', () => {
-            // Existing code...
-          
-            setupPlaylist(); // Add this line to initialize the playlist event listeners
-          });
-            <div class="font-medium text-white">${track.title}</div>
-            <div class="text-sm text-gray-400">${track.user.name}</div>
-          </div>
-        </div>
-      `).join('');
-
-      audiusTracks.innerHTML = tracksHtml || '<div class="text-gray-400 text-center">No tracks found</div>';
-
-    } catch (error) {
-      console.error('Error loading tracks:', error);
-      audiusTracks.innerHTML = `
-        <div class="text-red-400 text-center p-4">
-          <p>Error loading tracks</p>
-          <p class="text-sm mt-2">${error.message}</p>
-        </div>`;
-    }
-  }
-
-  audiusTracks.addEventListener('click', async (e) => {
-    const trackElement = e.target.closest('[data-track-url]');
-    if (trackElement) {
-      await playAudiusTrack(trackElement);
-    }
-  });
-
-  async function playAudiusTrack(trackElement) {
-    try {
-      const trackUrl = trackElement.dataset.trackUrl;
-      if (!trackUrl) return;
-
-      // Disconnect old audio source if it exists
-      if (audioSource) {
-        audioSource.disconnect();
-      }
-
-      // Load the track into the audio element
-      audio.src = trackUrl;
-      audio.crossOrigin = "anonymous";
-      audio.load();
+  playlistItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const songSrc = item.getAttribute('data-song');
+      audio.src = songSrc;
+      setupAudio(null);
       audio.play();
-
-      // Reconnect the audio nodes
-      audioSource = audioContext.createMediaElementSource(audio);
-      audioSource.connect(analyser);
-      analyser.connect(audioContext.destination);
-
-      // Update UI
-      const trackTitle = trackElement.querySelector('.font-medium').textContent;
-      const trackArtist = trackElement.querySelector('.text-sm').textContent;
-      songTitle.textContent = `${trackTitle} - ${trackArtist}`;
       playIcon.classList.remove('fa-play');
       playIcon.classList.add('fa-pause');
-
-      // Close modal
-      audiusModal.classList.remove('opacity-100');
-      audiusModal.classList.add('opacity-0', 'pointer-events-none');
-
-    } catch (error) {
-      console.error('Error playing track:', error);
-      alert('Error playing track: ' + error.message);
-    }
-  }
+      songTitle.textContent = item.textContent.trim();
+    });
+  });
 
   // Update token handling to work with file protocol
   const hashParams = window.location.hash
@@ -326,7 +200,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function initAudio() {
     audio = new Audio();
-    audio.src = 'assets/scruz x t.o - HARLEM SHAKE BOOTLEG.wav';
+    audio.src = 'assets/1 Hop This Time V2.mp3';
     audio.crossOrigin = 'anonymous';
   
     if (!audioContext) {
