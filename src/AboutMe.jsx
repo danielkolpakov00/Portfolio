@@ -9,6 +9,7 @@ const AboutMe = () => {
   const [openAccordion, setOpenAccordion] = useState(null);
   const accordionRefs = useRef([]);
   const containerRef = useRef(null);
+  const borderRef = useRef(null);
 
   const toggleAccordion = (index) => {
     if (openAccordion === index) {
@@ -34,12 +35,11 @@ const AboutMe = () => {
       }
       setOpenAccordion(index);
       gsap.to(accordionRefs.current[index], {
-        height: 'auto',
-        paddingTop: '1rem',
+        height: '140',
         paddingBottom: '1rem',
         opacity: 1,
-        duration: 0.4,
-        ease: 'power3.out',
+        duration: 0.6, // Increased duration
+        ease: 'power2.out', // Changed easing
       });
       accordionRefs.current[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -47,6 +47,14 @@ const AboutMe = () => {
 
   useEffect(() => {
     gsap.from('.about-section', { y: 50, duration: 1, ease: 'power3.out', delay: 0.5 });
+
+    // Animate the border
+    gsap.to(borderRef.current, {
+      attr: { 'stroke-dashoffset': -1000 },
+      duration: 40,
+      ease: 'linear',
+      repeat: -1,
+    });
   }, []);
 
   return (
@@ -105,7 +113,7 @@ const AboutMe = () => {
                 </div>
               </div>
             </div>
-            <div className="relative w-full flex-1 bg-white text-blue2 p-8 rounded-lg shadow-lg text-left flex flex-col z-10">
+            <div className="relative w-full flex-1 bg-white text-blue2 p-8 rounded-lg shadow-lg text-left flex flex-col z-10 animated-border">
               <div className="relative z-10 p-4 flex-1">
                 <h3 className="text-3xl font-georama italic mb-6">Areas of Expertise</h3>
 
@@ -175,6 +183,22 @@ const AboutMe = () => {
                   </div>
                 </div>
               </div>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                <rect
+                  ref={borderRef}
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
+                  rx="8"
+                  ry="8"
+                  fill="none"
+                  stroke="blue"
+                  strokeWidth="4"
+                  strokeDasharray="20"
+                  strokeDashoffset="0"
+                />
+              </svg>
             </div>
           </div>
         </div>
