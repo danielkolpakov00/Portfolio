@@ -65,7 +65,7 @@ const AboutMe = () => {
         >
           {/* Content */}
           <div className="flex flex-col md:flex-row justify-center items-stretch space-y-8 md:space-y-0 md:space-x-8">
-            <div className="relative w-full flex-1 bg-blue2 text-white p-8 rounded-lg shadow-lg text-left flex flex-col z-10">
+            <div className="relative w-full flex-1 bg-blue1 text-white p-8 rounded-lg shadow-lg text-left flex flex-col z-10">
               <img
                 src={DanielImage}
                 alt="Daniel"
