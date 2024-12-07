@@ -34,6 +34,7 @@
     "typeit-react": "^2.7.7"
   },
   "devDependencies": {
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "web-audio-beat-detector": "^8.2.19"
   }
 }

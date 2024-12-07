@@ -63,7 +63,16 @@
       </span>
     </div>
 
-
+    <!-- Color Cycle Button with Tooltip -->
+    <div class="relative group">
+      <button class="cycle-btn" class="text-gray-300 hover:text-green-400 text-xl">
+        <i class="fas fa-palette"></i>
+      </button>
+      <span
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        Toggle Color Cycle
+      </span>
+    </div>
 
   </nav>
 
@@ -73,34 +82,43 @@
   </div>
 
   <!-- Now Playing Section -->
-  <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-30 p-6 rounded-lg shadow-xl backdrop-blur-md flex items-center justify-between w-190">
-    <div class="flex items-center space-x-4">
+  <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-30 px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between w-[90%] sm:w-[600px] md:w-[700px] lg:w-[800px]">
+    <div class="flex items-center space-x-4 w-full sm:w-auto">
       <!-- Play/Pause Button -->
-      <button id="play-btn" class="text-gray-300 hover:text-green-400 text-2xl p-3 focus:outline-none">
-        <i class="fas fa-play" id="play-icon"></i>
+      <button id="play-btn" class="flex-shrink-0 text-gray-300 hover:text-white transition-colors duration-200 bg-white bg-opacity-5 hover:bg-opacity-10 rounded-full p-3">
+        <i class="fas fa-play text-xl sm:text-2xl" id="play-icon"></i>
       </button>
-      <div>
-        <div class="p-4">
-          <p class="text-sm text-gray-400">Now Playing</p>
-          <p class="font-bold text-lg" id="song-title">Demo</p>
-        </div>
+      
+      <div class="min-w-0">
+        <p class="text-xs text-gray-400 font-medium mb-1">Now Playing</p>
+        <p class="font-bold text-sm sm:text-base text-white truncate max-w-[180px] sm:max-w-[250px] md:max-w-[350px]" id="song-title">Demo</p>
       </div>
     </div>
-    <div class="flex items-center space-x-2">
-      <span id="current-time" class="text-gray-300">0:00</span>
-      <input type="range" id="progress-slider" min="0" max="100" value="0" class="w-40 h-1 bg-gray-600 rounded-full" />
-      <span id="total-time" class="text-gray-300">0:00</span>
+
+    <div class="flex flex-col items-center w-full sm:w-auto mt-3 sm:mt-0">
+      <div class="flex items-center space-x-3 w-full sm:w-auto mb-1">
+        <span id="current-time" class="text-gray-400 text-xs sm:text-sm font-medium">0:00</span>
+        <div class="relative flex-grow sm:w-48 md:w-64 lg:w-80">
+          <input type="range" 
+                 id="progress-slider" 
+                 min="0" 
+                 max="100" 
+                 value="0" 
+                 class="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-white hover:accent-gray-300 transition-all" />
+        </div>
+        <span id="total-time" class="text-gray-400 text-xs sm:text-sm font-medium">0:00</span>
+      </div>
     </div>
   </div>
 
   <!-- Playlist Panel -->
-  <div id="playlist-panel" class="fixed right-8 top-24 bg-black bg-opacity-30 p-6 rounded-lg shadow-xl backdrop-blur-md w-96 opacity-0 pointer-events-none transition-opacity duration-300">
-    <h2 class="text-xl font-bold mb-6 text-white border-b border-gray-500 pb-2">Playlist</h2>
-    <ul id="playlist-items" class="space-y-3 max-h-[70vh] overflow-y-auto">
-      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/1 Hop This Time V2.mp3">
-        1 Hop This Time
+  <div id="playlist-panel" class="fixed right-4 sm:right-8 top-20 sm:top-24 bg-black bg-opacity-30 p-4 sm:p-6 rounded-lg shadow-xl backdrop-blur-md w-[90%] sm:w-80 md:w-96 opacity-0 pointer-events-none transition-opacity duration-300">
+    <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-white border-b border-gray-500 pb-2">Playlist</h2>
+    <ul id="playlist-items" class="space-y-2 sm:space-y-3 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
+      <li class="text-gray-300 cursor-pointer p-2 sm:p-3 rounded bg-white bg-opacity-5 text-sm sm:text-base hover:bg-opacity-10 transition-all" data-song="assets/1 Hop This Time V2.mp3">
+        1 Hop This Time!
       </li>
-      <li class="text-gray-300 cursor-pointer p-3 rounded bg-white bg-opacity-5" data-song="assets/scruz work! MIX V3.mp3">
+      <li class="text-gray-300 cursor-pointer p-2 sm:p-3 rounded bg-white bg-opacity-5 text-sm sm:text-base hover:bg-opacity-10 transition-all" data-song="assets/scruz work! MIX V3.mp3">
         Work!
       </li>
     </ul>
@@ -111,11 +129,11 @@
 
   <!-- Settings Modal -->
   <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-black bg-opacity-40 p-6 rounded-lg w-96 text-center shadow-xl">
+    <div class="bg-black bg-opacity-40 p-4 sm:p-6 rounded-lg w-[90%] sm:w-80 md:w-96 text-center shadow-xl mx-4">
       <h2 class="text-xl font-bold mb-4 text-white">Settings</h2>
       <div class="mb-4">
         <label for="color-picker" class="block text-sm mb-2 text-gray-300">Visualizer Color</label>
-        <input type="color" id="color-picker" class="w-16 h-16 rounded-full shadow-inner" value="#ffff00" />
+        <input type="color" id="color-picker" class="w-16 h-16 rounded-full shadow-inner" value="#00FFFF" />
       </div>
     </div>
   </div>
@@ -126,8 +144,10 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/"
+        "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+        "three/examples/jsm/postprocessing/EffectComposer.js": "https://unpkg.com/three@0.159.0/examples/jsm/postprocessing/EffectComposer.js",
+        "three/examples/jsm/postprocessing/RenderPass.js": "https://unpkg.com/three@0.159.0/examples/jsm/postprocessing/RenderPass.js",
+        "three/examples/jsm/postprocessing/UnrealBloomPass.js": "https://unpkg.com/three@0.159.0/examples/jsm/postprocessing/UnrealBloomPass.js"
       }
     }
   </script>
