@@ -1,8 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { scaleRotate as Menu } from 'react-burger-menu';
 
 const Navbar = ({ isOpen, setIsOpen }) => {
+  useEffect(() => {
+    if (isOpen) {
+      // Prevent scrolling
+      document.body.style.overflow = 'hidden';
+      // Store current scroll position
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      // Re-enable scrolling
+      document.body.style.overflow = 'unset';
+      document.body.style.position = 'static';
+    }
+
+    // Cleanup function
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.position = 'static';
+      document.body.style.width = 'auto';
+    };
+  }, [isOpen]);
+
   const handleMenuToggle = () => setIsOpen(!isOpen);
 
   return (

@@ -1,6 +1,7 @@
 // App.jsx
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import Scene from './Scene';
 import Hero from './Hero';
 import AboutMe from './AboutMe';
@@ -18,6 +19,17 @@ const App = () => {
   return (
     <Router>
       <div id="outer-container">
+        <Helmet>
+          <title>Daniel Kolpakov | Front End Development, Web Developer</title>
+          <meta
+            name="description"
+            content="Web Developer based in North Vancouver, British Columbia. Specializing in React.js, and front end development."
+          />
+          <meta
+            name="keywords"
+            content="web developer vancouver, daniel kolpakov, react.js developer, front end development, ui/ux designer, daniel kolpakov portfolio, daniel kolpakov projects, bcit new media"
+          />
+        </Helmet>
         {showScene ? (
           <Scene onComplete={handleSceneComplete} />
         ) : (
