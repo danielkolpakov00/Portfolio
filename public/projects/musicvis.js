@@ -8,6 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const settingsModal = document.getElementById('settings-modal');
   const settingsBtn = document.getElementById('settings-btn');
   const colorPicker = document.getElementById('color-picker');
+  const bgColorPicker = document.getElementById('bg-color-picker');
   const songTitle = document.getElementById('song-title');
   const progressSlider = document.getElementById('progress-slider');
   const currentTime = document.getElementById('current-time');
@@ -21,19 +22,39 @@ window.addEventListener('DOMContentLoaded', () => {
   const playlistBtn = document.getElementById('playlist-btn');
   const playlistPanel = document.getElementById('playlist-panel');
   const cycleBtn = document.querySelector('.cycle-btn');
+  const nowPlaying = document.querySelector('.now-playing');
+
+
+  const uiElements = [
+    settingsBtn, uploadBtn, playBtn, volumeBtn, playlistBtn, cycleBtn, songTitle, nowPlaying, currentTime, totalTime
+  ];
 
   // variables for three.js stuff and audio
   let scene, camera, renderer, sphere, particlesMaterial, audioContext, analyser, dataArray, audioSource, audio;
-  const ORIGINAL_COLOR = new THREE.Color().setHSL(0.5, 1.0, 0.5); // cyan 
-  let ORIGINAL_BG_COLOR = new THREE.Color(0x00FFFF); // initial background colour on page load
+  const ORIGINAL_COLOR = new THREE.Color(0x0000FF); // blue
+  let ORIGINAL_BG_COLOR = new THREE.Color(0xFFFFFF); // white
   let composer;
   let bloomPass;
 
+  let userSelectedColor = new THREE.Color(0x0000FF); // Default blue
+  let isUsingCustomColor = false;
 
-  let isColorCycling = false; // initially, the colours will not cycle
+  let isColorCycling = false; // initially, the colours will not cycle, maybe I should change this so that it cycles by default?
   let baseHue = 0.5;
   let bgHueOffset = 0.5;
   let isAudioConnected = false; 
+  let isAudioSourceConnected = false;
+
+  // Add these variables with other state variables
+  let currentColor = new THREE.Color(0x0000FF);
+  let targetColor = new THREE.Color(0x0000FF);
+  let colorLerpFactor = 0.1; // Adjust for smoother/faster transitions
+  let bassThreshold = 200; // Adjust based on your audio analysis
+
+  // Add these near other state variables at the top of the file
+  let previousPositions = null;
+  let transitionProgress = 0;
+  const TRANSITION_SPEED = 0.02;
 
   // initialize the scene and audio
   initScene();
@@ -140,6 +161,10 @@ window.addEventListener('DOMContentLoaded', () => {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 400;
   
+    // Add camera constraints
+    camera.minDistance = 400;
+    camera.maxDistance = 400;
+  
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('visualizer').appendChild(renderer.domElement);
@@ -161,9 +186,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const sphereMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        baseColor: { value: new THREE.Color().setHSL(0.5, 1.0, 0.5) }, 
+        baseColor: { value: new THREE.Color(0x0000FF) }, // blue
         intensity: { value: 4.0 },
-        glowColor: { value: new THREE.Color(1.0, 1.0, 1.0) } // making it glow
+        glowColor: { value: new THREE.Color(1.0, 1.0, 1.0) }, // making it glow
+        fresnelPower: { value: 1.2 }, // Adjustable fresnel power
+        glowIntensity: { value: 0.15 } // Adjustable glow intensity
       },
 
 
@@ -182,13 +209,23 @@ window.addEventListener('DOMContentLoaded', () => {
         uniform vec3 glowColor;
         uniform float time;
         uniform float intensity;
+        uniform float fresnelPower;
+        uniform float glowIntensity;
         varying vec3 vNormal;
         varying vec3 vPosition;
         
         void main() {
-          float fresnel = pow(1.0 + dot(vNormal, normalize(cameraPosition)), 1.2);
-          vec3 color = mix(baseColor * 2.0, glowColor, fresnel * 0.15); // Fixed glow color
-          gl_FragColor = vec4(color, 1.0);
+          // Smoother fresnel calculation
+          float fresnel = pow(1.0 - dot(vNormal, normalize(cameraPosition)), fresnelPower);
+          
+          // Smooth color mixing
+          vec3 finalColor = mix(
+            baseColor * (1.0 + intensity * 0.5),
+            glowColor,
+            fresnel * glowIntensity * (1.0 + intensity * 0.3)
+          );
+          
+          gl_FragColor = vec4(finalColor, 1.0);
         }
       `
     });
@@ -214,8 +251,12 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
     window.addEventListener('resize', onWindowResize); 
 
     // Add this to initScene after creating sphere
-    scene.background = new THREE.Color().setHSL(0.0, 0.0, 0.1); // Initial dark background
+    scene.background = new THREE.Color(0xFFFFFF); // white background
   }
+
+  window.addEventListener('wheel', (event) => {
+    event.preventDefault();
+  }, { passive: false });
 
   function onWindowResize() {
     // adjust camera and renderer on resize, for smaller screens
@@ -272,21 +313,18 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
     sphere.rotation.y += 0.001; // rotating the sphere on the y-axis
     sphere.rotation.x += 0.001; // rotating the sphere on the x-axis
   
-    if (isColorCycling) { // if the user wants the colors to cycle, then the colors will cycle
-      // Increment base hue for cycling
-      baseHue = (baseHue + 0.001) % 1.0; // cycling through the hues
-  
-      // Update sphere color
-      const sphereColor = new THREE.Color().setHSL(baseHue, 1.0, 0.5); // more saturation.
-      sphere.material.uniforms.baseColor.value.copy(sphereColor); // copying the sphere color. this is to make the sphere change color. 
-  
-      // Update background color
-      const bgHue = (baseHue + bgHueOffset) % 1.0;
-      const bgColor = new THREE.Color().setHSL(bgHue, 0.7, 0.1); // Subtle complementary background
-      scene.background = bgColor;
+    // Get positions
+    const positions = sphere.geometry.attributes.position.array;
+    const originalPositions = sphere.geometry.attributes.originalPosition.array;
+
+    // Initialize previousPositions if needed
+    if (!previousPositions) {
+      previousPositions = new Float32Array(positions.length);
+      previousPositions.set(positions);
     }
-  
+
     if (audio && !audio.paused) {
+      transitionProgress = Math.min(1, transitionProgress + TRANSITION_SPEED);
       // Analyze audio frequency data
       analyser.getByteFrequencyData(dataArray); // getting the frequency data from the audio
       const positions = sphere.geometry.attributes.position.array; // getting the positions of the vertices of the sphere
@@ -346,16 +384,65 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
       const totalIntensity = (subBass + bass + lowMid + mid + highMid + high) / (255 * 6); // calculating the total intensity of the audio
       sphere.material.uniforms.time.value = Date.now() * 0.001; // updating the time uniform of the shader
       sphere.material.uniforms.intensity.value = totalIntensity; // updating the intensity uniform of the shader
-      sphere.material.uniforms.baseColor.value.setHSL(baseHue, 1.0, 0.5) // updating the base color uniform of the shader;
   
       updateProgress(); 
+
+      // Get bass average
+      const bassAverage = getAverageFrequency(dataArray, 0, 8);
+      
+      // Adjust color transition speed based on bass intensity
+      colorLerpFactor = THREE.MathUtils.lerp(
+        0.1, // minimum smoothing
+        0.01, // maximum smoothing (slower transitions)
+        Math.min(bassAverage / bassThreshold, 1.0)
+      );
+
+      // Store current positions for transition
+      previousPositions.set(positions);
     } else {
-      // else reset sphere positions and intensity
-      const positions = sphere.geometry.attributes.position.array; 
-      const originalPositions = sphere.geometry.attributes.originalPosition.array;
-      positions.set(originalPositions); 
+      // Transition to idle state
+      transitionProgress = Math.max(0, transitionProgress - TRANSITION_SPEED);
+      
+      const time = Date.now() * 0.001;
+      
+      for (let i = 0; i < positions.length; i += 3) {
+        const originalX = originalPositions[i];
+        const originalY = originalPositions[i + 1];
+        const originalZ = originalPositions[i + 2];
+
+        // Create gentle wave motion
+        const normal = new THREE.Vector3(originalX, originalY, originalZ).normalize();
+        const amplitude = 2; // Adjust this for more/less movement
+        
+        const idleDistortion = 
+          Math.sin(normal.x * 2 + time) * 
+          Math.cos(normal.y * 2 + time * 0.5) * 
+          amplitude;
+
+        // Interpolate between previous active state and new idle state
+        positions[i] = THREE.MathUtils.lerp(
+          previousPositions[i],
+          originalX + normal.x * idleDistortion,
+          1 - transitionProgress
+        );
+        positions[i + 1] = THREE.MathUtils.lerp(
+          previousPositions[i + 1],
+          originalY + normal.y * idleDistortion,
+          1 - transitionProgress
+        );
+        positions[i + 2] = THREE.MathUtils.lerp(
+          previousPositions[i + 2],
+          originalZ + normal.z * idleDistortion,
+          1 - transitionProgress
+        );
+      }
+
       sphere.geometry.attributes.position.needsUpdate = true;
-      sphere.material.uniforms.intensity.value = 0; 
+      sphere.material.uniforms.intensity.value = THREE.MathUtils.lerp(
+        sphere.material.uniforms.intensity.value,
+        0,
+        0.1
+      );
     }
   
     // Render the scene
@@ -397,6 +484,19 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
       color.getHSL(hsl); // getting the hue, saturation, and lightness of the color
       baseHue = hsl.h; // setting the base hue to the hue of the color
       sphere.material.uniforms.baseColor.value.copy(color); // copying the color to the base color uniform of the shader
+      userSelectedColor = color;
+      isUsingCustomColor = true;
+      
+      // Create a lighter version of the color for UI elements
+      const uiColor = new THREE.Color(colorPicker.value);
+      const uiHSL = {};
+      uiColor.getHSL(uiHSL);
+      uiColor.setHSL(uiHSL.h, uiHSL.s, Math.min(0.8, uiHSL.l + 0.3)); // Make it lighter by increasing lightness
+      
+      // Update UI icons color with the lighter version
+      uiElements.forEach(element => {
+        element.style.color = '#' + uiColor.getHexString();
+      });
     } catch (error) {
       console.error('Error updating particle colors:', error); // incase there's an error updating the particle colors, god forbid.
     }
@@ -415,26 +515,52 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
     }
   }
 
+  function disconnectExistingAudio() {
+    if (audioSource) {
+      audioSource.disconnect();
+      audioSource = null;
+    }
+    isAudioSourceConnected = false;
+  }
+
   function setupAudio(file) { // this function is used to set up the audio
     if (file) { 
-      // load new audio file
+      console.log('File selected:', file.name); // Debugging statement
+
+      disconnectExistingAudio();
+      
       const reader = new FileReader(); // create a new file reader
       reader.onload = (e) => { // when the file is loaded
-        // Disconnect old audio source if it exists
-        if (audioSource) { // if the audio source exists, disconnect it. This is to prevent multiple audio sources from being connected at the same time
-          audioSource.disconnect(); 
-        }
-    
+        console.log('File loaded:', e.target.result); // Debugging statement
+
+        audio = new Audio();
         audio.src = e.target.result; // set the audio source to the result of the file reader
         audio.load(); // load the audio
-  
-        audioSource = audioContext.createMediaElementSource(audio); // create a new audio source
-        audioSource.connect(analyser); // connect the audio source to the analyser
-        analyser.connect(audioContext.destination); // connect the analyser to the audio context destination
+
+        // Only create new source if not already connected
+        if (!isAudioSourceConnected) {
+          audioSource = audioContext.createMediaElementSource(audio); // create a new audio source
+          audioSource.connect(analyser); // connect the audio source to the analyser
+          analyser.connect(audioContext.destination); // connect the analyser to the audio context destination
+          isAudioSourceConnected = true;
+        }
 
         audio.onloadedmetadata = () => { // when the metadata of the audio is loaded
+          console.log('Audio metadata loaded:', audio.duration); // Debugging statement
           totalTime.textContent = formatTime(audio.duration); 
           songTitle.textContent = file.name; // set the song title to the name of the file
+        };
+
+        audio.onplay = () => {
+          console.log('Audio is playing'); // Debugging statement
+        };
+
+        audio.onpause = () => {
+          console.log('Audio is paused'); // Debugging statement
+        };
+
+        audio.onerror = (e) => {
+          console.error('Audio error:', e); // Debugging statement
         };
       };
 
@@ -452,8 +578,11 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
   }
 
 
-  const playlistItems = document.querySelectorAll('#playlist-items li'); // getting all the playlist items
 
+
+// The Playlist function.
+
+  const playlistItems = document.querySelectorAll('#playlist-items li'); // getting all the playlist items
   playlistItems.forEach(item => { // iterating through the playlist items
     item.addEventListener('click', async () => {
       const songSrc = item.getAttribute('data-song');
@@ -461,27 +590,20 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
       if (audioSource && isAudioConnected) { // if the audio source exists and is connected
         audioSource.disconnect(); // disconnect the audio source
         isAudioConnected = false; // set isAudioConnected to false to prevent multiple audio sources from being connected at the same time
-      }
-
-     
+      }  
       audio.src = songSrc; // set the audio source to the song source
       songTitle.textContent = item.textContent.trim(); // set the song title to the text content of the playlist item
-      
       try {
 
         if (audioContext.state === 'suspended') { // if the audio context is suspended
           await audioContext.resume(); // resume the audio context
         }
-        
-  
         if (!isAudioConnected) {   // if the audio is not connected
           audioSource = audioContext.createMediaElementSource(audio); // create a new audio source
           audioSource.connect(analyser); // connect the audio source to the analyser
           analyser.connect(audioContext.destination); // connect the analyser to the audio context destination
           isAudioConnected = true; // set isAudioConnected to true
-        }
-
-      
+        }   
         await audio.play(); // play the audio
         playIcon.classList.remove('fa-play'); // remove the play icon
         playIcon.classList.add('fa-pause'); // add the pause icon 
@@ -492,12 +614,39 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
     });
   });
 
-});
-const colorPicker = document.getElementById('color-picker'); // getting the color picker
- 
+  function updateBackgroundColor() {
+    if (!scene) {
+      console.error('Scene not initialized');
+      return;
+    }
 
+    try {
+      const color = new THREE.Color(bgColorPicker.value);
+      scene.background = color;
+      ORIGINAL_BG_COLOR = color; // Update original background color
+    } catch (error) {
+      console.error('Error updating background color:', error);
+    }
+  }
 
-colorPicker.addEventListener('input', () => { // when the user changes the color picker
-  updateParticleColors(); // update the particle colors
-  updateBackgroundFromSphere(); // update the background from the sphere
+  bgColorPicker.addEventListener('input', updateBackgroundColor);
+
+  // Set initial UI colors
+  const initialColor = new THREE.Color(colorPicker.value);
+  updateUIColors(initialColor);
 });
+
+// Add function to update UI colors
+function updateUIColors(color) {
+  const hexColor = '#' + color.getHexString();
+  
+  // Update text elements
+  uiElements.text.forEach(element => {
+    element.style.color = color.getHSL(hsl);
+  });
+  
+  // Update icons
+  uiElements.icons.forEach(icon => {
+    icon.style.color = color.getHSL(hsl);
+  });
+}

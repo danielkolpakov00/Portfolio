@@ -1,1 +1,6 @@
-/* Tailwind CSS used for styling */
+@font-face {
+    font-family: 'Georama';
+    src: url('../../src/assets/fonts/Georama-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }

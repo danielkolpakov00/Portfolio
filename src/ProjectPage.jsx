@@ -4,7 +4,6 @@ import hljs from 'highlight.js';
 import './dk-blue.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
-import TypeIt from 'typeit-react';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -92,10 +91,12 @@ const ProjectPage = () => {
   }, [selectedProject]);
 
   useEffect(() => {
-    if (codeBlockRef.current) {
+    if (codeBlockRef.current && codeContent) {
+      // Force a new highlight when tab or content changes
+      hljs.configure({ languages: ['html', 'css', 'javascript'] });
       hljs.highlightElement(codeBlockRef.current);
     }
-  }, [codeContent]);
+  }, [codeContent, activeTab]);
 
   if (error)
     return <p className="text-red-500 text-center mt-4">{error}</p>;
@@ -124,11 +125,11 @@ const ProjectPage = () => {
 
       <div className="project-demo flex justify-center">
         {selectedProject.demoUrl ? (
-          <div className="w-full max-w-4xl h-[calc(100vw*(3/4))] lg:h-[600px] overflow-hidden shadow-lg">
+          <div className="w-full max-w-6xl aspect-[4/3] md:aspect-[16/9] lg:h-[800px] overflow-hidden shadow-lg mb-0">
             <iframe
               src={selectedProject.demoUrl}
               title={`${selectedProject.title} Demo`}
-              className="w-full h-full"
+              className="w-full h-full border-0"
               allow="fullscreen"
             ></iframe>
           </div>
@@ -139,8 +140,8 @@ const ProjectPage = () => {
         )}
       </div>
 
-      <div className="flex justify-center mt-0">
-        <div className="code-block w-full max-w-4xl bg-gray-900 shadow-lg overflow-hidden">
+      <div className="flex justify-center -mt-[1px]">
+        <div className="code-block w-full max-w-6xl bg-gray-900 shadow-lg overflow-hidden">
           <div className="flex">
             {['html', 'css', 'js'].map((tab) => {
               const icons = {
@@ -173,25 +174,15 @@ const ProjectPage = () => {
             })}
           </div>
 
-          <div className="p-4 text-white overflow-x-auto min-h-96 max-h-96 overflow-y-auto">
-            <TypeIt
-              key={`${activeTab}-${codeContent}`}
-              options={{
-                speed: 5,
-                waitUntilVisible: false,
-                afterStep: () => {
-                  if (codeBlockRef.current) {
-                    hljs.highlightElement(codeBlockRef.current);
-                  }
-                },
-              }}
-            >
-              <pre className="whitespace-pre-wrap">
-                <code ref={codeBlockRef} className={`language-${activeTab} bg-gray-900`}>
-                  {codeContent}
-                </code>
-              </pre>
-            </TypeIt>
+          <div className="p-4 text-white overflow-x-auto min-h-[400px] max-h-[400px] overflow-y-auto">
+            <pre className="hljs" key={`${activeTab}-${codeContent}`}>
+              <code 
+                ref={codeBlockRef} 
+                className={`language-${activeTab === 'js' ? 'javascript' : activeTab}`}
+              >
+                {codeContent}
+              </code>
+            </pre>
           </div>
         </div>
       </div>

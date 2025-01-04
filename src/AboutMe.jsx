@@ -209,7 +209,7 @@ const AboutMe = () => {
           <div className="relative p-8 bg-blue1 text-white rounded-lg shadow-lg flex flex-col items-center">
             <div className="relative z-10 p-4 flex-1 text-center">
               <div className="flex justify-center mb-4">
-                <FaCode className="text-8xl" />
+              <FaCode className="text-8xl" />
               </div>
               <h3
                 className="text-3xl font-semibold mb-4"
@@ -285,7 +285,7 @@ const AboutMe = () => {
         <div className="pb-4">
           <h4 className="text-xl font-semibold mb-2">Digital Art & Design</h4>
           <p className="text-base leading-relaxed">
-            Creating digital illustrations and UI concepts using Procreate and Figma. I love experimenting with different styles and techniques, from minimalist designs to detailed illustrations.
+            Creating digital illustrations and UI concepts using Figma. I love experimenting with different styles and techniques, from minimalist designs to detailed illustrations.
           </p>
         </div>
       </div>

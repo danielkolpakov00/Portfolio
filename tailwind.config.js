@@ -3,11 +3,14 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./public/**/*.html",
+    "./public/projects/**/*.{html,js}",
   ],
   theme: {
     extend: {
       animation: {
         'spin-slow': 'spin 10s linear infinite',
+        'shake-scale': 'shakeAndScale 4s ease-in-out infinite 1s',
       },
       colors: {
         blue1: "#1B69FA",
