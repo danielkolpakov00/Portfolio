@@ -34,104 +34,100 @@
         /* Layout adjustment */
         /* (You can include any custom CSS adjustments here) */
     </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blue1: "#1B69FA",
+                        blue2: "#1B44FA",
+                        offwhite: "#f5fdff"
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
-<body class="bg-gray-900 text-white font-sans relative">
+<body class="bg-offwhite text-blue2 font-sans relative min-h-screen">
 
-    <div class="container w-full mx-auto flex lg:flex-row flex-col">
+    <div class="container w-full flex flex-col lg:flex-row gap-4">
         <!-- Bet and Controls Section (Side Panel) -->
         <!-- Control Panel (Includes Both Manual and Auto Modes) -->
-<div class="control-panel flex flex-col space-y-6 bg-gray-800 p-6 rounded-l-lg shadow-lg lg:w-1/1 w-full mr-0">
+<div class="control-panel flex flex-col space-y-8 bg-white p-8 rounded-lg shadow-lg lg:w-80 w-full">
     <!-- Manual/Auto Toggle -->
-    <div class="flex justify-between bg-gray-900 p-1 rounded-full">
-        <button id="manual-tab" class="tab-button w-1/2 bg-gray-700 text-white py-2 rounded-full focus:outline-none">Manual</button>
-        <button id="auto-tab" class="tab-button w-1/2 text-gray-300 py-2 rounded-full focus:outline-none">Auto</button>
+    <div class="flex justify-between bg-offwhite p-2 rounded-full">
+        <button id="manual-tab" class="tab-button w-1/2 bg-blue1 text-offwhite py-3 rounded-full focus:outline-none transition-colors">Manual</button>
+        <button id="auto-tab" class="tab-button w-1/2 text-blue2 py-3 rounded-full focus:outline-none transition-colors">Auto</button>
+    </div>
+
+    <!-- Game Stats -->
+    <div class="stats-panel flex flex-col space-y-6 bg-offwhite p-6 rounded-lg">
+        <p class="text-blue2 text-center text-lg">Credits: <span id="bal" class="text-blue1 font-bold">1000</span></p>
+        <p class="text-blue2 text-center text-lg">Total Plays: <span id="total-bets" class="text-blue1 font-bold">0</span></p>
+        <p class="text-blue2 text-center text-lg">Points: <span id="winnings" class="text-blue1 font-bold">0</span></p>
     </div>
 
     <!-- Manual Mode Content -->
-    <div id="manual-content" class="tab-content">
-        <!-- Bet Amount Section -->
-        <div class="flex justify-between items-center">
-            <label for="bet" class="text-gray-400 font-semibold">Bet Amount</label>
-            <span id="manual-bet-display" class="text-gray-400">CA$10.00</span>
+    <div id="manual-content" class="tab-content space-y-6">
+        <div class="space-y-4">
+            <label for="bet" class="text-blue2 font-semibold block">Credit Amount</label>
+            <div class="bg-offwhite flex items-center rounded-lg p-3 space-x-3">
+                <input type="number" id="bet" min="1" max="100" class="bg-transparent text-blue2 focus:outline-none w-full text-lg" value="10">
+                <button id="half-button" class="bg-blue1 py-2 px-4 rounded text-offwhite hover:bg-blue2 transition-colors">½</button>
+                <button id="double-button" class="bg-blue1 py-2 px-4 rounded text-offwhite hover:bg-blue2 transition-colors">2×</button>
+            </div>
+            <span id="manual-bet-display" class="text-blue2 block text-center">10 credits</span>
         </div>
-
-        <!-- Bet Input Field and Options -->
-        <div class="bg-gray-900 flex items-center rounded-lg px-2 py-2 space-x-2">
-            <input type="number" id="bet" class="bg-transparent text-white focus:outline-none w-full text-lg" value="10">
-            <button id="half-button" class="bg-gray-700 py-2 px-4 rounded text-white">½</button>
-            <button id="double-button" class="bg-gray-700 py-2 px-4 rounded text-white">2×</button>
-        </div>
-
-        <!-- Bet Button -->
-        <button id="manual-bet-button" class="bg-green-500 hover:bg-green-600 text-black py-3 rounded-lg font-bold text-lg w-full">Bet</button>
+        <button id="manual-bet-button" class="bg-blue1 hover:bg-blue2 text-offwhite py-4 rounded-lg font-bold text-lg w-full transition-colors">Play</button>
     </div>
 
     <!-- Auto Mode Content (Initially Hidden) -->
-    <div id="auto-content" class="tab-content hidden">
+    <div id="auto-content" class="tab-content hidden space-y-6">
         <!-- Bet Amount Section -->
         <div class="flex justify-between items-center">
-            <label for="auto-bet" class="text-gray-400 font-semibold">Bet Amount</label>
-            <span id="auto-bet-display" class="text-gray-400">CA$10.00</span>
+            <label for="auto-bet" class="text-blue2 font-semibold">Credit Amount</label>
+            <span id="auto-bet-display" class="text-blue2">10 credits</span>
         </div>
 
         <!-- Bet Input Field and Options -->
-        <div class="bg-gray-900 flex items-center rounded-lg px-2 py-2 space-x-2">
-            <input type="number" id="auto-bet" class="bg-transparent text-white focus:outline-none w-full text-lg" value="10">
-            <button id="auto-half-button" class="bg-gray-700 py-2 px-4 rounded text-white">½</button>
-            <button id="auto-double-button" class="bg-gray-700 py-2 px-4 rounded text-white">2×</button>
+        <div class="bg-offwhite flex items-center rounded-lg px-2 py-2 space-x-2">
+            <input type="number" id="auto-bet" class="bg-transparent text-blue2 focus:outline-none w-full text-lg" value="10">
+            <button id="auto-half-button" class="bg-blue1 py-2 px-4 rounded text-offwhite">½</button>
+            <button id="auto-double-button" class="bg-blue1 py-2 px-4 rounded text-offwhite">2×</button>
         </div>
 
         <!-- Auto Bet Button -->
-        <button id="autobet-btn" class="bg-green-500 hover:bg-green-600 text-black py-3 rounded-lg font-bold text-lg w-full">Start Autobet</button>
+        <button id="autobet-btn" class="bg-blue1 hover:bg-blue2 text-offwhite py-3 rounded-lg font-bold text-lg w-full">Start Autobet</button>
     </div>
 
     <!-- Drop Balls Button -->
-    <button id="drop-balls-btn" class="bg-blue-500 hover:bg-blue-600 text-black py-3 rounded-lg font-bold text-lg w-full">Drop Balls</button>
+    <button id="drop-balls-btn" class="bg-blue1 hover:bg-blue2 text-offwhite py-4 rounded-lg font-bold text-lg w-full transition-colors">Drop Multiple</button>
 </div>
 
 
-        <!-- Auto Mode Content (Initially Hidden) -->
-        <div id="auto-content" class="tab-content hidden">
-            <!-- Bet Amount Section -->
-            <div class="flex justify-between items-center">
-                <label for="auto-bet" class="text-gray-400 font-semibold">Bet Amount</label>
-                <span class="text-gray-400">CA$0.00</span>
-            </div>
-
-            <!-- Bet Input Field and Options -->
-            <div class="bg-gray-900 flex items-center rounded-lg px-2 py-2 space-x-2">
-                <input type="number" id="auto-bet" class="bg-transparent text-white focus:outline-none w-full text-lg" value="10">
-                <button id="auto-half-button" class="bg-gray-700 py-2 px-4 rounded text-white">½</button>
-                <button id="auto-double-button" class="bg-gray-700 py-2 px-4 rounded text-white">2×</button>
-            </div>
-
-            <!-- Auto Bet Button -->
-            <button id="autobet-btn" class="bg-green-500 hover:bg-green-600 text-black py-3 rounded-lg font-bold text-lg w-full">Start Autobet</button>
-        </div>
-
         <!-- Game Stats and Balance Section (Top Panel) -->
-        <div class="stats-panel flex flex-col space-y-4 bg-gray-800 p-6 shadow-lg w-full">
+        <div class="stats-panel flex flex-col space-y-4 bg-white p-6 shadow-lg w-full">
             <!-- Total Bets Display -->
-            <p class="text-gray-400 text-center">Total Bets: <span id="total-bets" class="text-white font-bold">0</span></p>
+            <p class="text-blue2 text-center">Total Bets: <span id="total-bets" class="text-blue1 font-bold">0</span></p>
 
             <!-- Winnings Display -->
-            <p class="text-gray-400 text-center">Winnings: <span id="winnings" class="text-white font-bold">0</span></p>
+            <p class="text-blue2 text-center">Winnings: <span id="winnings" class="text-blue1 font-bold">0</span></p>
 
             <!-- Balance Display -->
-            <p class="text-gray-400 text-center">Balance: <span id="bal" class="text-white font-bold">1000</span></p>
+            <p class="text-blue2 text-center">Balance: <span id="bal" class="text-blue1 font-bold">1000</span></p>
         </div>
 
         <!-- Game Container and Statistics Panel -->
-        <div class="game-panel flex flex-col w-full lg:i ml-0">
-            <div id="game-container" class="h-[600px] mb-0 relative border border-none rounded-lg overflow-hidden">
+        <div class="game-panel flex-1">
+            <div id="game-container" class="h-[600px] lg:h-[600px] relative rounded-lg overflow-hidden shadow-lg">
                 <div id="scroll" class="absolute top-0"></div>
             </div>
 
             <!-- Statistics Panel -->
-            <div id="statistics-panel" class="stats-panel bg-gray-800 p-6 rounded-lg shadow-lg w-full mt-0">
-                <p id="bet-counter" class="text-white font-bold">Total Bets: 0</p>
-                <table class="w-full text-white">
+            <div id="statistics-panel" class="bg-white p-6 rounded-lg shadow-lg mt-4">
+                <p id="bet-counter" class="text-blue2 font-bold">Total Bets: 0</p>
+                <table class="w-full text-blue2">
                     <thead>
                         <tr>
                             <th class="text-left">Multiplier</th>
@@ -166,15 +162,15 @@
 
 
 manualTab.addEventListener('click', () => {
-    manualTab.classList.add('bg-gray-700', 'text-white');
-    autoTab.classList.remove('bg-gray-700', 'text-white');
+    manualTab.classList.add('bg-blue1', 'text-offwhite');
+    autoTab.classList.remove('bg-blue1', 'text-offwhite');
     manualContent.classList.remove('hidden');
     autoContent.classList.add('hidden');
 });
 
 autoTab.addEventListener('click', () => {
-    autoTab.classList.add('bg-gray-700', 'text-white');
-    manualTab.classList.remove('bg-gray-700', 'text-white');
+    autoTab.classList.add('bg-blue1', 'text-offwhite');
+    manualTab.classList.remove('bg-blue1', 'text-offwhite');
     autoContent.classList.remove('hidden');
     manualContent.classList.add('hidden');
 });
@@ -239,7 +235,7 @@ betButton.addEventListener('click', () => {
                 width: 800,
                 height: 600,
                 wireframes: false,
-                background: '#1f2937',
+                background: '#f5fdff', // Updated to offwhite
                 pixelRatio: window.devicePixelRatio,
             },
         });
@@ -269,7 +265,7 @@ betButton.addEventListener('click', () => {
                         isStatic: true,
                         friction: 0.0,
                         restitution: 0.5,
-                        render: { fillStyle: '#FFFFFF' },
+                        render: { fillStyle: '#1B44FA' }, // Updated to blue2
                         collisionFilter: {
                             category: 0x0004,
                             mask: 0x0001 // Collide with balls
@@ -400,7 +396,7 @@ document.getElementById('half-button').addEventListener('click', () => {
     let bet = parseFloat(betInput.value) || 0;
     bet = (bet / 2).toFixed(2);
     betInput.value = bet;
-    betDisplay.textContent = `CA$${bet}`;
+    betDisplay.textContent = `${bet} credits`;
 });
 
 document.getElementById('double-button').addEventListener('click', () => {
@@ -409,7 +405,7 @@ document.getElementById('double-button').addEventListener('click', () => {
     let bet = parseFloat(betInput.value) || 0;
     bet = (bet * 2).toFixed(2);
     betInput.value = bet;
-    betDisplay.textContent = `CA$${bet}`;
+    betDisplay.textContent = `${bet} credits`;
 });
 
 // Event listeners for Auto bet adjustment buttons
@@ -419,7 +415,7 @@ document.getElementById('auto-half-button').addEventListener('click', () => {
     let bet = parseFloat(betInput.value) || 0;
     bet = (bet / 2).toFixed(2);
     betInput.value = bet;
-    betDisplay.textContent = `CA$${bet}`;
+    betDisplay.textContent = `${bet} credits`;
 });
 
 document.getElementById('auto-double-button').addEventListener('click', () => {
@@ -428,7 +424,7 @@ document.getElementById('auto-double-button').addEventListener('click', () => {
     let bet = parseFloat(betInput.value) || 0;
     bet = (bet * 2).toFixed(2);
     betInput.value = bet;
-    betDisplay.textContent = `CA$${bet}`;
+    betDisplay.textContent = `${bet} credits`;
 });
 
 // Update bet display on input change (Manual)
@@ -436,7 +432,7 @@ document.getElementById('bet').addEventListener('input', () => {
     const betInput = document.getElementById('bet');
     const betDisplay = document.getElementById('manual-bet-display');
     let bet = parseFloat(betInput.value) || 0;
-    betDisplay.textContent = `CA$${bet.toFixed(2)}`;
+    betDisplay.textContent = `${bet.toFixed(2)} credits`;
 });
 
 // Update bet display on input change (Auto)
@@ -444,7 +440,7 @@ document.getElementById('auto-bet').addEventListener('input', () => {
     const betInput = document.getElementById('auto-bet');
     const betDisplay = document.getElementById('auto-bet-display');
     let bet = parseFloat(betInput.value) || 0;
-    betDisplay.textContent = `CA$${bet.toFixed(2)}`;
+    betDisplay.textContent = `${bet.toFixed(2)} credits`;
 });
 
 // Modified dropBall function to accept betAmount
@@ -463,7 +459,11 @@ function dropBall(betAmount) {
         friction: 0.005,
         density: 0.5,
         label: 'Ball',
-        render: { fillStyle: '#ff5733' },
+        render: { 
+            fillStyle: '#1B69FA',  // Updated to blue1
+            strokeStyle: '#1B44FA', // Updated to blue2
+            lineWidth: 1
+        },
         collisionFilter: {
             category: 0x0001,
             mask: 0x0002 | 0x0004 // Collide with walls, zones, and pegs
@@ -524,7 +524,7 @@ function dropBall(betAmount) {
         Events.on(render, 'afterRender', function () {
             if (showPath) {
                 const context = render.context;
-                context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Opaque red color
+                context.strokeStyle = 'rgba(27, 105, 250, 0.5)'; // Semi-transparent blue1
                 context.lineWidth = 2;
 
                 // Iterate over all balls to draw their paths

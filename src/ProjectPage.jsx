@@ -4,6 +4,7 @@ import hljs from 'highlight.js';
 import './dk-blue.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
+import { getProjectDescription } from './components/ProjectDescriptions';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -103,6 +104,8 @@ const ProjectPage = () => {
   if (!selectedProject || codeContent === '')
     return <p className="text-center mt-4">Loading...</p>;
 
+  const DescriptionComponent = selectedProject ? getProjectDescription(selectedProject.id) : null;
+
   return (
     <div className="project-page bg-offwhite max-w-7xl mx-auto p-4 lg:p-8">
       <h1 className="text-4xl font-bold text-blue-600 text-center my-8">
@@ -187,9 +190,9 @@ const ProjectPage = () => {
         </div>
       </div>
 
-      <div className="project-description w-full max-w-lg text-lg text-gray-700 mt-8 mx-auto text-center">
-        <h3 className="text-2xl font-semibold mb-4">Description</h3>
-        <p>{selectedProject.description}</p>
+      <div className="project-description w-full max-w-2xl text-gray-700 mt-8 mx-auto">
+        <h3 className="text-2xl font-semibold mb-6 text-center">About This Project</h3>
+        {DescriptionComponent && <DescriptionComponent />}
       </div>
     </div>
   );

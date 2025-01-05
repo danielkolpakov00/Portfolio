@@ -2,7 +2,7 @@
 function updateBalance(amount) {
     let balance = parseFloat(document.getElementById('bal').textContent) || 0;
     balance += amount;
-    document.getElementById('bal').textContent = balance.toFixed(2);
+    document.getElementById('bal').textContent = Math.max(0, balance).toFixed(0);
 }
 
 // Function to drop multiple balls
@@ -201,3 +201,24 @@ function dropBall(betAmount) {
     document.getElementById('bet-counter').textContent = `Total Bets: ${totalBets}`;
     Composite.add(world, ball);
 }
+
+// Update bet display functions
+document.getElementById('bet').addEventListener('input', () => {
+    const betInput = document.getElementById('bet');
+    const betDisplay = document.getElementById('manual-bet-display');
+    let bet = parseFloat(betInput.value) || 0;
+    // Clamp bet value between 1 and 100
+    bet = Math.min(Math.max(bet, 1), 100);
+    betInput.value = bet;
+    betDisplay.textContent = `${bet} credits`;
+});
+
+// Update auto bet display
+document.getElementById('auto-bet').addEventListener('input', () => {
+    const betInput = document.getElementById('auto-bet');
+    const betDisplay = document.getElementById('auto-bet-display');
+    let bet = parseFloat(betInput.value) || 0;
+    bet = Math.min(Math.max(bet, 1), 100);
+    betInput.value = bet;
+    betDisplay.textContent = `${bet} credits`;
+});
