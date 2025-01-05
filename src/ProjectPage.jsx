@@ -4,6 +4,7 @@ import hljs from 'highlight.js';
 import './dk-blue.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { getProjectDescription } from './components/ProjectDescriptions';
 
 const ProjectPage = () => {
@@ -13,6 +14,8 @@ const ProjectPage = () => {
   const [activeTab, setActiveTab] = useState(null);
   const [codeContent, setCodeContent] = useState('');
   const codeBlockRef = useRef(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isContentLoading, setIsContentLoading] = useState(true);
 
   const fetchCodeFile = async (fileUrl) => {
     try {
@@ -24,6 +27,21 @@ const ProjectPage = () => {
       return '';
     }
   };
+
+  const CodeSkeleton = () => (
+    <div className="animate-pulse space-y-2">
+      {[...Array(20)].map((_, i) => (
+        <div 
+          key={i} 
+          className="h-4 bg-gray-700 rounded"
+          style={{
+            width: `${Math.floor(Math.random() * 40 + 60)}%`,
+            opacity: 1 - (i * 0.03)
+          }}
+        />
+      ))}
+    </div>
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -57,7 +75,8 @@ const ProjectPage = () => {
   useEffect(() => {
     const loadTabContent = async () => {
       if (!selectedProject || !activeTab) return;
-
+      
+      setIsContentLoading(true);
       const currentTab = activeTab;
 
       let fileUrl;
@@ -79,6 +98,8 @@ const ProjectPage = () => {
 
       if (currentTab === activeTab) {
         setCodeContent(content);
+        // Add small delay to ensure smooth transition
+        setTimeout(() => setIsContentLoading(false), 300);
       }
     };
 
@@ -92,12 +113,39 @@ const ProjectPage = () => {
   }, [selectedProject]);
 
   useEffect(() => {
-    if (codeBlockRef.current && codeContent) {
+    if (codeBlockRef.current && codeContent && !isContentLoading) {
       // Force a new highlight when tab or content changes
       hljs.configure({ languages: ['html', 'css', 'javascript'] });
       hljs.highlightElement(codeBlockRef.current);
+      
+      // Add animation classes to code lines
+      requestAnimationFrame(() => {
+        const codeLines = codeBlockRef.current.innerHTML.split('\n');
+        codeBlockRef.current.innerHTML = codeLines
+          .map((line, index) => 
+            `<div class="opacity-0 animate-reveal" style="animation-delay: ${index * 50}ms">${line}</div>`
+          )
+          .join('');
+      });
     }
-  }, [codeContent, activeTab]);
+  }, [codeContent, activeTab, isContentLoading]);
+
+  // Add Tailwind animation class
+  const tailwindAnimations = `
+    @keyframes reveal {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-reveal {
+      animation: reveal 0.5s ease-out forwards;
+    }
+  `;
 
   if (error)
     return <p className="text-red-500 text-center mt-4">{error}</p>;
@@ -108,6 +156,7 @@ const ProjectPage = () => {
 
   return (
     <div className="project-page bg-offwhite max-w-7xl mx-auto p-4 lg:p-8">
+      <style>{tailwindAnimations}</style>
       <h1 className="text-4xl font-bold text-blue-600 text-center my-8">
         {selectedProject.title}
       </h1>
@@ -177,15 +226,33 @@ const ProjectPage = () => {
             })}
           </div>
 
-          <div className="p-4 text-white overflow-x-auto min-h-[400px] max-h-[400px] overflow-y-auto">
-            <pre className="hljs" key={`${activeTab}-${codeContent}`}>
-              <code 
-                ref={codeBlockRef} 
-                className={`language-${activeTab === 'js' ? 'javascript' : activeTab}`}
-              >
-                {codeContent}
-              </code>
+          <div className={`relative p-4 text-white transition-[height] duration-300 ease-in-out ${
+            isExpanded ? 'h-[800px]' : 'h-[400px]'
+          }`}>
+            <pre className="hljs h-full overflow-x-auto overflow-y-auto [&>code>div]:leading-6" key={`${activeTab}-${codeContent}`}>
+              {isContentLoading ? (
+                <CodeSkeleton />
+              ) : (
+                <code 
+                  ref={codeBlockRef} 
+                  className={`language-${activeTab === 'js' ? 'javascript' : activeTab} block`}
+                >
+                  {codeContent}
+                </code>
+              )}
             </pre>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="sticky left-[calc(100%-2.5rem)] bottom-2 bg-gray-800 hover:bg-gray-700 rounded-full p-2 transition-colors duration-200"
+              title={isExpanded ? "Collapse" : "Expand"}
+            >
+              <FontAwesomeIcon
+                icon={faCaretDown}
+                className={`text-gray-400 transition-transform duration-300 ${
+                  isExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
           </div>
         </div>
       </div>
