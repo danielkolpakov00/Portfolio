@@ -1,6 +1,6 @@
 // App.jsx
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Scene from './Scene';
 import Hero from './Hero';
@@ -15,7 +15,7 @@ const App = () => {
     // Check if user has seen the scene before
     const hasSeenScene = localStorage.getItem('hasSeenScene');
     // Check if this is a direct access to a route other than home
-    const isDirectAccess = window.location.pathname !== '/';
+    const isDirectAccess = window.location.hash !== '' && window.location.hash !== '#/';
     return !hasSeenScene && !isDirectAccess;
   });
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -27,7 +27,7 @@ const App = () => {
 
   useEffect(() => {
     // Handle direct access to routes by hiding scene
-    if (window.location.pathname !== '/') {
+    if (window.location.hash !== '' && window.location.hash !== '#/') {
       setShowScene(false);
     }
   }, []);
