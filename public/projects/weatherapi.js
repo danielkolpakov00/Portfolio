@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 
 // 2. DOM Elements & Constants
 const timeSlider = document.getElementById('timeSlider');
@@ -121,25 +122,43 @@ scene.add(sunLight);
 const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
 scene.add(ambientLight);
 
-// Replace cloud texture loading with solid color material
+// Update cloud creation function
 function createCloud(size, x, y, direction) {
-  const cloudGeometry = new THREE.PlaneGeometry(size, size / 1.5);
-  const cloudMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.8,
-    side: THREE.DoubleSide,
-    blending: THREE.CustomBlending,
-    blendSrc: THREE.SrcAlphaFactor,
-    blendDst: THREE.OneMinusSrcAlphaFactor,
-    depthTest: false
+  const loader = new SVGLoader();
+  const cloud = new THREE.Group();
+  cloud.meshes = []; // Store references to cloud meshes
+  
+  loader.load('./assets/cloud.svg', function(data) {
+    const paths = data.paths;
+    
+    paths.forEach((path) => {
+      const shapes = path.toShapes(true);
+      
+      shapes.forEach((shape) => {
+        const geometry = new THREE.ShapeGeometry(shape);
+        const material = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.8,
+          side: THREE.DoubleSide,
+          depthTest: false
+        });
+        
+        const mesh = new THREE.Mesh(geometry, material);
+        cloud.add(mesh);
+        cloud.meshes.push(mesh); // Store reference to mesh
+      });
+    });
+    
+    // Scale and position the cloud group
+    cloud.scale.set(size * 0.001, size * 0.001, 1);
+    cloud.position.set(x, -3, 1);
   });
-
-  const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-  cloud.position.set(x, y, 1);
+  
   cloud.direction = direction;
   
-  // Add glow with white color
+  // Add glow effect
+  const glowGeometry = new THREE.PlaneGeometry(size, size * 0.6);
   const glowMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -149,23 +168,38 @@ function createCloud(size, x, y, direction) {
     depthTest: false
   });
   
-  const glowCloud = new THREE.Mesh(cloudGeometry, glowMaterial);
-  glowCloud.scale.set(1.05, 1.05, 1);
-  cloud.add(glowCloud);
-
+  const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+  cloud.add(glow);
+  
   scene.add(cloud);
   return cloud;
 }
 
-// Update cloud creation with smaller numbers and closer positions
-const clouds = [
-  createCloud(2.5, -8, 2, 0.2),
-  createCloud(3, 6, 1.5, -0.15),
-  createCloud(2, -5, 0.5, 0.25),
-  createCloud(2.8, 4, 0, -0.2),
-  createCloud(2.2, -3, 1.5, 0.3),
-  createCloud(2.5, 2, -0.5, -0.25)
-];
+// Update getRandomCloudPosition function
+function getRandomCloudPosition() {
+  const dims = getResponsiveRadius();
+  const margin = 2; // Extra space beyond visible bounds
+  return {
+    x: (Math.random() * (dims.maxX * 2 + margin * 2)) - (dims.maxX + margin),
+    y: (Math.random() * (dims.maxY * 2 + margin * 2)) - (dims.maxY + margin)
+  };
+}
+
+// Update getRandomDirection function for horizontal movement only
+function getRandomDirection() {
+  const speed = Math.random() * 0.001 + 0.003; // Random speed between 0.02 and 0.12
+  return Math.random() > 0.5 ? speed : -speed; // Only horizontal movement
+}
+
+// Update cloud creation array
+const clouds = Array(6).fill(null).map(() => {
+  const pos = getRandomCloudPosition();
+  const size = Math.random() * 1.5 + 2; // Random size between 2 and 3.5
+  const direction = getRandomDirection();
+  const cloud = createCloud(size, pos.x, pos.y, direction);
+  cloud.verticalRange = { min: -2, max: 2 }; // Add vertical bounds
+  return cloud;
+});
 
 // Create Rain Particle System
 function createRain() {
@@ -271,20 +305,30 @@ function animate() {
   composer.render(); // Replace renderer.render() with composer.render()
 }
 
+// Update animateClouds function for horizontal-only movement
 function animateClouds() {
+  const dims = getResponsiveRadius();
+  const margin = 2;
+  
   clouds.forEach((cloud) => {
-    cloud.position.x += 0.005 * cloud.direction;
-    if (cloud.position.x > 15) {
-      cloud.position.x = -15;
+    // Update horizontal position only
+    cloud.position.x += cloud.direction;
+
+    // Reset position when out of bounds
+    if (cloud.position.x > dims.maxX + margin) {
+      cloud.position.x = -dims.maxX - margin;
+      cloud.direction = getRandomDirection();
     }
-    if (cloud.position.x < -15) {
-      cloud.position.x = 15;
+    if (cloud.position.x < -dims.maxX - margin) {
+      cloud.position.x = dims.maxX + margin;
+      cloud.direction = getRandomDirection();
     }
     
-    // Animate cloud glow
-    const glow = cloud.children[0];
-    glow.rotation.z += 0.001;
-    glow.material.opacity = 0.2 + Math.sin(Date.now() * 0.001) * 0.1;
+    // Animate cloud glow opacity only
+    const glow = cloud.children[cloud.children.length - 1];
+    if (glow && glow.material) {
+      glow.material.opacity = 0.2 + Math.sin(Date.now() * 0.001) * 0.1;
+    }
   });
 }
 
@@ -505,7 +549,7 @@ function updateTime(simulatedTime) {
     const minX = dims.minX;
     const maxY = dims.maxY;
     const radius = dims.radius;
-    const centerX = (maxX + minX) / 2;
+    const centerX = (maxX + minX) / 4;
 
     // Calculate positions using circular motion
     const angle = dayProgress * Math.PI * 2;
@@ -568,8 +612,19 @@ function updateTime(simulatedTime) {
 
 function updateCloudBloom(isDaytime) {
   clouds.forEach((cloud) => {
-    cloud.material.opacity = isDaytime ? 0.8 : 0.6;
-    cloud.children[0].material.opacity = isDaytime ? 0.3 : 0.2;
+    if (cloud.meshes) {
+      cloud.meshes.forEach(mesh => {
+        if (mesh.material) {
+          mesh.material.opacity = isDaytime ? 0.8 : 0.6;
+        }
+      });
+    }
+    
+    // Update glow (assuming it's the last child)
+    const glow = cloud.children[cloud.children.length - 1];
+    if (glow && glow.material) {
+      glow.material.opacity = isDaytime ? 0.3 : 0.2;
+    }
   });
   
   // Adjust bloom settings
