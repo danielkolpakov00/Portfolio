@@ -259,7 +259,7 @@ const ProjectPage = () => {
       </div>
 
       <div className="project-description w-full max-w-2xl text-gray-700 mt-8 mx-auto">
-        <h3 className="text-2xl font-semibold mb-6 text-center">About {projects.title}</h3>
+        <h3 className="text-2xl font-semibold mb-6 text-center">About {selectedProject.title}</h3>
         {DescriptionComponent && <DescriptionComponent />}
       </div>
     </div>
