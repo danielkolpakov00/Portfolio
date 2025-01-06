@@ -156,7 +156,7 @@ const ProjectPage = () => {
   const DescriptionComponent = selectedProject ? getProjectDescription(selectedProject.id) : null;
 
   return (
-    <div className="project-page bg-offwhite max-w-7xl mx-auto p-4 lg:p-8">
+    <div className="project-page max-w-7xl mx-auto p-4 lg:p-8">
       <style>{tailwindAnimations}</style>
       <h1 className="text-4xl font-bold text-blue-600 text-center my-8">
         {selectedProject.title}

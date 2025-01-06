@@ -11,6 +11,8 @@ export default {
       animation: {
         'spin-slow': 'spin 10s linear infinite',
         'shake-scale': 'shakeAndScale 4s ease-in-out infinite 1s',
+        gradient: 'gradient 6s linear infinite',
+        'gradient-x': 'gradient 15s ease infinite',
       },
       colors: {
         blue1: "#1B69FA",
@@ -19,6 +21,21 @@ export default {
       },
       fontFamily: {
         'georama': ['Georama', 'sans-serif'],
+      },
+      keyframes: {
+        gradient: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center'
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center'
+          }
+        },
+      },
+      backgroundImage: {
+        'gradient-radial': 'var(--gradient-bg)',
       },
     },
   },

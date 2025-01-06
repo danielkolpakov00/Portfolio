@@ -40,7 +40,7 @@ const projects = [
 
 const PortfolioPreview = () => {
   return (
-    <div className="px-4 lg:px-8 py-16 bg-offwhite">
+    <div className="px-4 lg:px-8 py-16">
       <style>
         {`
           .shine-effect {

@@ -34,7 +34,7 @@ const App = () => {
 
   return (
     <Router>
-      <div id="outer-container">
+      <div id="outer-container" className="min-h-screen bg-gradient-to-r from-white via-[#f5fdff] to-white animate-gradient-x bg-[length:200%_200%]">
         <Helmet>
           <title>Daniel Kolpakov | Front End Development, Web Developer</title>
           <meta
