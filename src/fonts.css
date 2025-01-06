@@ -1,0 +1,7 @@
+@font-face {
+  font-family: 'Georama';
+  src: url('../public/fonts/Georama-SemiBoldItalic.woff2') format('woff2');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}

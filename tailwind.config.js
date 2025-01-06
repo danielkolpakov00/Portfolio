@@ -17,6 +17,9 @@ export default {
         blue2: "#1B44FA",
         offwhite: "#f5fdff",
       },
+      fontFamily: {
+        'georama': ['Georama', 'sans-serif'],
+      },
     },
   },
   plugins: [
