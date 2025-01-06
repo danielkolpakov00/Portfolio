@@ -5,18 +5,26 @@ body { margin: 0; }
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: 'Abril Fatface', sans-serif;
-  letter-spacing: 4px;
-  font-size: 36px;
+  letter-spacing: 2px;
+  font-size: clamp(18px, 4vw, 36px);
   color: rgb(255, 255, 255);
   transition: color 1s ease;
   text-align: center;
-  width: 80%;
+  width: 90%;
+  max-width: 800px;
   overflow: hidden;
-  height: 50px; /* Adjust height to fit one message */
+  height: auto;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .weatherMessage {
   position: absolute;
   width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+  line-height: 1.4;
 }
 canvas { display: block; }
 #timeDisplay {
@@ -42,16 +50,38 @@ canvas { display: block; }
   pointer-events: none;
 }
 #timeSlider {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  width: 200px;
+  margin-bottom: 5px;
   display: none;
+  -webkit-appearance: none;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
 }
+
+#timeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+}
+
+#timeSlider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+}
+
 #debugButton {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
+  position: relative;
   font-size: 16px;
   padding: 15px 20px;
   border-radius: 100px;
@@ -79,9 +109,7 @@ canvas { display: block; }
   pointer-events: none;
 }
 #playButton {
-  position: absolute;
-  bottom: 20px;
-  left: 80px;
+  position: relative;
   font-size: 16px;
   padding: 15px 20px;
   border-radius: 100px;
@@ -90,4 +118,71 @@ canvas { display: block; }
   border: none;
   font-family: Arial, sans-serif;
   transition: background-color 0.5s ease;
+}
+
+#controlGroup {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 10px;
+}
+
+#precipButton {
+  position: relative;
+  font-size: 16px;
+  padding: 15px 20px;
+  border-radius: 100px;
+  cursor: pointer;
+  background-color: white;
+  border: none;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.5s ease;
+}
+
+#precipControls {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  gap: 15px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px;
+  border-radius: 100px;
+}
+
+#precipType {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: none;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+}
+
+#precipIntensity {
+  width: 120px;
+  cursor: pointer;
+}
+
+/* Add media query for very small screens */
+@media (max-width: 480px) {
+  #weatherDisplay {
+    letter-spacing: 1px;
+    min-height: 80px;
+  }
+  
+  #timeDisplay {
+    font-size: clamp(40px, 15vw, 90px);
+    letter-spacing: 4px;
+  }
 }
