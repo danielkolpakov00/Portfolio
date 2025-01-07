@@ -271,7 +271,7 @@ const AboutMe = () => {
         <div className="border-b border-blue-400 pb-9">
           <h4 className="text-xl font-semibold mb-2">Music Enthusiast</h4>
           <p className="text-base leading-relaxed">
-            I enjoy listening to a wide range of music genres, from house music to classical. I also play the piano and guitar in my free time. Music is a big part of my life and inspires me in my creative work.
+            I enjoy listening to a wide range of music genres, from house music to classical. Listening to music and discovering new songs is a big part of my life and inspires me in my creative work.
           </p>
         </div>
         
