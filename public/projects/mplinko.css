@@ -1,1 +1,36 @@
-/* Tailwind CDN used for this project */
+.alert-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.alert-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.alert-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.alert-exit-active {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+/* Layout adjustment */
+/* (You can include any custom CSS adjustments here) */
+@keyframes shine {
+    0%, 100% {
+        filter: brightness(100%);
+    }
+    50% {
+        filter: brightness(130%);
+    }
+}
+
+.animate-shine {
+    animation: shine 2s infinite;
+}
