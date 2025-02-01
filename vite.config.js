@@ -12,8 +12,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
+        reactProjects: './public/reactprojects/**/*.jsx'
       },
     },
+    assetsInlineLimit: 0,
   },
   publicDir: 'public',
   resolve: {
@@ -21,14 +23,15 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  assetsInclude: ['**/*.glb'],
+  assetsInclude: ['**/*.jsx'],
   optimizeDeps: {
     include: ['react-router-dom'], // Ensure react-router-dom is included
     exclude: ['three']
   },
   server: {
     fs: {
-      strict: false
+      strict: false,
+      allow: ['..']
     }
   }
 });
