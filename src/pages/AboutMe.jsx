@@ -8,37 +8,36 @@ import '../App.css';
 import { Link } from 'react-router-dom';
 import TsParticles from '../components/TsParticles';  // Fix import statement
 
-
-// const projects = [
-//   {
-//     id: 1,
-//     title: 'Weather API Project',
-//     description: 'I built a Three.js scene that grabs weather data from OpenWeather API and displays the current temperature in Vancouver.',
-//     buttonText: 'Check it out!',
-//     color: '#284af7',
-//   },
-//   {
-//     id: 2,
-//     title: 'Matter.js Plinko',
-//     description: 'Using a physics engine, I made a fun and interesting Plinko game, and balanced it as much as possible using y-axis forces and testing peg layouts.',
-//     buttonText: 'Check it out!',
-//     color: '#284af7',
-//   },
-//   {
-//     id: 3,
-//     title: '3D Bedroom Scene',
-//     description: 'As I have a desire for learning 3D design, I created a Three.js scene that resembles a bedroom.',
-//     buttonText: 'Check it out!',
-//     color: '#284af7',
-//   },
-//   {
-//     id: 4,
-//     title: 'Music Visualizer',
-//     description: 'I created a music visualizer using Three.js and Web Audio API. The visualizer reacts to the music and creates a unique visual experience.',
-//     buttonText: 'Check it out!',
-//     color: '#284af7',
-//   }
-// ];
+const projects = [
+  {
+    id: 1,
+    title: 'Weather API Project',
+    description: 'I built a Three.js scene that grabs weather data from OpenWeather API and displays the current temperature in Vancouver.',
+    buttonText: 'Check it out!',
+    color: '#284af7',
+  },
+  {
+    id: 2,
+    title: 'Matter.js Plinko',
+    description: 'Using a physics engine, I made a fun and interesting Plinko game, and balanced it as much as possible using y-axis forces and testing peg layouts.',
+    buttonText: 'Check it out!',
+    color: '#284af7',
+  },
+  {
+    id: 3,
+    title: '3D Bedroom Scene',
+    description: 'As I have a desire for learning 3D design, I created a Three.js scene that resembles a bedroom.',
+    buttonText: 'Check it out!',
+    color: '#284af7',
+  },
+  {
+    id: 4,
+    title: 'Music Visualizer',
+    description: 'I created a music visualizer using Three.js and Web Audio API. The visualizer reacts to the music and creates a unique visual experience.',
+    buttonText: 'Check it out!',
+    color: '#284af7',
+  }
+];
 
 const AboutMe = () => {
   const borderRef = useRef(null);
@@ -55,16 +54,16 @@ const AboutMe = () => {
     });
   }, []);
 
-  // const handleMouseEnter = (index) => {
-  //   const shine = shineRefs.current[index];
-  //   // Reset the position before animating
-  //   gsap.set(shine, { x: '-100%' });
-  //   gsap.to(shine, { 
-  //     x: '200%', 
-  //     duration: 0.8,
-  //     ease: 'power1.inOut',
-  //   });
-  // };
+  const handleMouseEnter = (index) => {
+    const shine = shineRefs.current[index];
+    // Reset the position before animating
+    gsap.set(shine, { x: '-100%' });
+    gsap.to(shine, { 
+      x: '200%', 
+      duration: 0.8,
+      ease: 'power1.inOut',
+    });
+  };
 
   return (
     <section className="about-section py-20 text-center relative min-h-screen">
@@ -81,7 +80,7 @@ const AboutMe = () => {
         />
       </Helmet>
       <h2
-        className="text-4xl text-blue2 mb-12 font-georama font-semibold font-italic"
+        className="text-4xl text-blue2 font-georama italic mb-12"
         style={{ textShadow: '2px 2px 0px lightgray' }}
       >
         About me
@@ -90,106 +89,84 @@ const AboutMe = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[minmax(200px,auto)]">
           {/* Profile Box - Spans 2 columns and 2 rows */}
-            
-          <div className="md:col-span-2 md:row-span-2 bg-offwhite opacity-80 backdrop-blur-sm text-white p-8 shadow-lg rounded-xl">
-  <h3 className="text-8xl font-semibold -mt-16 text-blue2 opacity-80">About Me</h3>
-  <div className="relative w-full h-128 mx-auto mb-4 m-12">
-    <img
-      src={DanielImage}
-      alt="Daniel"
-      className="w-full h-full object-cover shadow-lg filter rounded-lg"
-    />
-    <div className="absolute inset-0 bg-blue2 mix-blend-overlay opacity-100 filter brightness-200"></div>
-  </div>
-
-  <div className="relative p-4 flex-1 text-center">
-    <p className="text-base align-center text-blue2 text-lg">
-      I'm deeply passionate about blending design and development, turning digital interfaces into experiences. I enjoy pushing boundaries and learning how to create amazing web development projects that catch the eye.
-    </p>
-    <div className="flex justify-center items-center space-x-8 mt-8">
-      <div className="relative group">
-        <FaReact
-          className="text-4xl text-offwhite mx-auto hover:text-blue-400 transition-colors"
-          title="Built with React"
-        />
-        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-10 bg-gray-800 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-          React for UI
-        </div>
-      </div>
-      <div className="relative group">
-        <FaCube
-          className="text-4xl text-offwhite mx-auto hover:text-blue-400 transition-colors"
-          title="3D and Interactive Media"
-        />
-        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-10 bg-gray-800 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-          3D Interactive Media
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-                <div className="md:col-span-2 bg-offwhite opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-lg flex items-center justify-center rounded-tl-3xl rounded-br-3xl">
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="flex flex-col items-center">
-                  <Link to="https://github.com/danielkolpakov00" target="_blank" rel="noopener noreferrer">
-                    <div 
+          <div className="md:col-span-2 md:row-span-2 bg-offwite opacity-80 backdrop-blur-sm text-white p-8 shadow-lg">
+          
+            <img
+              src={DanielImage}
+              alt="Daniel"
+              className="w-30 h-96 object-cover mx-auto shadow-lg mb-4 "
+            />
+            <h3
+                className="text-5xl font-georama italic font-semibold text-offwhite mb-4 -mt-14 text-shadow-blue-500"
+               
+              >About</h3>
+            <div className="relative z-10 p-4 flex-1 text-center">
+              
+                
+              <p className="text-base leading-relaxed text-blue2">
+                I'm deeply passionate about blending design and development, turning digital interfaces into experiences. I enjoy pushing boundaries and learning how to create amazing web development projects that catch the eye.
+              </p>
+              <div className="flex justify-center items-center space-x-8 mt-8">
+                <div className="relative group">
+                  <FaReact
+                    className="text-4xl text-offwhite mx-auto hover:text-blue-400 transition-colors"title="Built with React"
+                  />
+                  <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-10 bg-gray-800 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    React for UI
+                  </div>
+                </div>
+                <div className="relative group">
+                  <FaCube
+                    className="text-4xl text-offwhite mx-auto hover:text-blue-400 transition-colors"
+                    title="3D and Interactive Media"
+                  />
+                  <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-10 bg-gray-800 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    3D Interactive Media
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="md:col-span-2 bg-offwhite opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-lg flex items-center justify-center rounded-tl-3xl rounded-br-3xl">
+            <div className="grid grid-cols-2 gap-8">
+              <div className="flex flex-col items-center">
+                <Link to="https://github.com/danielkolpakov00" target="_blank" rel="noopener noreferrer">
+                  <div 
                     className="text-8xl text-blue2 hover:text-blue-700 transition-colors cursor-pointer p-4 rounded-lg"
-                    >
+                  >
                     <FaGithub />
-                    </div>
-                  </Link>
                   </div>
-                  <div className="flex flex-col items-center">
-                  <Link to="https://www.linkedin.com/in/daniel-kolpakov-829901221" target="_blank" rel="noopener noreferrer">
-                    <div 
+                </Link>
+              </div>
+              <div className="flex flex-col items-center">
+                <Link to="https://www.linkedin.com/in/daniel-kolpakov-829901221" target="_blank" rel="noopener noreferrer">
+                  <div 
                     className="text-8xl text-blue2 hover:text-blue-700 transition-colors cursor-pointer p-4 rounded-lg"
-                    >
+                  >
                     <FaLinkedin />
-                    </div>
-                  </Link>
                   </div>
-                </div>
-                </div>
+                </Link>
+              </div>
+            </div>
+          </div>
 
-                {/* Journey Box - Spans 2 columns */}
-                <div className="md:col-span-2 bg-offwhite backdrop-blur-sm opacity-80 text-white rounded-xl shadow-lg">
-                  <div className="p-8">
-                    <div className="flex items-center justify-center mb-6">
-                      <FaCode className="text-6xl text-blue2 transform hover:rotate-12 transition-transform duration-300" />
-                    </div>
-                    
-                    <div className="relative z-10">
-                      <h3 className="text-3xl font-semibold mb-8 text-blue2 text-center pb-4">
-                        Professional Journey
-                      </h3>
-                      
-                      <div className="space-y-6">
-                        <p className="text-lg leading-relaxed text-blue2">
-                          With a foundation in BCIT's New Media Design and Web Development program, 
-                          I've developed expertise in modern web technologies including React.js, Three.js, 
-                          and responsive design principles.
-                        </p>
-                        
-                        <p className="text-lg leading-relaxed text-blue2">
-                          My specialization lies in front-end development, particularly in creating 
-                          immersive 3D web experiences and intuitive user interfaces. I consistently 
-                          stay ahead of industry trends and emerging technologies to deliver 
-                          cutting-edge solutions.
-                        </p>
-                        
-                        <p className="text-lg leading-relaxed text-blue2">
-                          Through numerous successful projects, I've established strong proficiency in 
-                          web development best practices, WCAG accessibility standards, and modern 
-                          development workflows. My portfolio showcases particular expertise in Three.js 
-                          and WebGL implementations, where technical precision meets creative design.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* Journey Box - Spans 2 columns */}
+          <div className="md:col-span-2 bg-offwhite backdrop-blur-sm opacity-80 backdrop-blur-sm text-white rounded-xl shadow-lg">
+            <FaCode className="text-6xl mx-auto mb-4 mt-8"/>
+            <div className="relative z-10 p-4 flex-1 text-center">
+              <h3
+                className="text-3xl font-semibold mb-4 text-blue2"
+                style={{ textShadow: '2px 2px 0pxrgb(255, 255, 255)' }}
+              >
+                My Journey
+              </h3>
+              <p className="text-base leading-relaxed pt-8 pb-8 text-blue2">
+                I started my path in web development driven by a passion for creating interactive and engaging digital experiences. During my time at BCIT's New Media Design and Web Development program, I have been honing my skills in React.js, Three.js, and modern web technologies.
+              </p>
+            </div>
+          </div>
 
-                {/* Technical Toolbox - Spans 2 columns */}
+          {/* Technical Toolbox - Spans 2 columns */}
           <div className="md:col-span-2 bg-offwhite opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-lg order-1">
             <FaToolbox className="text-6xl text-blue2 mx-auto mb-4" />
             <div className="relative z-10 p-4 flex-1 w-full">
@@ -274,7 +251,7 @@ const AboutMe = () => {
           </div>
 
           {/* Projects Box - Spans full width */}
-          {/* <div className="md:col-span-4 p-6 rounded-xl opacity-80">
+          <div className="md:col-span-4 p-6 rounded-xl opacity-80">
             <h3 className="text-3xl font-semibold mb-6 text-blue2">Projects</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {projects.map((project, index) => (
@@ -297,7 +274,7 @@ const AboutMe = () => {
                   <div className="mt-auto pt-4">
                     <Link 
                       to={`/projects/${project.id}`}
-                      className="relative z-10 px-4 py-2 bg-offwhite backdrop-blur-sm text-blue2 rounded inline-block hover:bg-blue-600 hover:text-offwhite transition-colors"
+                      className="relative z-10 px-6 py-3 text-blue2 rounded inline-block hover:bg-blue-600 hover:text-offwhite transition-colors animated-border bg-transparent"
                     >
                       View Project
                     </Link>
@@ -305,7 +282,7 @@ const AboutMe = () => {
                 </div>
               ))}
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </section>

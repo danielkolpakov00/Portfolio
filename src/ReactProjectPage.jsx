@@ -2,13 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import hljs from 'highlight.js';
 import './dk-blue.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faReact } from '@fortawesome/free-brands-svg-icons';
-import { faCode, faPuzzlePiece } from '@fortawesome/free-solid-svg-icons';
-import { getProjectDescription } from './components/ProjectDescriptions';
 
 // Replace the glob pattern to include the "public" folder:
-const allProjectJSXFiles = import.meta.glob('/public/reactprojects/*/src/**/*.jsx', { as: 'raw' });
+const allProjectJSXFiles = import.meta.glob('./src/reactprojects/*/src/**/*.jsx', { as: 'raw' });
 
 // ...existing helper function...
 const extractFileName = (filePath) =>

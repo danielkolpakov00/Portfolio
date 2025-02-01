@@ -13,11 +13,6 @@ body {
   font-family: 'Georama', sans-serif;
 }
 
-/* Smooth scrolling for the entire site */
-html {
-  scroll-behavior: smooth;
-}
-
 #page-wrap.scale-with-border {
   transform-origin: center;
 }
@@ -56,17 +51,30 @@ canvas {
   }
 }
 
-/* Smooth transition utilities */
-.transition-all {
-  transition-property: all;
+@keyframes dash {
+  to {
+    background-position: 100% 50%, 100% 50%, 50% 100%, 50% 100%;
+  }
 }
 
-.duration-300 {
-  transition-duration: 300ms;
+.animated-border {
+  position: relative;
+  border: 2px solid transparent;
+  background-image: linear-gradient(90deg, #284af7 50%, transparent 50%),
+                    linear-gradient(90deg, #284af7 50%, transparent 50%),
+                    linear-gradient(0deg, #284af7 50%, transparent 50%),
+                    linear-gradient(0deg, #284af7 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
+  background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0%;
+  padding: 8px 16px;
+  animation: dash 4s linear infinite;
 }
 
-.ease-in-out {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes dash {
+  to {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes border-move {
@@ -78,26 +86,18 @@ canvas {
   }
 }
 
-/* Hide scrollbar but keep functionality */
-.project-container {
-  scrollbar-width: initial; /* Firefox */
-  -ms-overflow-style: initial; /* IE/Edge */
+@keyframes gradient {
+   0%, 100% {
+    background-position: 0% 50%;
+    background-image: linear-gradient(90deg, var(--tw-gradient-from) 0%, var(--tw-gradient-via) 50%, var(--tw-gradient-to) 100%);
+  }
+  50% {
+    background-position: 100% 50%;
+    background-image: linear-gradient(90deg, var(--tw-gradient-from) 0%, rgba(255,255,255,0.1) 50%, var(--tw-gradient-to) 100%);
+  }
 }
 
-.project-container::-webkit-scrollbar {
-  display: initial; /* Chrome/Safari/Opera */
-}
-
-/* Horizontal scrolling styles */
-.projects-container {
-  -ms-overflow-style: initial;
-  scrollbar-width: initial;
-}
-
-.projects-container::-webkit-scrollbar {
-  display: initial;
-}
-
-.projects-container {
-  scroll-padding: 0 1rem;
+.animate-gradient-stagger {
+  animation: gradient 4s ease infinite;
+  animation-fill-mode: forwards;
 }

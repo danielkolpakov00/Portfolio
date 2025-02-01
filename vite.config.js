@@ -5,35 +5,24 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   base: './',
+  assetsInclude: ['**/*.glb'], // Added to handle .glb assets
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
     rollupOptions: {
-      input: './index.html', // Remove glob pattern from input
+      input: './index.html',
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
+        // Dynamically group vendor modules
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) return 'vendor';
         },
       },
     },
-    assetsInlineLimit: 0,
   },
-  publicDir: 'public',
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, 'src'),
     },
   },
-  assetsInclude: ['**/*.jsx'],
-  optimizeDeps: {
-    include: ['react-router-dom'],
-    exclude: ['three']
-  },
-  server: {
-    fs: {
-      strict: false,
-      allow: ['..']
-    }
-  }
 });
