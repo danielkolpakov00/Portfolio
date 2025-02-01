@@ -1,0 +1,3 @@
+[submodule "gradient-generator"]
+	path = gradient-generator
+	url = https://github.com/danielkolpakov00/gradient-generator.git

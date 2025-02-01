@@ -13,6 +13,11 @@ body {
   font-family: 'Georama', sans-serif;
 }
 
+/* Smooth scrolling for the entire site */
+html {
+  scroll-behavior: smooth;
+}
+
 #page-wrap.scale-with-border {
   transform-origin: center;
 }
@@ -51,7 +56,18 @@ canvas {
   }
 }
 
+/* Smooth transition utilities */
+.transition-all {
+  transition-property: all;
+}
 
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 @keyframes border-move {
   from {
@@ -60,4 +76,28 @@ canvas {
   to {
     background-position: 0 0, 10px 0;
   }
+}
+
+/* Hide scrollbar but keep functionality */
+.project-container {
+  scrollbar-width: initial; /* Firefox */
+  -ms-overflow-style: initial; /* IE/Edge */
+}
+
+.project-container::-webkit-scrollbar {
+  display: initial; /* Chrome/Safari/Opera */
+}
+
+/* Horizontal scrolling styles */
+.projects-container {
+  -ms-overflow-style: initial;
+  scrollbar-width: initial;
+}
+
+.projects-container::-webkit-scrollbar {
+  display: initial;
+}
+
+.projects-container {
+  scroll-padding: 0 1rem;
 }

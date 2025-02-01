@@ -1,5 +1,6 @@
 // src/Contact.jsx
 import React, { useState } from 'react';
+import TsParticles from "./components/TsParticles";
 
 const Contact = ({ isOpen }) => {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -25,68 +26,58 @@ const Contact = ({ isOpen }) => {
   };
 
   return (
-    <section className={`flex justify-center py-12 bg-blue-50 p-8 ${isOpen ? 'border-4 border-blue2' : ''}`}>
-      <div className="w-full max-w-lg p-8 bg-blue-600 rounded-lg shadow-lg">
-        <h2 className="text-4xl font-bold text-center text-white italic mb-8">Get In Touch</h2>
+    <section className="relative px-4 lg:px-8 py-16">
+      <div className="absolute inset-0">
+        <TsParticles />
+      </div>
+      <div className="relative z-10 w-full max-w-2xl mx-auto">
+        <h2 
+          className="text-center text-6xl font-georama text-white font-bold italic mb-12"
+          style={{
+            textShadow: "2px 2px 0px #1B69FA, -2px -2px 0px #1B69FA, 2px -2px 0px #1B69FA, -2px 2px 0px #1B69FA"
+          }}
+        >
+          Get In Touch
+        </h2>
 
         {formSubmitted ? (
-          <div className="text-center text-white">
-            <h3 className="text-2xl font-semibold mb-4">Thank You!</h3>
-            <p>We've received your message and will get back to you soon.</p>
+          <div className="text-center bg-white/30 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+            <h3 className="text-2xl font-semibold mb-4 text-blue2">Thank You!</h3>
+            <p className="text-gray-800">We've received your message and will get back to you soon.</p>
           </div>
         ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6 bg-white/30 backdrop-blur-sm rounded-xl p-8 shadow-lg" onSubmit={handleSubmit}>
+            {[
+              { id: 'name', label: 'Name', type: 'text', required: true },
+              { id: 'surname', label: 'Surname', type: 'text', required: false },
+              { id: 'email', label: 'Email', type: 'email', required: true },
+            ].map((field) => (
+              <div key={field.id}>
+                <label htmlFor={field.id} className="block text-gray-800 font-semibold mb-2">
+                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type={field.type}
+                  id={field.id}
+                  className="w-full p-3 rounded-lg border-2 border-blue2/20 bg-white/50 backdrop-blur-sm
+                           focus:ring-2 focus:ring-blue2 focus:border-transparent transition-all"
+                  placeholder={`Enter your ${field.label.toLowerCase()}`}
+                  value={formData[field.id]}
+                  onChange={handleInputChange}
+                  required={field.required}
+                  aria-label={`Enter your ${field.label.toLowerCase()}`}
+                />
+              </div>
+            ))}
+            
             <div>
-              <label htmlFor="name" className="block text-white font-semibold mb-2">
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                className="w-full p-3 rounded-lg border-none focus:ring-2 focus:ring-blue-300"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                aria-label="Enter your name"
-              />
-            </div>
-            <div>
-              <label htmlFor="surname" className="block text-white font-semibold mb-2">
-                Surname
-              </label>
-              <input
-                type="text"
-                id="surname"
-                className="w-full p-3 rounded-lg border-none focus:ring-2 focus:ring-blue-300"
-                placeholder="Enter your surname"
-                value={formData.surname}
-                onChange={handleInputChange}
-                aria-label="Enter your surname"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-white font-semibold mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="w-full p-3 rounded-lg border-none focus:ring-2 focus:ring-blue-300"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                aria-label="Enter your email"
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="block text-white font-semibold mb-2">
+              <label htmlFor="message" className="block text-gray-800 font-semibold mb-2">
                 Message <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="message"
-                className="w-full p-3 rounded-lg border-none h-32 focus:ring-2 focus:ring-blue-300"
+                className="w-full p-3 rounded-lg border-2 border-blue2/20 bg-white/50 backdrop-blur-sm
+                         focus:ring-2 focus:ring-blue2 focus:border-transparent transition-all h-32"
                 placeholder="Enter your message"
                 value={formData.message}
                 onChange={handleInputChange}
@@ -94,9 +85,12 @@ const Contact = ({ isOpen }) => {
                 aria-label="Enter your message"
               ></textarea>
             </div>
+            
             <button
               type="submit"
-              className="w-full bg-white text-blue-600 font-semibold p-3 rounded-lg hover:bg-blue-100 transition-colors"
+              className="w-full bg-blue2 text-white font-semibold p-3 rounded-lg 
+                       hover:bg-blue-700 transition-colors shadow-lg
+                       hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
               Submit
             </button>

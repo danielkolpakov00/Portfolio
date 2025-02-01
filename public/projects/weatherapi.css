@@ -1,5 +1,7 @@
-body { margin: 0; }
-#weatherDisplay {
+body { 
+  margin: 0; 
+}
+#weatherDisplay { 
   position: absolute;
   top: 50%;
   left: 50%;

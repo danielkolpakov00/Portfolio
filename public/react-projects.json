@@ -1,0 +1,20 @@
+{
+  "projects": [
+    {
+      "id": "gradient-generator",
+      "title": "Gradient Generator Project",
+      "description": "A dynamic gradient generator built with React and Tailwind CSS. This tool lets users create and customize gradient backgrounds with live previews, adjustable color stops, directional controls, and opacity settings. Ideal for designers and developers to quickly experiment with aesthetic color schemes.",
+      "technologies": ["React", "Tailwind CSS"],
+      "componentFile": "/reactprojects/gradient-generator/App.jsx",
+      "demoUrl": "https://your-demo-url.com/gradient-generator/demo"
+    },
+    {
+      "id": "lastfm-app",
+      "title": "LastFM App",
+      "description": "An interactive React application that integrates with the LastFM API to provide up-to-date music and artist information. Featuring dynamic playlists, detailed artist biographies, and real-time track updates, this project demonstrates advanced API integration, responsive design, and modern React practices.",
+      "technologies": ["React", "API", "TailwindCSS"],
+      "componentFile": "/reactprojects/lastfm-app/App.jsx",
+      "demoUrl": "https://your-demo-url.com/lastfm-app/demo"
+    }
+  ]
+}

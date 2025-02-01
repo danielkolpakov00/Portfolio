@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Scene from './Scene';
-import Hero from './Hero';
-import AboutMe from './AboutMe';
+import Hero from './pages/Hero';
+import AboutMe from './pages/AboutMe';
 import Contact from './Contact';
 import PortfolioPreview from './PortfolioPreview';
 import ProjectPage from './ProjectPage';
+import ReactProjectPage from './ReactProjectPage';
 import Navbar from './Navbar';
 
 const App = () => {
@@ -59,6 +60,7 @@ const App = () => {
                   <Route path="/portfolio" element={<PortfolioPreview />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/projects/:id" element={<ProjectPage />} />
+                  <Route path="/react-projects/:id" element={<ReactProjectPage />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </main>

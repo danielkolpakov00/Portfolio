@@ -10,31 +10,116 @@ const BedroomScenePreview = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#284af7'); // Set background color to blue
-    const camera = new THREE.PerspectiveCamera(75, mount.clientWidth / mount.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    scene.background = null;
+    const camera = new THREE.PerspectiveCamera(50, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: true 
+    });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     mount.appendChild(renderer.domElement);
 
-    // Add a simple box to represent the bedroom
-    const geometry = new THREE.BoxGeometry(2, 2, 2);
-    const material = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); // Brown color
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    // Materials
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x1B69FA });
+    
+    // Room container
+    const roomGroup = new THREE.Group();
 
-    camera.position.z = 5;
+
+
+
+const bedMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+
+    // Floor outline
+    const floorGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-2, -1, -2),
+      new THREE.Vector3(2, -1, -2),
+      new THREE.Vector3(2, -1, 2),
+      new THREE.Vector3(-2, -1, 2),
+      new THREE.Vector3(-2, -1, -2),
+    ]);
+    const floor = new THREE.Line(floorGeometry, lineMaterial);
+    roomGroup.add(floor);
+  
+
+    // Walls outlines
+    const wallsGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-2, -1, -2),
+      new THREE.Vector3(-2, 2, -2),
+      new THREE.Vector3(2, 2, -2),
+      new THREE.Vector3(2, -1, -2),
+      new THREE.Vector3(2, -1, 2),
+      new THREE.Vector3(2, 2, 2),
+      new THREE.Vector3(2, 2, -2),
+    ]);
+    const walls = new THREE.Line(wallsGeometry, lineMaterial);
+    roomGroup.add(walls);
+
+    // Bed outline
+    const bedGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-1.5, -0.9, -1.5),
+      new THREE.Vector3(-0.5, -0.9, -1.5),
+      new THREE.Vector3(-0.5, -0.9, 0),
+      new THREE.Vector3(-1.5, -0.9, 0),
+      new THREE.Vector3(-1.5, -0.9, -1.5),
+      new THREE.Vector3(-1.5, -0.5, -1.5),
+      new THREE.Vector3(-0.5, -0.5, -1.5),
+      new THREE.Vector3(-0.5, -0.5, 0),
+      new THREE.Vector3(-1.5, -0.5, 0),
+      new THREE.Vector3(-1.5, -0.5, -1.5),
+    ]);
+    const bed = new THREE.Line(bedGeometry, bedMaterial);
+    roomGroup.add(bed);
+
+
+    const deskMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+
+    // Desk outline
+    const deskGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0.5, -0.9, -1.5),
+      new THREE.Vector3(1.5, -0.9, -1.5),
+      new THREE.Vector3(1.5, -0.9, -0.5),
+      new THREE.Vector3(0.5, -0.9, -0.5),
+      new THREE.Vector3(0.5, -0.9, -1.5),
+      new THREE.Vector3(0.5, -0.3, -1.5),
+      new THREE.Vector3(1.5, -0.3, -1.5),
+      new THREE.Vector3(1.5, -0.3, -0.5),
+      new THREE.Vector3(0.5, -0.3, -0.5),
+      new THREE.Vector3(0.5, -0.3, -1.5),
+    ]);
+    const desk = new THREE.Line(deskGeometry, deskMaterial);
+    roomGroup.add(desk);
+
+    scene.add(roomGroup);
+
+    // Set camera position for isometric view
+    camera.position.set(5, 4, 5);
+    camera.lookAt(0, 0, 0);
 
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+      
+      // Gentle floating motion
+      roomGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+      roomGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.1;
+      
       renderer.render(scene, camera);
     };
     animate();
 
-    // Cleanup on unmount
+    // Handle window resize
+    const handleResize = () => {
+      camera.aspect = mount.clientWidth / mount.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(mount.clientWidth, mount.clientHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       mount.removeChild(renderer.domElement);
     };
   }, []);
