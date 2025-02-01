@@ -1,3 +1,6 @@
-[submodule "gradient-generator"]
-	path = gradient-generator
-	url = https://github.com/danielkolpakov00/gradient-generator.git
+[submodule "public/reactprojects/gradient-generator"]
+    path = public/reactprojects/gradient-generator
+    url = ./public/reactprojects/gradient-generator
+[submodule "public/reactprojects/lastfm-app"]
+    path = public/reactprojects/lastfm-app
+    url = ./public/reactprojects/lastfm-app
