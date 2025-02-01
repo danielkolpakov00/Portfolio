@@ -10,9 +10,11 @@ export default defineConfig({
     assetsDir: 'assets',
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: './index.html',
-        reactProjects: './public/reactprojects/**/*.jsx'
+      input: './index.html', // Remove glob pattern from input
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+        },
       },
     },
     assetsInlineLimit: 0,
@@ -25,7 +27,7 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.jsx'],
   optimizeDeps: {
-    include: ['react-router-dom'], // Ensure react-router-dom is included
+    include: ['react-router-dom'],
     exclude: ['three']
   },
   server: {
