@@ -1,6 +1,0 @@
-[submodule "public/reactprojects/gradient-generator"]
-    path = public/reactprojects/gradient-generator
-    url = ./public/reactprojects/gradient-generator
-[submodule "public/reactprojects/lastfm-app"]
-    path = public/reactprojects/lastfm-app
-    url = ./public/reactprojects/lastfm-app
