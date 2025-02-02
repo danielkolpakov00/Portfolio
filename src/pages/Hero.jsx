@@ -144,6 +144,7 @@ const Hero = ({ isOpen }) => {
   );
 
   return (
+    
     <div className={`relative flex items-center justify-center min-h-screen bg-offwhite p-0 ${isOpen ? 'border-4 border-blue2' : ''}`}>
       <TsParticles />
       

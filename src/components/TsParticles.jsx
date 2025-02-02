@@ -1,16 +1,8 @@
-import { useEffect, useState, useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, memo } from 'react';
 import Particles from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 
 const TsParticles = () => {
-  const [init, setInit] = useState(false);
-
-  useEffect(() => {
-    loadSlim().then(() => {
-      setInit(true);
-    });
-  }, []);
-
   const particlesLoaded = (container) => {
     console.log(container);
   };
@@ -21,40 +13,26 @@ const TsParticles = () => {
 
   const options = useMemo(
     () => ({
+      // ...existing options...
       background: {
-        color: {
-          value: "#f5fdff",
-        },
+        color: { value: "#f5fdff" },
       },
-      fpsLimit: 30, // Lower FPS limit for better performance
+      fpsLimit: 30,
       interactivity: {
         events: {
-          onClick: {
-            enable: true,
-            mode: "push",
-          },
-          onHover: {
-            enable: true,
-            mode: "repulse",
-          },
+          onClick: { enable: true, mode: "push" },
+          onHover: { enable: true, mode: "repulse" },
         },
         modes: {
-          push: {
-            quantity: 1,
-          },
-          repulse: {
-            distance: 100, // Reduced distance for repulse effect
-            duration: 0.2, // Shorter duration for repulse effect
-          },
+          push: { quantity: 12 },
+          repulse: { distance: 100, duration: 0.2 },
         },
       },
       particles: {
-        color: {
-          value: "#1B69FA",
-        },
+        color: { value: "#1B69FA" },
         links: {
-          color: "#1B44FA",
-          distance: 100, // Reduced distance for links
+          color: "#0000FF", // blue links
+          distance: 100,
           enable: true,
           opacity: 0.3,
           width: 1,
@@ -62,38 +40,20 @@ const TsParticles = () => {
         move: {
           direction: "none",
           enable: true,
-          outModes: {
-            default: "bounce",
-          },
+          outModes: { default: "bounce" },
           random: true,
-          speed: 1, // Reduced speed for particles
+          speed: 1,
           straight: false,
         },
-        number: {
-          density: {
-            enable: true,
-            area: 800,
-          },
-          value: 50, // Reduced number of particles
-        },
+        number: { density: { enable: true, area: 800 }, value: 50 },
         opacity: {
           value: { min: 0.2, max: 0.8 },
-          animation: {
-            enable: true,
-            speed: 1,
-            sync: false,
-          },
+          animation: { enable: true, speed: 1, sync: false },
         },
-        shape: {
-          type: "circle",
-        },
+        shape: { type: "circle" },
         size: {
-          value: { min: 1, max: 3 }, // Reduced size range for particles
-          animation: {
-            enable: true,
-            speed: 2,
-            sync: false,
-          },
+          value: { min: 1, max: 3 },
+          animation: { enable: true, speed: 2, sync: false },
         },
       },
       detectRetina: true,
@@ -101,23 +61,23 @@ const TsParticles = () => {
     [],
   );
 
-  return init ? (
+  return (
     <Particles
       id="tsparticles"
       init={particlesInit}
       particlesLoaded={particlesLoaded}
       options={options}
       style={{
-        position: 'absolute',
+        position: 'fixed', // Changed from 'absolute' to 'fixed'
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 0,
+        width: '100vw',    // Use viewport width and height
+        height: '100vh',
+        zIndex: -1,        // Ensure it stays in the background
         pointerEvents: 'none',
       }}
     />
-  ) : null;
+  );
 };
 
 export default memo(TsParticles);

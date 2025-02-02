@@ -10,6 +10,7 @@ import TsParticles from "./components/TsParticles";
 import { Link } from "react-router-dom";
 import "./index.css";
 import ProjectWidget from "./components/ProjectWidget";
+import { FaReact } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -60,6 +61,17 @@ const PortfolioPreview = () => {
     fetch('/react-projects.json')
       .then(res => res.json())
       .then(data => setReactProjects(data.projects));
+  }, []);
+
+  // New scroll event to hide the "React Projects" button when scrolling down
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.pageYOffset > 100) { // adjust threshold as needed
+        setShowIndicator(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -141,7 +153,11 @@ const PortfolioPreview = () => {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {reactProjects.map((project) => (
-            <div key={project.id}>
+            <div key={project.id} className="relative">
+              {/* React SVG Icon in preview container */}
+              <div className="absolute top-2 right-2 z-10">
+                <FaReact className="text-blue1" size={24} />
+              </div>
               <ProjectWidget
                 {...project}
                 buttonText="View Project"
