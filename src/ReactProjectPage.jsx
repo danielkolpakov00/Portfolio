@@ -148,14 +148,14 @@ void main() {
           <div className="flex flex-col items-center w-full md:w-1/2">
             <h4 className="text-lg text-blue2 font-semibold mb-2">Talking Animation</h4>
             <video autoPlay loop muted className="w-full rounded-lg shadow-lg">
-              <source src="src/assets/blenderdemo.mp4" type="video/mp4" />
+              <source src="assets/blenderdemo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
           <div className="flex flex-col items-center w-full md:w-1/2">
             <h4 className="text-lg text-blue2 font-semibold mb-2">Idle Animation</h4>
             <video autoPlay loop muted className="w-full rounded-lg shadow-lg">
-              <source src="src/assets/blenderdemo2.mp4" type="video/mp4" />
+              <source src="assets/blenderdemo2.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
