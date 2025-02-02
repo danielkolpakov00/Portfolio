@@ -35,7 +35,7 @@ const App = () => {
 
   return (
     <Router>
-      <div id="outer-container" className="min-h-screen bg-gradient-to-r from-white via-[#f5fdff] to-white animate-gradient-x bg-[length:200%_200%]">
+      <div id="outer-container" className="min-h-screen bg-offwhite display-none">
         <Helmet>
           <title>Daniel Kolpakov | Web Developer</title>
           <meta
@@ -52,7 +52,7 @@ const App = () => {
         ) : (
           <>
             <Navbar isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
-            <div id="page-wrap" className={isNavOpen ? 'scale-with-border' : ''}>
+            <div id="page-wrap" className={`${isNavOpen ? 'relative animate-marchingAnts rounded-xl' : ''}`}>
               <main>
                 <Routes>
                   <Route path="/" element={<Hero />} />

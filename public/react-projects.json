@@ -2,11 +2,11 @@
   "projects": [
     {
       "id": "gradient-generator",
-      "title": "Gradient Generator Project",
+      "title": "Gradient Generator",
       "technologies": ["React", "Tailwind CSS"],
       "componentFile": "/reactprojects/gradient-generator/App.jsx",
       "demoUrl": "https://color.danielkolpakov.com",
-      "image": "src/assets/grad.jpg"
+      "image": "src/assets/grad.png"
     },
     {
       "id": "lastfm-app",

@@ -28,13 +28,15 @@ const Navbar = ({ isOpen, setIsOpen }) => {
 
   return (
     <div>
-      {/* Custom Toggle Button */}
-      <button
-        onClick={handleMenuToggle}
-        className="fixed top-4 left-4 z-20 p-2 text-blue3 text-3xl font-georama font-semibold italic transition-transform transform hover:scale-110"
-      >
-        ☰
-      </button>
+      {/* Custom Toggle Button - Only show when menu is closed */}
+      {!isOpen && (
+        <button
+          onClick={handleMenuToggle}
+          className="fixed top-4 left-4 z-20 p-2 text-blue2 text-3xl font-georama font-semibold transition-transform transform hover:scale-110 bg-none rounded-xl p-4 border-2 border-blue2 transition-display duration-300"
+        >
+          ☰
+        </button>
+      )}
 
       {/* Burger Menu with scaleRotate effect */}
       <Menu
@@ -54,6 +56,7 @@ const Navbar = ({ isOpen, setIsOpen }) => {
             flexDirection: 'column',
             height: '100vh',
             justifyContent: 'center',
+            opacity: 0.85,
           },
           bmItemList: {
             display: 'flex',
@@ -68,7 +71,7 @@ const Navbar = ({ isOpen, setIsOpen }) => {
         {/* Custom Close Button */}
         <button
           onClick={handleMenuToggle}
-          className="absolute top-4 right-4 text-blue3 text-2xl font-georama font-semibold italic transition-transform transform hover:scale-110"
+          className="absolute top-4 right-4 text-blue2 text-2xl font-georama font-semibold transition-transform transform hover:scale-110"
         >
           ✕
         </button>

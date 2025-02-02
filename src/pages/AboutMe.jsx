@@ -66,7 +66,7 @@ const AboutMe = () => {
   };
 
   return (
-    <section className="about-section py-20 text-center relative min-h-screen">
+    <section className="about-section py-20 text-center relative min-h-screen bg-offwhite">
       <TsParticles />
       <Helmet>
         <title>About Me | Daniel Kolpakov</title>
@@ -274,7 +274,12 @@ const AboutMe = () => {
                   <div className="mt-auto pt-4">
                     <Link 
                       to={`/projects/${project.id}`}
-                      className="relative z-10 px-6 py-3 text-blue2 rounded inline-block hover:bg-blue-600 hover:text-offwhite transition-colors animated-border bg-transparent"
+                      className="relative z-10 px-6 py-3 text-blue2 rounded inline-block hover:bg-blue-600 hover:text-blue1 transition-colors border border-solid border-blue2 hover:border-dashed transition-colors transition-transform transition-all hover:bg-blur-lg"
+                      style={{
+                        background: 'linear-gradient(90deg, transparent 50%, rgba(40, 74, 247, 0.1) 100%)',
+                        backgroundSize: '200% 100%',
+                        
+                      }}
                     >
                       View Project
                     </Link>

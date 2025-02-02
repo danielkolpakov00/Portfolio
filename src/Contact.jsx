@@ -1,9 +1,12 @@
 // src/Contact.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import TsParticles from "./components/TsParticles";
 
 const Contact = ({ isOpen }) => {
+  const form = useRef();
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
@@ -19,7 +22,25 @@ const Contact = ({ isOpen }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.name && formData.email && formData.message) {
-      setFormSubmitted(true);
+      setIsSubmitting(true);
+      
+      emailjs.sendForm(
+        'service_wuru4qp', // Replace with your EmailJS service ID
+        'template_s8pz8cy', // Replace with your EmailJS template ID
+        form.current,
+        '_jnN7FnCIOo5eWAU-' // Replace with your EmailJS public key
+      )
+        .then(() => {
+          setFormSubmitted(true);
+          setFormData({ name: '', surname: '', email: '', message: '' });
+        })
+        .catch((error) => {
+          console.error('Failed to send email:', error);
+          alert('Failed to send message. Please try again.');
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
     } else {
       alert('Please fill in all required fields.');
     }
@@ -46,7 +67,7 @@ const Contact = ({ isOpen }) => {
             <p className="text-gray-800">We've received your message and will get back to you soon.</p>
           </div>
         ) : (
-          <form className="space-y-6 bg-white/30 backdrop-blur-sm rounded-xl p-8 shadow-lg" onSubmit={handleSubmit}>
+          <form ref={form} className="space-y-6 bg-white/30 backdrop-blur-sm rounded-xl p-8 shadow-lg" onSubmit={handleSubmit}>
             {[
               { id: 'name', label: 'Name', type: 'text', required: true },
               { id: 'surname', label: 'Surname', type: 'text', required: false },
@@ -88,11 +109,13 @@ const Contact = ({ isOpen }) => {
             
             <button
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-blue2 text-white font-semibold p-3 rounded-lg 
                        hover:bg-blue-700 transition-colors shadow-lg
-                       hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                       hover:shadow-xl transform hover:-translate-y-0.5 transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit
+              {isSubmitting ? 'Sending...' : 'Submit'}
             </button>
           </form>
         )}

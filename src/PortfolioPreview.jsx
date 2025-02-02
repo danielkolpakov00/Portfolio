@@ -28,7 +28,7 @@ const projects = [
     id: 2,
     title: "Matter.js Plinko",
     description:
-      "Using a physics engine, I made a fun and interesting Plinko game, and balanced it as much as possible using y-axis forces and testing peg layouts.",
+      "Using a physics engine, I made a Plinko game and balanced it as much as possible using y-axis forces and testing peg layouts.",
     buttonText: "Check it out!",
     color: "#284af7",
     visual: PlinkoPreview,
@@ -54,13 +54,28 @@ const projects = [
 ];
 
 const PortfolioPreview = () => {
-  const [reactProjects, setReactProjects] = useState([]);
+  const [reactProjects, setReactProjects] = useState(() => {
+    // Try to get cached data from localStorage first
+    const cached = localStorage.getItem('reactProjects');
+    return cached ? JSON.parse(cached) : [];
+  });
   const [showIndicator, setShowIndicator] = useState(true);
 
   useEffect(() => {
-    fetch('/react-projects.json')
-      .then(res => res.json())
-      .then(data => setReactProjects(data.projects));
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/react-projects.json');
+        if (!response.ok) throw new Error('Failed to load projects');
+        const data = await response.json();
+        setReactProjects(data.projects);
+        // Cache the fetched data
+        localStorage.setItem('reactProjects', JSON.stringify(data.projects));
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    };
+    
+    fetchProjects();
   }, []);
 
   // New scroll event to hide the "React Projects" button when scrolling down
@@ -128,15 +143,12 @@ const PortfolioPreview = () => {
 
       {/* Vanilla JS Projects */}
       <section aria-labelledby="vanilla-projects" className="mb-16 px-4">
-        <h3
-          id="vanilla-projects"
-          className="text-3xl text-white mb-6"
-        >
+        <h3 id="vanilla-projects" className="text-3xl text-white mb-6">
           Vanilla JavaScript Projects
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl">
           {projects.map((project) => (
-            <div key={project.id}>
+            <div key={project.id} className="relative min-h-[400px]">
               <ProjectWidget {...project} />
             </div>
           ))}
@@ -145,16 +157,12 @@ const PortfolioPreview = () => {
 
       {/* React Projects */}
       <section aria-labelledby="react-projects" id="react-projects" className="mb-16 px-4">
-        <h3
-          id="react-projects"
-          className="text-3xl text-white mb-6"
-        >
+        <h3 id="react-projects" className="text-3xl text-white mb-6">
           React Projects
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl">
           {reactProjects.map((project) => (
-            <div key={project.id} className="relative">
-              {/* React SVG Icon in preview container */}
+            <div key={project.id} className="relative min-h-[400px]">
               <div className="absolute top-2 right-2 z-10">
                 <FaReact className="text-blue1" size={24} />
               </div>
@@ -162,11 +170,13 @@ const PortfolioPreview = () => {
                 {...project}
                 buttonText="View Project"
                 color="#284af7"
-                routePrefix="/react-projects" // pass custom route prefix
+                routePrefix="/react-projects"
                 visual={project.visual || (() => (
-                  <div className="w-full h-full flex items-center justify-center bg-blue-100">
-                    <span className="text-blue-600 text-xl">React Project</span>
-                  </div>
+                  <img
+                    src={project.image || "/path/to/default/react-image.png"}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                  />
                 ))}
               />
             </div>

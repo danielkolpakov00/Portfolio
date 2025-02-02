@@ -7,6 +7,19 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 body {
   background-color: #F5FDFF;
   margin: 0;
@@ -15,6 +28,7 @@ body {
 
 #page-wrap.scale-with-border {
   transform-origin: center;
+  position: relative; /* ensure positioning context */
 }
 
 #outer-container, #page-wrap {
@@ -24,12 +38,8 @@ body {
 }
 
 #page-wrap {
-  transition: transform 0.3s ease, border 0.3s ease;
-}
-
-#page-wrap.scale-with-border {
-  border: 4px solid #284af7;
-  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+  position: relative;
 }
 
 .title-area {
@@ -45,59 +55,25 @@ canvas {
   height: 100% !important;
 }
 
-@keyframes dash-animation {
-  to {
-    background-position: 100% 0;
-  }
-}
-
-@keyframes dash {
-  to {
-    background-position: 100% 50%, 100% 50%, 50% 100%, 50% 100%;
-  }
-}
-
-.animated-border {
-  position: relative;
-  border: 2px solid transparent;
-  background-image: linear-gradient(90deg, #284af7 50%, transparent 50%),
-                    linear-gradient(90deg, #284af7 50%, transparent 50%),
-                    linear-gradient(0deg, #284af7 50%, transparent 50%),
-                    linear-gradient(0deg, #284af7 50%, transparent 50%);
-  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-  background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-  background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0%;
-  padding: 8px 16px;
-  animation: dash 4s linear infinite;
-}
-
-@keyframes dash {
-  to {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes border-move {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: 0 0, 10px 0;
-  }
-}
-
-@keyframes gradient {
-   0%, 100% {
-    background-position: 0% 50%;
-    background-image: linear-gradient(90deg, var(--tw-gradient-from) 0%, var(--tw-gradient-via) 50%, var(--tw-gradient-to) 100%);
-  }
-  50% {
-    background-position: 100% 50%;
-    background-image: linear-gradient(90deg, var(--tw-gradient-from) 0%, rgba(255,255,255,0.1) 50%, var(--tw-gradient-to) 100%);
-  }
-}
-
 .animate-gradient-stagger {
   animation: gradient 4s ease infinite;
   animation-fill-mode: forwards;
+}
+
+@keyframes marchingAnts {
+  to {
+    rotateX: 180deg 
+  }
+}
+
+.animate-marchingAnts {
+  border: 4px solid transparent;
+  border-image: repeating-linear-gradient(
+    45deg,
+    #284af7,
+    #284af7 10px,
+    transparent 10px,
+    transparent 20px
+  ) 1;
+  animation: marchingAnts 1s linear infinite;
 }
