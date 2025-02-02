@@ -7,123 +7,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plinko Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="mplinko.css" rel="stylesheet">
-    <script src="mplinko.js"></script>
-</head>
-
-<body class="bg-gray-900 text-white font-sans relative">
-
-    <div class="container w-full mx-auto flex lg:flex-row flex-col">
-        <!-- Bet and Controls Section (Side Panel) -->
-        <!-- Control Panel (Includes Both Manual and Auto Modes) -->
-<div class="control-panel flex flex-col space-y-6 bg-gray-800 p-6 rounded-l-lg shadow-lg lg:w-1/1 w-full mr-0">
-    <!-- Manual/Auto Toggle -->
-    <div class="flex justify-between bg-gray-900 p-1 rounded-full">
-        <button id="manual-tab" class="tab-button w-1/2 bg-gray-700 text-white py-2 rounded-full focus:outline-none">Manual</button>
-        <button id="auto-tab" class="tab-button w-1/2 text-gray-300 py-2 rounded-full focus:outline-none">Auto</button>
-    </div>
-
-    <!-- Manual Mode Content -->
-    <div id="manual-content" class="tab-content">
-        <!-- Bet Amount Section -->
-        <div class="flex justify-between items-center">
-            <label for="bet" class="text-gray-400 font-semibold">Bet Amount</label>
-            <span id="manual-bet-display" class="text-gray-400">CA$10.00</span>
-        </div>
-
-        <!-- Bet Input Field and Options -->
-        <div class="bg-gray-900 flex items-center rounded-lg px-2 py-2 space-x-2">
-            <input type="number" id="bet" class="bg-transparent text-white focus:outline-none w-full text-lg" value="10">
-            <button id="half-button" class="bg-gray-700 py-2 px-4 rounded text-white">½</button>
-            <button id="double-button" class="bg-gray-700 py-2 px-4 rounded text-white">2×</button>
-        </div>
-
-        <!-- Bet Button -->
-        <button id="manual-bet-button" class="bg-green-500 hover:bg-green-600 text-black py-3 rounded-lg font-bold text-lg w-full">Bet</button>
-    </div>
-
-    <!-- Auto Mode Content (Initially Hidden) -->
-    <div id="auto-content" class="tab-content hidden">
-        <!-- Bet Amount Section -->
-        <div class="flex justify-between items-center">
-            <label for="auto-bet" class="text-gray-400 font-semibold">Bet Amount</label>
-            <span id="auto-bet-display" class="text-gray-400">CA$10.00</span>
-        </div>
-
-        <!-- Bet Input Field and Options -->
-        <div class="bg-gray-900 flex items-center rounded-lg px-2 py-2 space-x-2">
-            <input type="number" id="auto-bet" class="bg-transparent text-white focus:outline-none w-full text-lg" value="10">
-            <button id="auto-half-button" class="bg-gray-700 py-2 px-4 rounded text-white">½</button>
-            <button id="auto-double-button" class="bg-gray-700 py-2 px-4 rounded text-white">2×</button>
-        </div>
-
-        <!-- Auto Bet Button -->
-        <button id="autobet-btn" class="bg-green-500 hover:bg-green-600 text-black py-3 rounded-lg font-bold text-lg w-full">Start Autobet</button>
-    </div>
-
-    <!-- Drop Balls Button -->
-    <button id="drop-balls-btn" class="bg-blue-500 hover:bg-blue-600 text-black py-3 rounded-lg font-bold text-lg w-full">Drop Balls</button>
-</div>
-
-
-        <!-- Auto Mode Content (Initially Hidden) -->
-        <div id="auto-content" class="tab-content hidden">
-            <!-- Bet Amount Section -->
-            <div class="flex justify-between items-center">
-                <label for="auto-bet" class="text-gray-400 font-semibold">Bet Amount</label>
-                <span class="text-gray-400">CA$0.00</span>
-            </div>
-
-            <!-- Bet Input Field and Options -->
-            <div class="bg-gray-900 flex items-center rounded-lg px-2 py-2 space-x-2">
-                <input type="number" id="auto-bet" class="bg-transparent text-white focus:outline-none w-full text-lg" value="10">
-                <button id="auto-half-button" class="bg-gray-700 py-2 px-4 rounded text-white">½</button>
-                <button id="auto-double-button" class="bg-gray-700 py-2 px-4 rounded text-white">2×</button>
-            </div>
-
-            <!-- Auto Bet Button -->
-            <button id="autobet-btn" class="bg-green-500 hover:bg-green-600 text-black py-3 rounded-lg font-bold text-lg w-full">Start Autobet</button>
-        </div>
-
-        <!-- Game Stats and Balance Section (Top Panel) -->
-        <div class="stats-panel flex flex-col space-y-4 bg-gray-800 p-6 shadow-lg w-full">
-            <!-- Total Bets Display -->
-            <p class="text-gray-400 text-center">Total Bets: <span id="total-bets" class="text-white font-bold">0</span></p>
-
-            <!-- Winnings Display -->
-            <p class="text-gray-400 text-center">Winnings: <span id="winnings" class="text-white font-bold">0</span></p>
-
-            <!-- Balance Display -->
-            <p class="text-gray-400 text-center">Balance: <span id="bal" class="text-white font-bold">1000</span></p>
-        </div>
-
-        <!-- Game Container and Statistics Panel -->
-        <div class="game-panel flex flex-col w-full lg:i ml-0">
-            <div id="game-container" class="h-[600px] mb-0 relative border border-none rounded-lg overflow-hidden">
-                <div id="scroll" class="absolute top-0"></div>
-            </div>
-
-            <!-- Statistics Panel -->
-            <div id="statistics-panel" class="stats-panel bg-gray-800 p-6 rounded-lg shadow-lg w-full mt-0">
-                <p id="bet-counter" class="text-white font-bold">Total Bets: 0</p>
-                <table class="w-full text-white">
-                    <thead>
-                        <tr>
-                            <th class="text-left">Multiplier</th>
-                            <th class="text-right">Hits</th>
-                            <th class="text-right">Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stats-body">
-                        <!-- Stats rows will be dynamically populated here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Alert Container -->
-        <div id="alert-container" class="fixed top-4 right-4 space-y-2"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <script src="mplinko.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blue1: "#1B69FA",
+                        blue2: "#1B44FA",
+                        offwhite: "#f5fdff"
+                    }
+                }
+            }
+        }
+    </script>
+    </head>
+    <body class="bg-offwhite text-blue2 font-sans relative min-h-screen">
+        <!-- Main container with improved centering and responsive layout -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Control Panel -->
+                <div class="control-panel w-full lg:w-80 flex-shrink-0">
+                    <div class="bg-white p-6 rounded-lg shadow-lg space-y-6 sticky top-8">
+                        <!-- Existing control panel content -->
+                        <div class="flex justify-between bg-offwhite p-2 rounded-full">
+                            <button id="manual-tab" class="tab-button w-1/2 bg-blue1 text-offwhite py-3 rounded-full focus:outline-none transition-colors">Manual</button>
+                            <button id="auto-tab" class="tab-button w-1/2 text-blue2 py-3 rounded-full focus:outline-none transition-colors">Auto</button>
+                        </div>
     
-    </body>
-    </html>
+                        <!-- Game Stats -->
+                       
     
+                        <!-- Manual Mode Content -->
+                        <div id="manual-content" class="tab-content space-y-6">
+                            <div class="space-y-4">
+                                <label for="bet" class="text-blue2 font-semibold block">Credit Amount</label>
+                                <div class="bg-offwhite flex items-center rounded-lg p-3 space-x-3">
+                                    <input type="number" id="bet" min="1" max="100" class="bg-transparent text-blue2 focus:outline-none w-full text-lg" value="10">
+                                    <button id="half-button" class="bg-blue1 py-2 px-4 rounded text-offwhite hover:bg-blue2 transition-colors">½</button>
+                                    <button id="double-button" class="bg-blue1 py-2 px-4 rounded text-offwhite hover:bg-blue2 transition-colors">2×</button>
+                                </div>
+                                <span id="manual-bet-display" class="text-blue2 block text-center">10 credits</span>
+                            </div>
+                            <button id="manual-bet-button" class="bg-blue1 hover:bg-blue2 text-offwhite py-4 rounded-lg font-bold text-lg w-full transition-colors">Play</button>
+                        </div>
+    
+                        <!-- Auto Mode Content (Initially Hidden) -->
+                        <div id="auto-content" class="tab-content hidden space-y-6">
+                            <!-- Bet Amount Section -->
+                            <div class="flex justify-between items-center">
+                                <label for="auto-bet" class="text-blue2 font-semibold">Credit Amount</label>
+                                <span id="auto-bet-display" class="text-blue2">10 credits</span>
+                            </div>
+    
+                            <!-- Bet Input Field and Options -->
+                            <div class="bg-offwhite flex items-center rounded-lg px-2 py-2 space-x-2">
+                                <input type="number" id="auto-bet" class="bg-transparent text-blue2 focus:outline-none w-full text-lg" value="10">
+                                <button id="auto-half-button" class="bg-blue1 py-2 px-4 rounded text-offwhite">½</button>
+                                <button id="auto-double-button" class="bg-blue1 py-2 px-4 rounded text-offwhite">2×</button>
+                            </div>
+    
+                            <!-- Auto Bet Button -->
+                            <button id="autobet-btn" class="bg-blue1 hover:bg-blue2 text-offwhite py-3 rounded-lg font-bold text-lg w-full">Start Auto Drop</button>
+                        </div>
+    
+                        <!-- Drop Balls Button -->
+                        <button id="drop-balls-btn" class="bg-blue1 hover:bg-blue2 text-offwhite py-4 rounded-lg font-bold text-lg w-full transition-colors">Drop Multiple</button>
+                    </div>
+                </div>
+    
+                <!-- Game Area -->
+                <div class="flex-1 flex flex-col gap-6">
+                    <!-- Stats Panel -->
+                    <div class="bg-white p-4 rounded-lg shadow-lg grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                          
+                            <div class="flex items-center justify-center space-x-3">
+                                <img src="assets/coin.svg" alt="Coin" class="w-8 h-8 animate-shine" />
+                                <p class="font-bold text-2xl text-blue1" id="bal">1000</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="flex items-center justify-center space-x-3">
+                                <img src="assets/play.svg" alt="Play icon" class="w-4 h-4 text-blue1" />
+                                <span class="sr-only">Total Plays</span>
+                                <p class="font-bold text-2xl text-blue1" id="total-plays">0</p>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <!-- Game Container with responsive height -->
+                    <div id="game-container" class="w-full aspect-[4/3] max-h-[600px] relative rounded-lg overflow-hidden shadow-lg bg-offwhite">
+                        <div id="scroll" class="absolute top-0"></div>
+                    </div>
+    
+                    <!-- Statistics Panel -->
+                    <div class="bg-white p-4 rounded-lg shadow-lg">
+                        <p id="bet-counter" class="text-blue2 font-bold mb-4">Total Balls Dropped: 0</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-blue2">
+                                <!-- ...existing table content... -->
+                                <thead>
+                                    <tr>
+                                        <th class="text-left">Multiplier</th>
+                                        <th class="text-right">Hits</th>
+                                        <th class="text-right">Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stats-body">
+                                    <!-- Stats rows will be dynamically populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </body>
+        </html>
