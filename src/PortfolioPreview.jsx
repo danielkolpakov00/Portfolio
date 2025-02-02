@@ -163,11 +163,13 @@ const PortfolioPreview = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl">
           {reactProjects.map((project) => (
             <div key={project.id} className="relative min-h-[400px]">
-              <div className="absolute top-2 right-2 z-10">
-                <FaReact className="text-blue1" size={24} />
+              <div className="absolute bottom-1/ right-2 z-10">
+              <FaReact className="text-blue-400" size={24} />
               </div>
               <ProjectWidget
+              
                 {...project}
+                {...project.description}
                 buttonText="View Project"
                 color="#284af7"
                 routePrefix="/react-projects"
