@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Georama";
-  src: url('../src/assets/fonts/Georama-SemiBoldItalic.woff2') format('woff2');
+  src: url('../src/assets/fonts/Georama-VariableFont_wdth\,wght.ttf') format('truetype');
 }
 
 @tailwind base;
@@ -21,7 +21,7 @@ html, body {
 }
 
 body {
-  background-color: #F5FDFF;
+  background-color: transparent;
   margin: 0;
   font-family: 'Georama', sans-serif;
 }
@@ -76,4 +76,56 @@ canvas {
     transparent 20px
   ) 1;
   animation: marchingAnts 1s linear infinite;
+}
+
+html, body {
+  /* overflow: hidden; */
+  overscroll-behavior: none;
+}
+
+/* Add these styles to ensure particles container is visible */
+.particles-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+#tsparticles {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Make sure the main content is positioned above particles */
+#root, #outer-container, main {
+  position: relative;
+  z-index: 1;
+}
+
+/* Update particle container styles */
+.particles-wrapper {
+  position: fixed !important;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#backgroundParticles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+/* Add any offwhite backgrounds to components that need it */
+.bg-offwhite {
+  background-color: transparent;
 }

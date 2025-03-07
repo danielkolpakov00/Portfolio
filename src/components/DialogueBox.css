@@ -1,0 +1,21 @@
+.dialogue-container {
+  /* Base styling */
+  margin: 1rem auto;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  /* For tablets and up */
+  .dialogue-container {
+    max-width: 600px;
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* For desktops */
+  .dialogue-container {
+    max-width: 500px;
+    padding: 2rem;
+  }
+}

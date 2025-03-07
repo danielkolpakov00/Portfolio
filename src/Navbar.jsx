@@ -88,9 +88,7 @@ const Navbar = ({ isOpen, setIsOpen }) => {
           <Link to="/portfolio" className="my-12 text-white text-5xl font-georama block font-semibold italic hover:text-blue2 transition duration-300 ease-in-out" onClick={handleMenuToggle} style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>
             Portfolio
           </Link>
-          <Link to="/contact" className="my-12 text-white text-5xl font-georama block font-semibold italic hover:text-blue2 transition duration-300 ease-in-out" onClick={handleMenuToggle} style={{ textShadow: '1px 1px 0px #1B69FA, -1px -1px 0px #1B69FA, 1px -1px 0px #1B69FA, -1px 1px 0px #1B69FA' }}>
-            Contact
-          </Link>
+         
         </div>
       </Menu>
     </div>

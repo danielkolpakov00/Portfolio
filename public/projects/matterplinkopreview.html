@@ -2,37 +2,49 @@
 <html lang="en">
 
 <head>
-    <!-- Head Content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plinko Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: "#000000",
+                        light: "#ffffff",
+                        accent: "#ffffff",
+                        accent2: "#666666"
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Custom animation for alerts */
+        /* CSS from mplinko.css */
         .alert-enter {
             opacity: 0;
             transform: translateY(-20px);
         }
-
+        
         .alert-enter-active {
             opacity: 1;
             transform: translateY(0);
             transition: opacity 0.3s, transform 0.3s;
         }
-
+        
         .alert-exit {
             opacity: 1;
             transform: translateY(0);
         }
-
+        
         .alert-exit-active {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.3s, transform 0.3s;
         }
-
-        /* Layout adjustment */
-        /* (You can include any custom CSS adjustments here) */
+        
         @keyframes shine {
             0%, 100% {
                 filter: brightness(100%);
@@ -41,756 +53,1086 @@
                 filter: brightness(130%);
             }
         }
-
+        
         .animate-shine {
             animation: shine 2s infinite;
         }
-    </style>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        blue1: "#1B69FA",
-                        blue2: "#1B44FA",
-                        offwhite: "#f5fdff"
-                    }
-                }
+        
+        /* General Styling */
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #666666;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaaaaa;
+        }
+        
+        /* Game Container */
+        #game-container {
+            position: relative;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Multiplier labels */
+        .multiplier-label {
+            color: #f5f5f5;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 8px 0;
+            border-top: 2px solid transparent;
+            flex: 1;
+        }
+        
+        .multiplier-label-active {
+            color: #ffffff;
+            background-color: rgba(170, 170, 170, 0.2);
+            border-top: 2px solid #aaaaaa;
+        }
+        
+        /* Range input styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 5px;
+            background: #333;
+            border-radius: 5px;
+            background-image: linear-gradient(to right, #aaaaaa 0%, #aaaaaa 50%, #333 50%, #333 100%);
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            cursor: pointer;
+            border: none;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Make number inputs look cleaner */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
             }
         }
-    </script>
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+        
+        .animate-bounce {
+            animation: bounce 0.5s ease;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Win notification animation */
+        .win-show {
+            transform: translateY(0) !important;
+            opacity: 1 !important;
+        }
+        
+        /* Table styles */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        th, td {
+            padding: 8px 12px;
+        }
+        
+        th {
+            font-weight: 600;
+            text-align: left;
+        }
+        
+        tbody tr:hover {
+            background-color: rgba(170, 170, 170, 0.1);
+        }
+        
+        /* Fade animation */
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+    </style>
 </head>
 
-<body class="bg-offwhite text-blue2 font-sans relative min-h-screen">
-    <!-- Main container with improved centering and responsive layout -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Control Panel -->
-            <div class="control-panel w-full lg:w-80 flex-shrink-0">
-                <div class="bg-white p-6 rounded-lg shadow-lg space-y-6 sticky top-8">
-                    <!-- Existing control panel content -->
-                    <div class="flex justify-between bg-offwhite p-2 rounded-full">
-                        <button id="manual-tab" class="tab-button w-1/2 bg-blue1 text-offwhite py-3 rounded-full focus:outline-none transition-colors">Manual</button>
-                        <button id="auto-tab" class="tab-button w-1/2 text-blue2 py-3 rounded-full focus:outline-none transition-colors">Auto</button>
-                    </div>
-
-                    <!-- Game Stats -->
-                   
-
-                    <!-- Manual Mode Content -->
-                    <div id="manual-content" class="tab-content space-y-6">
-                        <div class="space-y-4">
-                            <label for="bet" class="text-blue2 font-semibold block">Credit Amount</label>
-                            <div class="bg-offwhite flex items-center rounded-lg p-3 space-x-3">
-                                <input type="number" id="bet" min="1" max="100" class="bg-transparent text-blue2 focus:outline-none w-full text-lg" value="10">
-                                <button id="half-button" class="bg-blue1 py-2 px-4 rounded text-offwhite hover:bg-blue2 transition-colors">½</button>
-                                <button id="double-button" class="bg-blue1 py-2 px-4 rounded text-offwhite hover:bg-blue2 transition-colors">2×</button>
-                            </div>
-                            <span id="manual-bet-display" class="text-blue2 block text-center">10 credits</span>
-                        </div>
-                        <button id="manual-bet-button" class="bg-blue1 hover:bg-blue2 text-offwhite py-4 rounded-lg font-bold text-lg w-full transition-colors">Play</button>
-                    </div>
-
-                    <!-- Auto Mode Content (Initially Hidden) -->
-                    <div id="auto-content" class="tab-content hidden space-y-6">
-                        <!-- Bet Amount Section -->
-                        <div class="flex justify-between items-center">
-                            <label for="auto-bet" class="text-blue2 font-semibold">Credit Amount</label>
-                            <span id="auto-bet-display" class="text-blue2">10 credits</span>
-                        </div>
-
-                        <!-- Bet Input Field and Options -->
-                        <div class="bg-offwhite flex items-center rounded-lg px-2 py-2 space-x-2">
-                            <input type="number" id="auto-bet" class="bg-transparent text-blue2 focus:outline-none w-full text-lg" value="10">
-                            <button id="auto-half-button" class="bg-blue1 py-2 px-4 rounded text-offwhite">½</button>
-                            <button id="auto-double-button" class="bg-blue1 py-2 px-4 rounded text-offwhite">2×</button>
-                        </div>
-
-                        <!-- Auto Bet Button -->
-                        <button id="autobet-btn" class="bg-blue1 hover:bg-blue2 text-offwhite py-3 rounded-lg font-bold text-lg w-full">Start Auto Drop</button>
-                    </div>
-
-                    <!-- Drop Balls Button -->
-                    <button id="drop-balls-btn" class="bg-blue1 hover:bg-blue2 text-offwhite py-4 rounded-lg font-bold text-lg w-full transition-colors">Drop Multiple</button>
+<body class="bg-dark text-light font-sans relative min-h-screen py-6 px-3 md:px-6">
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto mb-6">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Plinko</h1>
+            <div class="flex items-center space-x-4 bg-black/30 px-4 py-2 rounded-full">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-accent" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="total-plays" class="font-mono">0</span>
+                </div>
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-accent" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="bal" class="font-mono">1000</span>
                 </div>
             </div>
+        </div>
+    </header>
 
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- Game Area -->
-            <div class="flex-1 flex flex-col gap-6">
-                <!-- Stats Panel -->
-                <div class="bg-white p-4 rounded-lg shadow-lg grid grid-cols-2 gap-4">
-                    <div class="text-center">
-                      
-                        <div class="flex items-center justify-center space-x-3">
-                            <img src="assets/coin.svg" alt="Coin" class="w-8 h-8 animate-shine" />
-                            <p class="font-bold text-2xl text-blue1" id="bal">1000</p>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <div class="flex items-center justify-center space-x-3">
-                            <img src="assets/play.svg" alt="Play icon" class="w-4 h-4 text-blue1" />
-                            <span class="sr-only">Total Plays</span>
-                            <p class="font-bold text-2xl text-blue1" id="total-plays">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Game Container with responsive height -->
-                <div id="game-container" class="w-full aspect-[4/3] max-h-[600px] relative rounded-lg overflow-hidden shadow-lg bg-offwhite">
+            <div class="flex-1 order-2 lg:order-1">
+                <!-- Game Container with improved aspect ratio -->
+                <div id="game-container" class="w-full aspect-[3/4] md:aspect-[1/1] max-h-[700px] relative rounded-lg overflow-hidden shadow-xl bg-black border border-accent2/30">
+                    <!-- The game canvas will be inserted here by Matter.js -->
                     <div id="scroll" class="absolute top-0"></div>
+                    
+                    <!-- Multiplier zones will be positioned absolutely at the bottom -->
+                    <div id="multiplier-labels" class="absolute bottom-0 left-0 right-0 flex justify-around py-2 border-t border-accent2/50">
+                        <!-- Multiplier labels will be dynamically created here -->
+                    </div>
                 </div>
 
                 <!-- Statistics Panel -->
-                <div class="bg-white p-4 rounded-lg shadow-lg">
-                    <p id="bet-counter" class="text-blue2 font-bold mb-4">Total Balls Dropped: 0</p>
+                <div class="bg-black/50 p-4 mt-6 rounded-lg shadow-lg border border-accent2/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Statistics</h3>
+                        <p id="bet-counter" class="text-sm font-mono">Total Balls: 0</p>
+                    </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-blue2">
-                            <!-- ...existing table content... -->
-                            <thead>
+                        <table class="w-full text-light">
+                            <thead class="border-b border-accent2/30">
                                 <tr>
-                                    <th class="text-left">Multiplier</th>
-                                    <th class="text-right">Hits</th>
-                                    <th class="text-right">Percentage</th>
+                                    <th class="text-left py-2">Multiplier</th>
+                                    <th class="text-right py-2">Hits</th>
+                                    <th class="text-right py-2">Percentage</th>
                                 </tr>
                             </thead>
-                            <tbody id="stats-body">
+                            <tbody id="stats-body" class="text-accent">
                                 <!-- Stats rows will be dynamically populated here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel w-full lg:w-80 flex-shrink-0 order-1 lg:order-2">
+                <div class="bg-black/50 p-6 rounded-lg shadow-lg space-y-6 border border-accent2/30 sticky top-8">
+                    <!-- Mode Selector -->
+                    <div class="flex justify-between bg-black p-1 rounded-full border border-accent2/30">
+                        <button id="manual-tab" class="tab-button w-1/2 bg-accent text-black py-2 px-4 rounded-full focus:outline-none transition-colors font-medium">Manual</button>
+                        <button id="auto-tab" class="tab-button w-1/2 text-accent py-2 px-4 rounded-full focus:outline-none transition-colors font-medium">Auto</button>
+                    </div>
+
+                    <!-- Manual Mode Content -->
+                    <div id="manual-content" class="tab-content space-y-6">
+                        <div class="space-y-4">
+                            <label for="bet" class="text-light font-semibold block">Credit Amount</label>
+                            <div class="bg-black flex items-center rounded-lg p-3 space-x-3 border border-accent2/30">
+                                <input type="number" id="bet" min="1" max="100" class="bg-transparent text-light focus:outline-none w-full text-lg font-mono" value="10">
+                                <button id="half-button" class="bg-accent2 py-2 px-4 rounded text-light hover:bg-accent transition-colors">½</button>
+                                <button id="double-button" class="bg-accent2 py-2 px-4 rounded text-light hover:bg-accent transition-colors">2×</button>
+                            </div>
+                            <span id="manual-bet-display" class="text-accent block text-center font-mono">10 credits</span>
+                        </div>
+                        <button id="manual-bet-button" class="bg-accent hover:bg-light text-black py-4 rounded-lg font-bold text-lg w-full transition-colors">Drop Ball</button>
+                    </div>
+
+                    <!-- Auto Mode Content (Initially Hidden) -->
+                    <div id="auto-content" class="tab-content hidden space-y-6">
+                        <!-- Bet Amount Section -->
+                        <div class="flex justify-between items-center">
+                            <label for="auto-bet" class="text-light font-semibold">Credit Amount</label>
+                            <span id="auto-bet-display" class="text-accent font-mono">10 credits</span>
+                        </div>
+
+                        <!-- Bet Input Field and Options -->
+                        <div class="bg-black flex items-center rounded-lg px-2 py-2 space-x-2 border border-accent2/30">
+                            <input type="number" id="auto-bet" class="bg-transparent text-light focus:outline-none w-full text-lg font-mono" value="10">
+                            <button id="auto-half-button" class="bg-accent2 py-2 px-4 rounded text-light hover:bg-accent transition-colors">½</button>
+                            <button id="auto-double-button" class="bg-accent2 py-2 px-4 rounded text-light hover:bg-accent transition-colors">2×</button>
+                        </div>
+
+                        <!-- Speed and count controls -->
+                        <div class="space-y-3">
+                            <label class="text-light font-semibold block">Drop Speed</label>
+                            <input type="range" id="auto-speed" min="1" max="10" value="5" class="w-full accent-accent">
+                            <div class="flex justify-between text-accent text-sm">
+                                <span>Slow</span>
+                                <span>Fast</span>
+                            </div>
+                        </div>
+
+                        <!-- Number of balls -->
+                        <div class="space-y-3">
+                            <label class="text-light font-semibold block">Number of Balls</label>
+                            <div class="bg-black flex items-center rounded-lg p-2 border border-accent2/30">
+                                <input type="number" id="ball-count" min="10" max="1000" step="10" class="bg-transparent text-light focus:outline-none w-full text-lg font-mono" value="100">
+                            </div>
+                        </div>
+
+                        <!-- Auto Bet Button -->
+                        <button id="autobet-btn" class="bg-accent hover:bg-light text-black py-3 rounded-lg font-bold text-lg w-full">Start Auto Drop</button>
+                    </div>
+
+                    <!-- Drop Balls Button -->
+                    <div class="pt-4 border-t border-accent2/30">
+                        <button id="drop-balls-btn" class="bg-accent2 hover:bg-accent text-light py-3 rounded-lg font-medium w-full transition-colors">Drop Multiple (x10)</button>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="pt-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <label for="show-paths" class="text-light flex items-center cursor-pointer">
+                                <input type="checkbox" id="show-paths" class="mr-2 accent-accent">
+                                Show ball paths
+                            </label>
+                            <button id="reset-stats" class="text-accent hover:text-light transition-colors text-sm">Reset Stats</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Include Matter.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <!-- Potential winning notification -->
+    <div id="win-notification" class="fixed bottom-6 right-6 bg-accent text-black p-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 hidden">
+        <div class="flex items-center space-x-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a4 4 0 00-4-4H8.8a4 4 0 00-3.6 2.3L2 8" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z" />
+            </svg>
+            <div>
+                <p class="font-bold">You won!</p>
+                <p id="win-amount" class="font-mono">+100 credits</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript from mplinko.js -->
     <script>
-        const manualTab = document.getElementById('manual-tab');
-        const autoTab = document.getElementById('auto-tab');
-        const manualContent = document.getElementById('manual-content');
-        const autoContent = document.getElementById('auto-content');
-        const betButton = document.getElementById('manual-bet-button');
-        const dropThousand = document.getElementById('drop-balls-btn');
-        const autoBetButton = document.getElementById('autobet-btn');
-        let autobetInterval = null;
+        // Wait for DOM and Matter.js to fully load
+        window.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Check if Matter.js is loaded
+                if (typeof Matter === 'undefined') {
+                    throw new Error('Matter.js not loaded properly!');
+                }
 
-        manualTab.addEventListener('click', () => {
-            manualTab.classList.add('bg-blue1', 'text-offwhite');
-            autoTab.classList.remove('bg-blue1', 'text-offwhite');
-            manualContent.classList.remove('hidden');
-            autoContent.classList.add('hidden');
-        });
+                console.log("Matter.js loaded successfully");
 
-        autoTab.addEventListener('click', () => {
-            autoTab.classList.add('bg-blue1', 'text-offwhite');
-            manualTab.classList.remove('bg-blue1', 'text-offwhite');
-            autoContent.classList.remove('hidden');
-            manualContent.classList.add('hidden');
-        });
+                // Matter.js module aliases
+                const Engine = Matter.Engine,
+                      Render = Matter.Render,
+                      World = Matter.World,
+                      Bodies = Matter.Bodies,
+                      Body = Matter.Body,
+                      Events = Matter.Events,
+                      Composite = Matter.Composite;
 
-        betButton.addEventListener('click', () => {
-            const bet = parseFloat(document.getElementById('bet').value) || 0;
-            updateBalance(-bet);
-            dropBall(bet); // Drop ball with bet amount
-            totalHits++;
-        });
+                // Global variables
+                let engine, render, world;
+                let multipliers = [];
+                let statistics = [];
+                let totalHits = 0;
+                let totalBets = 0;
+                let showPath = false;
+                let autoPlayInterval = null;
 
-        dropThousand.addEventListener('click', () => {
-            dropBalls(); // Call the function to drop multiple balls
-        });
+                // Game dimensions - match exactly with the mplinko.js code you provided
+                const gameContainer = document.getElementById('game-container');
+                const containerWidth = gameContainer.clientWidth;
+                const containerHeight = gameContainer.clientHeight;
+                
+                const canvasWidth = Math.min(800, containerWidth);
+                const canvasHeight = Math.min(800, containerHeight);
+                const pegRadius = 6;
+                const ballRadius = 12;
+                const pegSpacingX = 60;
+                const pegSpacingY = 60;
+                const pegRows = 10;
+                const pegColumns = 11; // Must be odd for proper alignment
+                const pegOffsetX = (canvasWidth - (pegColumns - 1) * pegSpacingX) / 2;
+                const pegOffsetY = 120;
+                const zoneWidth = pegSpacingX;
+                const zoneHeight = 40;
 
-        // Autobet functionality
-        autoBetButton.addEventListener('click', () => {
-            if (autobetInterval === null) {
-                startAutobet();
-            } else {
-                stopAutobet();
-            }
-        });
+                // Create multipliers evenly distributed - exactly as in mplinko.js
+                const multiplierValues = [1, 2, 0.5, 4, 0.2, 8, 0.2, 4, 0.5, 2, 1];
+                const numberOfZones = multiplierValues.length;
 
-        function startAutobet() {
-            autobetInterval = setInterval(() => {
-                const bet = parseFloat(document.getElementById('auto-bet').value) || 0;
-                updateBalance(-bet);
-                dropBall(bet);
-            }, 1000);
-            autoBetButton.textContent = "Stop Auto Drop";
-            autoBetButton.classList.add('bg-red-500', 'hover:bg-red-600');
-            autoBetButton.classList.remove('bg-green-500', 'hover:bg-green-600');
-        }
+                // Update the range input background as it slides - FIX FOR LINE 370
+                function updateRangeBackground(e) {
+                    // Guard against undefined event object
+                    if (!e) return;
+                    
+                    const target = e.target;
+                    if (!target) return;
+                    
+                    const value = (target.value - target.min) / (target.max - target.min) * 100;
+                    target.style.backgroundImage = `linear-gradient(to right, #aaaaaa 0%, #aaaaaa ${value}%, #333 ${value}%, #333 100%)`;
+                }
 
-        function stopAutobet() {
-            clearInterval(autobetInterval);
-            autobetInterval = null;
-            autoBetButton.textContent = "Start Autobet";
-            autoBetButton.classList.add('bg-green-500', 'hover:bg-green-600');
-            autoBetButton.classList.remove('bg-red-500', 'hover:bg-red-600');
-        }
+                // Function to update range background directly from the element - FIX FOR LINE 878
+                function updateRangeBackgroundDirect(element) {
+                    if (!element) return;
+                    
+                    const value = (element.value - element.min) / (element.max - element.min) * 100;
+                    element.style.backgroundImage = `linear-gradient(to right, #aaaaaa 0%, #aaaaaa ${value}%, #333 ${value}%, #333 100%)`;
+                }
 
-        // Function to update balance
-        function updateBalance(amount) {
-            let balance = parseFloat(document.getElementById('bal').textContent) || 0;
-            balance += amount;
-            document.getElementById('bal').textContent = balance.toFixed(2);
-        }
+                // Function to update statistics when a ball hits a zone
+                function updateStatistics(zoneId) {
+                    const zoneStat = statistics.find(stat => stat.id == zoneId);
+                    if (zoneStat) {
+                        zoneStat.hits += 1; // Increment the hit count for the specific zone
+                        totalHits += 1; // Increment total hits
 
-        // Setup Matter.js engine and world
-        const { Engine, Render, Runner, Bodies, Composite, Events, Body, Common } = Matter;
+                        updateStatisticsPanel(); // Refresh the statistics panel
+                    }
+                }
 
-        const engine = Engine.create();
-        const { world } = engine;
-        engine.world.gravity.y = 1; // Increased gravity for more realistic fall
+                // Function to update statistics panel
+                function updateStatisticsPanel() {
+                    const statsBody = document.getElementById('stats-body');
+                    if (!statsBody) return;
+                    
+                    statsBody.innerHTML = ''; // Clear current rows
 
-        // Update render creation to be responsive
-        const render = Render.create({
-            element: document.getElementById('game-container'),
-            engine: engine,
-            options: {
-                width: document.getElementById('game-container').clientWidth,
-                height: document.getElementById('game-container').clientHeight,
-                wireframes: false,
-                background: '#f5fdff',
-                pixelRatio: window.devicePixelRatio,
-            },
-        });
+                    if (totalHits > 0) {
+                        statistics.forEach(stat => {
+                            stat.percentage = (stat.hits / totalHits) * 100; // Calculate actual percentage
 
-        // Add resize handler
-        window.addEventListener('resize', () => {
-            const container = document.getElementById('game-container');
-            render.canvas.width = container.clientWidth;
-            render.canvas.height = container.clientHeight;
-            // Update canvas bounds
-            render.bounds.max.x = render.canvas.width;
-            render.bounds.max.y = render.canvas.height;
-            // Adjust peg positions and other game elements if needed
-            // You might want to call a function to reposition game elements here
-        });
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="text-left">${stat.multiplier}x</td>
+                                <td class="text-right">${stat.hits}</td>
+                                <td class="text-right">${stat.percentage.toFixed(2)}%</td>
+                            `;
+                            statsBody.appendChild(row);
+                        });
+                    }
+                }
 
-        Engine.run(engine);
-        Render.run(render);
+                // Toggle auto bet on/off - FIX: Adding the missing toggleAutoBet function
+                function toggleAutoBet() {
+                    const button = document.getElementById('autobet-btn');
+                    if (!button) return;
+                    
+                    if (autoPlayInterval) {
+                        // Stop auto betting
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = null;
+                        button.textContent = 'Start Auto Drop';
+                        button.classList.remove('bg-light');
+                        button.classList.add('bg-accent');
+                    } else {
+                        // Start auto betting
+                        const betAmount = parseInt(document.getElementById('auto-bet')?.value || "10");
+                        const speedInput = document.getElementById('auto-speed');
+                        const speed = speedInput ? parseInt(speedInput.value) : 5;
+                        const ballCountInput = document.getElementById('ball-count');
+                        const ballCount = ballCountInput ? parseInt(ballCountInput.value) : 100;
+                        const interval = 1100 - (speed * 100); // Convert 1-10 scale to milliseconds
+                        
+                        let droppedCount = 0;
+                        
+                        button.textContent = 'Stop Auto Drop';
+                        button.classList.remove('bg-accent');
+                        button.classList.add('bg-light');
+                        
+                        autoPlayInterval = setInterval(() => {
+                            if (droppedCount >= ballCount) {
+                                toggleAutoBet(); // Stop after reaching the desired count
+                                return;
+                            }
+                            
+                            const balance = parseFloat(document.getElementById('bal')?.textContent || "0");
+                            if (balance >= betAmount) {
+                                updateBalance(-betAmount);
+                                dropBall(betAmount);
+                                droppedCount++;
+                            } else {
+                                toggleAutoBet(); // Stop if insufficient balance
+                                alert('Insufficient balance to continue auto drop');
+                            }
+                        }, interval);
+                    }
+                }
 
-        // Add after Matter.js initialization and before game logic
-        class Particle {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.alpha = 0.6;          // Reduced initial opacity
-                this.expandSpeed = 1.2;    // Faster expansion
-                this.radius = 4;          // Larger starting radius
-                this.maxRadius = 15;      // Larger maximum radius
-                this.color = '#1B69FA';   // blue1
-                this.lineWidth = 3;       // Thicker line
-            }
+                // Switch between manual and auto tabs
+                function switchTab(tabName) {
+                    const manualTab = document.getElementById('manual-tab');
+                    const autoTab = document.getElementById('auto-tab');
+                    const manualContent = document.getElementById('manual-content');
+                    const autoContent = document.getElementById('auto-content');
+                    
+                    if (!manualTab || !autoTab || !manualContent || !autoContent) return;
+                    
+                    if (tabName === 'manual') {
+                        manualTab.className = 'tab-button w-1/2 bg-accent text-black py-2 px-4 rounded-full transition-colors font-medium';
+                        autoTab.className = 'tab-button w-1/2 text-accent py-2 px-4 rounded-full transition-colors font-medium';
+                        manualContent.classList.remove('hidden');
+                        autoContent.classList.add('hidden');
+                    } else {
+                        autoTab.className = 'tab-button w-1/2 bg-accent text-black py-2 px-4 rounded-full transition-colors font-medium';
+                        manualTab.className = 'tab-button w-1/2 text-accent py-2 px-4 rounded-full transition-colors font-medium';
+                        autoContent.classList.remove('hidden');
+                        manualContent.classList.add('hidden');
+                    }
+                }
 
-            update() {
-                this.radius += this.expandSpeed;
-                this.alpha *= 0.94;  // Slower fade out
-                // Add slight oscillation to line width
-                this.lineWidth = 3 * (1 + Math.sin(this.radius * 0.3) * 0.2);
-                return this.radius < this.maxRadius;
-            }
+                // Adjust bet amount (half or double)
+                function adjustBet(factor, mode) {
+                    const inputId = mode === 'manual' ? 'bet' : 'auto-bet';
+                    const input = document.getElementById(inputId);
+                    if (!input) return;
+                    
+                    let value = parseInt(input.value) || 10;
+                    value = Math.min(Math.max(Math.round(value * factor), 1), 1000);
+                    input.value = value;
+                    
+                    if (mode === 'manual') {
+                        updateBetDisplay();
+                    } else {
+                        updateAutoBetDisplay();
+                    }
+                }
 
-            draw(context) {
-                context.beginPath();
-                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                context.strokeStyle = `rgba(27, 105, 250, ${this.alpha})`;
-                context.lineWidth = this.lineWidth;
-                context.stroke();
+                // Update the manual bet display
+                function updateBetDisplay() {
+                    const betInput = document.getElementById('bet');
+                    const betDisplay = document.getElementById('manual-bet-display');
+                    if (!betInput || !betDisplay) return;
+                    
+                    let bet = parseInt(betInput.value) || 0;
+                    bet = Math.min(Math.max(bet, 1), 1000);
+                    betInput.value = bet;
+                    betDisplay.textContent = `${bet} credits`;
+                }
 
-                // Add inner glow effect
-                const gradient = context.createRadialGradient(
-                    this.x, this.y, this.radius * 0.4,
-                    this.x, this.y, this.radius
-                );
-                gradient.addColorStop(0, `rgba(27, 105, 250, ${this.alpha * 0.1})`);
-                gradient.addColorStop(1, 'rgba(27, 105, 250, 0)');
-                context.fillStyle = gradient;
-                context.fill();
-            }
-        }
+                // Update the auto bet display
+                function updateAutoBetDisplay() {
+                    const betInput = document.getElementById('auto-bet');
+                    const betDisplay = document.getElementById('auto-bet-display');
+                    if (!betInput || !betDisplay) return;
+                    
+                    let bet = parseInt(betInput.value) || 0;
+                    bet = Math.min(Math.max(bet, 1), 1000);
+                    betInput.value = bet;
+                    betDisplay.textContent = `${bet} credits`;
+                }
 
-        let particles = [];
+                // Function to update balance
+                function updateBalance(amount) {
+                    const balElement = document.getElementById('bal');
+                    if (!balElement) return;
+                    
+                    let balance = parseFloat(balElement.textContent) || 0;
+                    balance += amount;
+                    balElement.textContent = Math.max(0, balance).toFixed(0);
+                }
 
-        const pegRows = 12;
-        const canvasWidth = render.options.width;
-        const canvasHeight = render.options.height;
-        const pegRadius = 6;
-        const pegSpacingX = 45;
-        const pegSpacingY = 45;
+                // Function to select target zone based on probabilities
+                function selectTargetZone() {
+                    const rand = Math.random();
+                    let cumulativeProbability = 0;
+                    for (let i = 0; i < multipliers.length; i++) {
+                        cumulativeProbability += multipliers[i].probability;
+                        if (rand < cumulativeProbability) {
+                            return multipliers[i];
+                        }
+                    }
+                    // In case of rounding errors, return the last zone
+                    return multipliers[multipliers.length - 1];
+                }
 
-        function createPegs(rows) {
-            for (let row = 1; row < rows; row++) {
-                const numberOfPegs = row + 2;
-                const startX = (canvasWidth - (numberOfPegs - 1) * pegSpacingX) / 2;
+                // Create pegs in a triangular pattern - fixing to match EXACTLY what's in mplinko.js
+                function createPegs() {
+                    if (!world) return;
+                    
+                    for (let row = 0; row < pegRows; row++) {
+                        // Offset every other row - exactly as in mplinko.js
+                        const offset = row % 2 === 0 ? 0 : pegSpacingX / 2;
+                        const cols = row % 2 === 0 ? pegColumns : pegColumns - 1;
+                        
+                        for (let col = 0; col < cols; col++) {
+                            const x = pegOffsetX + col * pegSpacingX + offset;
+                            const y = pegOffsetY + row * pegSpacingY;
+                            
+                            const peg = Bodies.circle(x, y, pegRadius, {
+                                isStatic: true,
+                                restitution: 0.5,
+                                friction: 0.05,
+                                render: {
+                                    fillStyle: '#FFFFFF' // White pegs exactly as in mplinko.js
+                                },
+                                collisionFilter: {
+                                    category: 0x0002,
+                                    mask: 0x0001 // Only collide with balls
+                                }
+                            });
+                            
+                            World.add(world, peg);
+                        }
+                    }
+                }
 
-                for (let col = 0; col < numberOfPegs; col++) {
-                    const x = startX + col * pegSpacingX;
-                    const y = row * pegSpacingY;
-
-                    const peg = Bodies.circle(x, y, pegRadius, {
+                // Create walls to contain the balls - matching mplinko.js
+                function createWalls() {
+                    if (!world) return;
+                    
+                    // Left wall
+                    const leftWall = Bodies.rectangle(0, canvasHeight / 2, 2, canvasHeight, {
                         isStatic: true,
-                        friction: 0.0,
-                        restitution: 0.5,
-                        render: { fillStyle: '#1B44FA' }, // Updated to blue2
+                        render: { fillStyle: '#333333' } // Dark gray
+                    });
+                    
+                    // Right wall
+                    const rightWall = Bodies.rectangle(canvasWidth, canvasHeight / 2, 2, canvasHeight, {
+                        isStatic: true,
+                        render: { fillStyle: '#333333' } // Dark gray
+                    });
+                    
+                    // Top wall (invisible, just to bounce balls back if they go too high)
+                    const topWall = Bodies.rectangle(canvasWidth / 2, -50, canvasWidth, 100, {
+                        isStatic: true,
+                        render: { fillStyle: '#000000' } // Black (invisible)
+                    });
+                    
+                    World.add(world, [leftWall, rightWall, topWall]);
+                }
+
+                // Create multiplier zones at the bottom - matching mplinko.js
+                function createMultiplierZones() {
+                    if (!world) return;
+                    
+                    const zoneY = canvasHeight - zoneHeight / 2 - 20; // Position zones at the bottom
+                    const zoneWidth = canvasWidth / numberOfZones;
+                    
+                    // Create multiplier labels in the DOM
+                    const multiplierLabelsContainer = document.getElementById('multiplier-labels');
+                    if (!multiplierLabelsContainer) return;
+                    
+                    multiplierLabelsContainer.innerHTML = ''; // Clear any existing labels
+                    multipliers = []; // Reset multipliers array
+                    
+                    for (let i = 0; i < numberOfZones; i++) {
+                        const x = i * zoneWidth + zoneWidth / 2;
+                        const multiplier = multiplierValues[i];
+                        
+                        // Create a physics body for the zone
+                        const zone = Bodies.rectangle(x, zoneY, zoneWidth - 2, zoneHeight, {
+                            isStatic: true,
+                            label: `Zone-${i}`,
+                            render: {
+                                fillStyle: 'transparent', // Make zones invisible
+                                lineWidth: 0
+                            },
+                            collisionFilter: {
+                                category: 0x0004,
+                                mask: 0x0001 // Only collide with balls
+                            }
+                        });
+                        
+                        // Store zone information for later use
+                        const zoneInfo = {
+                            id: i,
+                            x: x,
+                            multiplier: multiplier,
+                            probability: 1 / numberOfZones, // Equal probability for each zone by default
+                            body: zone
+                        };
+                        
+                        multipliers.push(zoneInfo);
+                        World.add(world, zone);
+                        
+                        // Create label in the DOM
+                        const labelElement = document.createElement('div');
+                        labelElement.className = 'multiplier-label';
+                        labelElement.id = `zone-label-${i}`;
+                        labelElement.textContent = `${multiplier}x`;
+                        
+                        // Store reference to the label element
+                        zone.labelElement = labelElement;
+                        
+                        multiplierLabelsContainer.appendChild(labelElement);
+                    }
+                }
+
+                // Initialize statistics tracking
+                function initializeStatistics() {
+                    statistics = multipliers.map(zone => ({
+                        id: zone.id,
+                        multiplier: zone.multiplier,
+                        hits: 0,
+                        percentage: 0
+                    }));
+                }
+
+                // Show winning notification
+                function showWinNotification(amount) {
+                    const notification = document.getElementById('win-notification');
+                    const winAmount = document.getElementById('win-amount');
+                    if (!notification || !winAmount) return;
+                    
+                    // Only show for significant wins (multiplier > 1)
+                    if (amount <= 0) return;
+                    
+                    winAmount.textContent = `+${amount} credits`;
+                    notification.classList.remove('hidden');
+                    
+                    // Use setTimeout to ensure the DOM has updated before adding the show class
+                    setTimeout(() => {
+                        notification.classList.add('win-show');
+                        
+                        // Hide after 3 seconds
+                        setTimeout(() => {
+                            notification.classList.remove('win-show');
+                            setTimeout(() => {
+                                notification.classList.add('hidden');
+                            }, 300);
+                        }, 3000);
+                    }, 10);
+                }
+
+                // Update the total plays counter
+                function updatePlaysCounter() {
+                    const plays = document.getElementById('total-plays');
+                    if (!plays) return;
+                    
+                    plays.textContent = (parseInt(plays.textContent) + 1).toString();
+                }
+
+                // Handle highlighting of multiplier zone when ball hits it
+                function highlightZone(zoneId) {
+                    // Remove highlight from all labels
+                    const labels = document.querySelectorAll('.multiplier-label');
+                    labels.forEach(label => label.classList.remove('multiplier-label-active'));
+                    
+                    // Add highlight to the hit zone
+                    const hitLabel = document.getElementById(`zone-label-${zoneId}`);
+                    if (hitLabel) {
+                        hitLabel.classList.add('multiplier-label-active');
+                        
+                        // Remove highlight after animation completes
+                        setTimeout(() => {
+                            hitLabel.classList.remove('multiplier-label-active');
+                        }, 800);
+                    }
+                }
+
+                // Modified dropBall function to match mplinko.js exactly
+                function dropBall(betAmount = 10) {
+                    if (!world) return null;
+                    
+                    totalBets++;
+                    const targetZone = selectTargetZone();
+
+                    // Drop from a random position within a narrower center area - exact mplinko.js value
+                    const minX = 350;
+                    const maxX = 450;
+                    const randomXPosition = Math.random() * (maxX - minX) + minX;
+                    const initialYPosition = pegSpacingY / 2; // Slightly above the first row of pegs
+
+                    const ball = Bodies.circle(randomXPosition, initialYPosition, ballRadius, {
+                        restitution: 0.7, // More bounce
+                        friction: 0.001, // Less friction for smoother movement
+                        density: 0.8, // Adjusted for better physics feel
+                        label: 'Ball',
+                        render: { 
+                            fillStyle: '#FFFFFF', // White ball
+                            strokeStyle: '#AAAAAA', // Light gray outline
+                            lineWidth: 1
+                        },
                         collisionFilter: {
-                            category: 0x0004,
-                            mask: 0x0001 // Collide with balls
+                            category: 0x0001,
+                            mask: 0x0002 | 0x0004 // Collide with walls, zones, and pegs
                         }
                     });
-                    Composite.add(world, peg);
+                    
+                    // Store data with the ball
+                    ball.targetX = targetZone.x; // For steering
+                    ball.targetZoneId = targetZone.id; // Track which zone we're targeting
+                    ball.betAmount = betAmount; // Store bet amount with the ball
+                    ball.pathPoints = []; // For path drawing
+                    
+                    // Update UI
+                    const betCounter = document.getElementById('bet-counter');
+                    if (betCounter) betCounter.textContent = `Total Balls: ${totalBets}`;
+                    
+                    // Add ball to world
+                    Composite.add(world, ball);
+                    
+                    return ball;
                 }
-            }
-        }
 
-        createPegs(pegRows);
-
-        // Define multiplier zones with probabilities
-        const zoneWidth = 40;
-        const zoneHeight = 25;
-        const chamferRadius = 5;
-
-        // Modify the multipliers array to adjust the probabilities
-        // Center zones have higher probabilities, edges have lower probabilities
-        const multipliers = [
-            { id: 1, x: 190, multiplier: 76, color: '#FFFF00', probability: 0.02 },
-            { id: 2, x: 235, multiplier: 10, color: '#00FF00', probability: 0.04 },
-            { id: 3, x: 280, multiplier: 3, color: '#FFA500', probability: 0.08 },
-            { id: 4, x: 325, multiplier: 0.9, color: '#FF0000', probability: 0.12 },
-            { id: 5, x: 370, multiplier: 0.2, color: '#FF0000', probability: 0.14 },
-            { id: 6, x: 415, multiplier: 0.3, color: '#FF0000', probability: 0.16 },
-            { id: 7, x: 460, multiplier: 0.2, color: '#FF0000', probability: 0.16 },
-            { id: 8, x: 505, multiplier: 0.3, color: '#FF0000', probability: 0.14 },
-            { id: 9, x: 550, multiplier: 0.9, color: '#FF0000', probability: 0.12 },
-            { id: 10, x: 595, multiplier: 3, color: '#FFA500', probability: 0.08 },
-            { id: 11, x: 640, multiplier: 10, color: '#00FF00', probability: 0.04 },
-            { id: 12, x: 685, multiplier: 76, color: '#FFFF00', probability: 0.02 }
-        ];
-
-        const totalProbability = multipliers.reduce((sum, zone) => sum + zone.probability, 0);
-        if (Math.abs(totalProbability - 1) > 0.0001) {
-            console.error('Total probability does not sum up to 1');
-        }
-
-        const multiplierContainer = document.createElement('div');
-        multiplierContainer.style.position = 'absolute';
-        multiplierContainer.style.top = '520px';
-        multiplierContainer.style.left = '0px';
-        multiplierContainer.style.width = '800px';
-        multiplierContainer.style.display = 'flex';
-        multiplierContainer.style.justifyContent = 'space-between';
-
-        // Update the bet-counter display
-        let totalBets = 0;
-        document.getElementById('bet-counter').textContent = `Total Bets: ${totalBets}`;
-
-        // Add the multipliers and labels to the container
-        multipliers.forEach(zone => {
-            const square = Bodies.rectangle(zone.x, 530, zoneWidth, zoneHeight, {
-                isStatic: true,
-                chamfer: { radius: chamferRadius },
-                label: `Zone-${zone.id}`,
-                render: {
-                    fillStyle: zone.color
-                },
-                collisionFilter: {
-                    category: 0x0002,
-                    mask: 0x0001 // Collide with balls
-                }
-            });
-
-            Body.setInertia(square, Infinity);
-            Composite.add(world, square);
-
-            // Create and position the label for the multiplier
-            const multiplierLabel = document.createElement('div');
-            multiplierLabel.textContent = `${zone.multiplier}x`;
-            multiplierLabel.style.position = 'absolute';
-            multiplierLabel.style.left = `${zone.x - (zoneWidth / 2)}px`;
-            multiplierLabel.style.top = '520px';
-            multiplierLabel.style.color = '#000';
-            multiplierLabel.style.fontSize = '12px';
-            multiplierLabel.style.fontWeight = 'bold';
-            multiplierLabel.style.textAlign = 'center';
-            multiplierLabel.style.width = `${zoneWidth}px`;
-
-            document.getElementById('game-container').appendChild(multiplierLabel);
-            square.labelElement = multiplierLabel; // Store reference to the label element
-        });
-
-        // Function to drop multiple balls
-        function dropBalls() {
-            for (let i = 0; i < 1000; i++) {
-                dropBall();
-            }
-        }
-
-        // Create walls
-        const wallLeft = Bodies.rectangle(185, 300, 10, 600, {
-            isStatic: true,
-            angle: Math.PI / 8,
-            render: { visible: false },
-            collisionFilter: {
-                category: 0x0002,
-                mask: 0x0001 // Collide with balls
-            }
-        });
-
-        const wallRight = Bodies.rectangle(615, 300, 10, 600, {
-            isStatic: true,
-            angle: -Math.PI / 8,
-            render: { visible: false },
-            collisionFilter: {
-                category: 0x0002,
-                mask: 0x0001 // Collide with balls
-            }
-        });
-
-        Composite.add(world, [wallLeft, wallRight]);
-
-        // Ball drop functionality
-        const ballRadius = 12;
-        let betCount = 0;
-
-        // Boolean to toggle the path drawing
-        const showPath = false; // Set to false to disable path drawing
-
-        // Event listeners for Manual bet adjustment buttons
-        document.getElementById('half-button').addEventListener('click', () => {
-            const betInput = document.getElementById('bet');
-            const betDisplay = document.getElementById('manual-bet-display');
-            let bet = parseFloat(betInput.value) || 0;
-            bet = (bet / 2).toFixed(2);
-            betInput.value = bet;
-            betDisplay.textContent = `${bet} credits`;
-        });
-
-        document.getElementById('double-button').addEventListener('click', () => {
-            const betInput = document.getElementById('bet');
-            const betDisplay = document.getElementById('manual-bet-display');
-            let bet = parseFloat(betInput.value) || 0;
-            bet = (bet * 2).toFixed(2);
-            betInput.value = bet;
-            betDisplay.textContent = `${bet} credits`;
-        });
-
-        // Event listeners for Auto bet adjustment buttons
-        document.getElementById('auto-half-button').addEventListener('click', () => {
-            const betInput = document.getElementById('auto-bet');
-            const betDisplay = document.getElementById('auto-bet-display');
-            let bet = parseFloat(betInput.value) || 0;
-            bet = (bet / 2).toFixed(2);
-            betInput.value = bet;
-            betDisplay.textContent = `${bet} credits`;
-        });
-
-        document.getElementById('auto-double-button').addEventListener('click', () => {
-            const betInput = document.getElementById('auto-bet');
-            const betDisplay = document.getElementById('auto-bet-display');
-            let bet = parseFloat(betInput.value) || 0;
-            bet = (bet * 2).toFixed(2);
-            betInput.value = bet;
-            betDisplay.textContent = `${bet} credits`;
-        });
-
-        // Update bet display on input change (Manual)
-        document.getElementById('bet').addEventListener('input', () => {
-            const betInput = document.getElementById('bet');
-            const betDisplay = document.getElementById('manual-bet-display');
-            let bet = parseFloat(betInput.value) || 0;
-            betDisplay.textContent = `${bet.toFixed(2)} credits`;
-        });
-
-        // Update bet display on input change (Auto)
-        document.getElementById('auto-bet').addEventListener('input', () => {
-            const betInput = document.getElementById('auto-bet');
-            const betDisplay = document.getElementById('auto-bet-display');
-            let bet = parseFloat(betInput.value) || 0;
-            betDisplay.textContent = `${bet.toFixed(2)} credits`;
-        });
-
-        // Add these constants near the top of your script
-        const BALL_CLEANUP_TIMEOUT = 10000; // 10 seconds
-        const STUCK_VELOCITY_THRESHOLD = 0.1;
-        const STUCK_CHECK_INTERVAL = 1000; // Check every second
-
-        // Modified dropBall function to accept betAmount
-        function dropBall(betAmount) {
-            // Increment total plays counter
-            const totalPlaysElement = document.getElementById('total-plays');
-            const currentPlays = parseInt(totalPlaysElement.textContent) || 0;
-            totalPlaysElement.textContent = currentPlays + 1;
-
-            // Rest of dropBall function remains the same
-            totalBets++;
-            const targetZone = selectTargetZone();
-
-            const minX = 390;
-            const maxX = 480;
-            const randomXPosition = Math.random() * (maxX - minX) + minX;
-            const initialYPosition = pegSpacingY / 3; // Higher initial position
-
-            const ball = Bodies.circle(randomXPosition, initialYPosition, ballRadius, {
-                restitution: 0.4,    // Slightly increased bounce
-                friction: 0.002,     // Very low friction
-                density: 0.6,        // Lighter ball
-                slop: 0,            // Prevent sinking
-                label: 'Ball',
-                frictionAir: 0.001,  // Add minimal air friction
-                render: {
-                    fillStyle: '#1B69FA',
-                    strokeStyle: '#1B44FA',
-                    lineWidth: 1
-                },
-                collisionFilter: {
-                    category: 0x0001,
-                    mask: 0x0002 | 0x0004
-                }
-            });
-
-            // Add initial downward velocity
-            Body.setVelocity(ball, { x: 0, y: 2 });
-
-            ball.targetX = targetZone.x;       // Store the target x-position
-            ball.targetZoneId = targetZone.id; // Store the target zone id
-            ball.betAmount = betAmount;        // Store the bet amount with the ball
-
-            // Add timestamp to track ball age
-            ball.createdAt = Date.now();
-            
-            // Add cleanup timeout
-            setTimeout(() => {
-                if (ball && ball.position) {
-                    Composite.remove(world, ball);
-                }
-            }, BALL_CLEANUP_TIMEOUT);
-
-            document.getElementById('bet-counter').textContent = `Total Balls Dropped: ${totalBets}`;
-            Composite.add(world, ball);
-        }
-
-        // Function to select target zone based on probabilities
-        function selectTargetZone() {
-            const rand = Math.random();
-            let cumulativeProbability = 0;
-            for (let i = 0; i < multipliers.length; i++) {
-                cumulativeProbability += multipliers[i].probability;
-                if (rand < cumulativeProbability) {
-                    return multipliers[i];
-                }
-            }
-            // In case of rounding errors, return the last zone
-            return multipliers[multipliers.length - 1];
-        }
-
-        // Steering mechanism to guide the ball towards the target zone
-        Events.on(engine, 'beforeUpdate', function () {
-            const currentTime = Date.now();
-            
-            Composite.allBodies(world).forEach(body => {
-                if (body.label === 'Ball') {
-                    // Check for stuck balls
-                    if (Math.abs(body.velocity.x) < STUCK_VELOCITY_THRESHOLD && 
-                        Math.abs(body.velocity.y) < STUCK_VELOCITY_THRESHOLD) {
+                // Modified setup event listeners function
+                function setupEventListeners() {
+                    // Tab switcher for manual/auto modes
+                    document.getElementById('manual-tab')?.addEventListener('click', () => switchTab('manual'));
+                    document.getElementById('auto-tab')?.addEventListener('click', () => switchTab('auto'));
+                    
+                    // Manual betting
+                    document.getElementById('manual-bet-button')?.addEventListener('click', () => {
+                        const betAmount = parseInt(document.getElementById('bet')?.value || "10");
+                        // Deduct the bet amount from the balance
+                        updateBalance(-betAmount);
+                        // Drop a ball with the bet amount
+                        dropBall(betAmount);
+                    });
+                    
+                    // Half/Double buttons for manual mode
+                    document.getElementById('half-button')?.addEventListener('click', () => adjustBet(0.5, 'manual'));
+                    document.getElementById('double-button')?.addEventListener('click', () => adjustBet(2, 'manual'));
+                    
+                    // Half/Double buttons for auto mode
+                    document.getElementById('auto-half-button')?.addEventListener('click', () => adjustBet(0.5, 'auto'));
+                    document.getElementById('auto-double-button')?.addEventListener('click', () => adjustBet(2, 'auto'));
+                    
+                    // Drop multiple balls button
+                    document.getElementById('drop-balls-btn')?.addEventListener('click', () => {
+                        const betAmount = parseInt(document.getElementById('bet')?.value || "10");
+                        for (let i = 0; i < 10; i++) {
+                            setTimeout(() => {
+                                updateBalance(-betAmount);
+                                dropBall(betAmount);
+                            }, i * 200);
+                        }
+                    });
+                    
+                    // Auto betting - now toggleAutoBet is defined
+                    document.getElementById('autobet-btn')?.addEventListener('click', toggleAutoBet);
+                    
+                    // Show path toggle
+                    const showPathCheckbox = document.getElementById('show-paths');
+                    if (showPathCheckbox) {
+                        showPathCheckbox.addEventListener('change', (e) => {
+                            showPath = e.target.checked;
+                        });
+                    }
+                    
+                    // Reset statistics button
+                    const resetStatsBtn = document.getElementById('reset-stats');
+                    if (resetStatsBtn) {
+                        resetStatsBtn.addEventListener('click', () => {
+                            statistics.forEach(stat => {
+                                stat.hits = 0;
+                                stat.percentage = 0;
+                            });
+                            totalHits = 0;
+                            totalBets = 0;
+                            const betCounter = document.getElementById('bet-counter');
+                            if (betCounter) betCounter.textContent = `Total Balls: ${totalBets}`;
+                            updateStatisticsPanel();
+                        });
+                    }
+                    
+                    // Update bet display when input changes
+                    document.getElementById('bet')?.addEventListener('input', updateBetDisplay);
+                    document.getElementById('auto-bet')?.addEventListener('input', updateAutoBetDisplay);
+                    
+                    // Update range input background as it slides - FIXED EVENT HANDLER
+                    const speedRange = document.getElementById('auto-speed');
+                    if (speedRange) {
+                        // Initialize the background gradient directly
+                        updateRangeBackgroundDirect(speedRange);
                         
-                        // If ball is stuck for more than 2 seconds, apply a small impulse
-                        if (!body.lastMoving || currentTime - body.lastMoving > 2000) {
-                            Body.applyForce(body, body.position, {
-                                x: (Math.random() - 0.5) * 0.001,
-                                y: 0.001
+                        // Safe event handler for input changes
+                        speedRange.addEventListener('input', updateRangeBackground);
+                    }
+                }
+
+                // Set up Matter.js engine
+                function setupGame() {
+                    try {
+                        console.log('Setting up game...');
+                        
+                        // Create engine and world exactly like mplinko.js
+                        engine = Engine.create({
+                            enableSleeping: true // Enable sleeping for better performance
+                        });
+                        
+                        world = engine.world;
+                        engine.gravity.y = 0.5; // Match mplinko.js gravity
+
+                        // Create renderer with black background
+                        render = Render.create({
+                            element: gameContainer,
+                            engine: engine,
+                            options: {
+                                width: canvasWidth,
+                                height: canvasHeight,
+                                wireframes: false,
+                                background: '#000000',
+                                showSleeping: false,
+                                showDebug: false,
+                            }
+                        });
+
+                        // Create game elements in the same order as mplinko.js
+                        console.log('Creating pegs...');
+                        createPegs();
+                        
+                        console.log('Creating walls...');
+                        createWalls();
+                        
+                        console.log('Creating multiplier zones...');
+                        createMultiplierZones();
+
+                        // Start the engine and renderer
+                        console.log('Starting engine and renderer...');
+                        Render.run(render);
+                        
+                        // Run the engine at fixed timestep for better physics simulation, like mplinko.js
+                        let lastTime = performance.now();
+                        const fixedTimeStep = 1000 / 60; // 60 FPS
+                        
+                        function gameLoop() {
+                            const currentTime = performance.now();
+                            const deltaTime = currentTime - lastTime;
+                            
+                            if (deltaTime > fixedTimeStep) {
+                                Engine.update(engine, fixedTimeStep);
+                                lastTime = currentTime;
+                            }
+                            
+                            requestAnimationFrame(gameLoop);
+                        }
+                        
+                        gameLoop();
+                        
+                        // Setup collision handling
+                        setupCollisionHandlers();
+                        
+                        // Initialize statistics tracking
+                        initializeStatistics();
+                        
+                        console.log('Game setup complete!');
+                        return true;
+                    } catch (error) {
+                        console.error('Error setting up game:', error);
+                        gameContainer.innerHTML = 
+                            '<div class="flex items-center justify-center h-full">' +
+                            `<p class="text-white text-xl">Error: ${error.message}</p>` +
+                            '</div>';
+                        return false;
+                    }
+                }
+                
+                // Setup collision handlers exactly as in mplinko.js
+                function setupCollisionHandlers() {
+                    if (!engine) return;
+                    
+                    // Steering mechanism to guide the ball towards the target zone
+                    Events.on(engine, 'beforeUpdate', function() {
+                        Composite.allBodies(world).forEach(body => {
+                            if (body.label === 'Ball' && body.targetX !== undefined) {
+                                // Apply steering force to guide the ball
+                                const steeringForce = 0.00005; // Same as mplinko.js
+                                
+                                const distanceToTarget = body.position.y;
+                                if (distanceToTarget > pegSpacingY && distanceToTarget < canvasHeight) {
+                                    const distanceX = body.targetX - body.position.x;
+                                    const distanceY = canvasHeight - body.position.y;
+
+                                    const steeringX = (distanceX / distanceY) * steeringForce;
+                                    Body.applyForce(body, body.position, { x: steeringX, y: 0 });
+                                }
+
+                                // Record the ball's position for path drawing
+                                if (showPath) {
+                                    body.pathPoints = body.pathPoints || [];
+                                    body.pathPoints.push({ x: body.position.x, y: body.position.y });
+                                }
+                            }
+                        });
+                    });
+
+                    // Handle collision and determine winnings
+                    Events.on(engine, 'collisionStart', event => {
+                        event.pairs.forEach(({ bodyA, bodyB }) => {
+                            const ball = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
+                            const zone = bodyA.label && bodyA.label.startsWith('Zone-') ? bodyA : bodyB.label && bodyB.label.startsWith('Zone-') ? bodyB : null;
+
+                            if (ball && zone) {
+                                const zoneId = parseInt(zone.label.split('-')[1]);
+                                const matchedMultiplier = multipliers.find(z => z.id == zoneId)?.multiplier || 1;
+                                const bet = ball.betAmount || 10; // Use the bet amount stored in the ball or default to 10
+                                const winnings = bet * matchedMultiplier;
+                                
+                                // Update balance
+                                updateBalance(winnings);
+                                
+                                // Show win notification for significant wins
+                                if (matchedMultiplier > 1) {
+                                    showWinNotification(winnings);
+                                }
+                                
+                                // Highlight the zone that was hit
+                                highlightZone(zoneId);
+                                
+                                // Update statistics
+                                updateStatistics(zoneId);
+                                
+                                // Update plays counter
+                                updatePlaysCounter();
+
+                                // Remove the ball after a short delay
+                                setTimeout(() => {
+                                    Composite.remove(world, ball);
+                                }, 300); // Same as mplinko.js
+                            }
+                        });
+                    });
+
+                    // Render event to draw the path lines
+                    Events.on(render, 'afterRender', function() {
+                        if (!render || !render.context) return;
+                        
+                        if (showPath) {
+                            const context = render.context;
+                            context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Same as mplinko.js
+                            context.lineWidth = 2;
+
+                            Composite.allBodies(world).forEach(body => {
+                                if (body.label === 'Ball' && body.pathPoints && body.pathPoints.length > 0) {
+                                    context.beginPath();
+                                    context.moveTo(body.pathPoints[0].x, body.pathPoints[0].y);
+
+                                    for (let i = 1; i < body.pathPoints.length; i++) {
+                                        context.lineTo(body.pathPoints[i].x, body.pathPoints[i].y);
+                                    }
+
+                                    context.stroke();
+                                }
                             });
                         }
-                    } else {
-                        body.lastMoving = currentTime;
-                    }
-
-                    // Remove balls that have fallen below the canvas
-                    if (body.position.y > canvasHeight + 100) {
-                        Composite.remove(world, body);
-                    }
+                    });
                 }
 
-                // Existing steering code
-                if (body.label === 'Ball' && body.targetX !== undefined) {
-                    // Apply steering force to guide the ball
-                    const steeringForce = 0.00005; // Adjust this value to control steering strength
-                    const maxSteeringDistance = 300; // Start steering when within this distance from the target
-
-                    const distanceToTarget = body.position.y;
-                    if (distanceToTarget > pegSpacingY && distanceToTarget < canvasHeight) {
-                        const distanceX = body.targetX - body.position.x;
-                        const distanceY = canvasHeight - body.position.y;
-
-                        const steeringX = (distanceX / distanceY) * steeringForce;
-                        Body.applyForce(body, body.position, { x: steeringX, y: 0 });
+                // Initialize the game safely - FIX FOR LINE 878
+                console.log('Document loaded, initializing game...');
+                if (setupGame()) {
+                    // Set up UI after successful game initialization
+                    setupEventListeners();
+                    
+                    // Initialize other necessary parts
+                    initializeStatistics();
+                    
+                    // Set initial range background DIRECTLY rather than through event
+                    const speedRange = document.getElementById('auto-speed');
+                    if (speedRange) {
+                        updateRangeBackgroundDirect(speedRange);
                     }
+                    
+                    const betCounter = document.getElementById('bet-counter');
+                    if (betCounter) betCounter.textContent = 'Total Balls: 0';
                 }
-            });
-        });
 
-        // Render event to draw the path line
-        Events.on(render, 'afterRender', function () {
-            const context = render.context;
-
-            // Only update and draw particles
-            particles = particles.filter(particle => {
-                const isAlive = particle.update();
-                if (isAlive) {
-                    particle.draw(context);
-                }
-                return isAlive;
-            });
-        });
-
-        // Handle collision and determine winnings
-        Events.on(engine, 'collisionStart', event => {
-            event.pairs.forEach(({ bodyA, bodyB }) => {
-                const ball = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
-                const zone = bodyA.label && bodyA.label.startsWith('Zone-') ? bodyA : bodyB.label && bodyB.label.startsWith('Zone-') ? bodyB : null;
-
-                if (ball && zone) {
-                    const zoneId = parseInt(zone.label.split('-')[1]); // Extract zone ID from label
-                    const matchedMultiplier = multipliers.find(z => z.id === zoneId).multiplier;
-                    const bet = ball.betAmount; // Use the bet amount stored in the ball
-                    const winnings = bet * matchedMultiplier;
-                    updateBalance(winnings); // Update the balance with the calculated winnings
-
-                    // Update statistics for the zone
-                    updateStatistics(zoneId);
-
-                    // Bounce animation for the zone and the corresponding label
-                    const targetZone = multipliers.find(z => z.id === zoneId);
-                    if (targetZone && !zone.bouncing) {
-                        zone.bouncing = true;
-                        const initialY = zone.position.y;
-                        const bounceDistance = 20;
-                        const bounceDuration = 300;
-
-                        let startTime = null;
-
-                        function animateBounce(timestamp) {
-                            if (!startTime) startTime = timestamp;
-                            const elapsed = timestamp - startTime;
-                            const progress = elapsed / bounceDuration;
-                            const easedProgress = Math.sin(progress * Math.PI);
-
-                            const newY = initialY + bounceDistance * easedProgress;
-                            Body.setPosition(zone, { x: zone.position.x, y: newY });
-
-                            // Bounce the corresponding label
-                            const labelElement = zone.labelElement;
-                            if (labelElement) {
-                                labelElement.style.top = `${520 + bounceDistance * easedProgress}px`;
-                            }
-
-                            if (elapsed < bounceDuration) {
-                                requestAnimationFrame(animateBounce);
-                            } else {
-                                Body.setPosition(zone, { x: zone.position.x, y: initialY });
-                                if (labelElement) {
-                                    labelElement.style.top = '520px'; // Reset label position
-                                }
-                                zone.bouncing = false;
-                            }
+                // Export functions to window for debugging
+                window.debugPlinko = {
+                    engine,
+                    render,
+                    world,
+                    dropBall: (betAmount = 10) => {
+                        try {
+                            return dropBall(betAmount);
+                        } catch (error) {
+                            console.error('Error dropping ball:', error);
+                            return null;
                         }
-
-                        requestAnimationFrame(animateBounce);
+                    },
+                    resetGame: () => {
+                        if (render) Render.stop(render);
+                        if (engine) Engine.clear(engine);
+                        setupGame();
                     }
-
-                    // Remove the ball after processing
-                    setTimeout(() => {
-                        Composite.remove(world, ball);
-                    }, 1);
-                }
-            });
-        });
-
-        const statistics = multipliers.map(multiplier => ({
-            id: multiplier.id,
-            multiplier: multiplier.multiplier,
-            hits: 0,
-            percentage: 0
-        }));
-        let totalHits = 0;
-
-        // Function to update statistics when a ball hits a zone
-        function updateStatistics(zoneId) {
-            const zoneStat = statistics.find(stat => stat.id == zoneId);
-            if (zoneStat) {
-                zoneStat.hits += 1; // Increment the hit count for the specific zone
-                totalHits += 1; // Increment total hits
-
-                updateStatisticsPanel(); // Refresh the statistics panel
+                };
+                
+            } catch (error) {
+                console.error("Critical initialization error:", error);
+                document.getElementById('game-container').innerHTML = 
+                    '<div class="flex items-center justify-center h-full">' +
+                    `<p class="text-white text-xl">Critical Error: ${error.message}</p>` +
+                    '</div>';
             }
-        }
-
-        // Function to update statistics panel
-        function updateStatisticsPanel() {
-            const statsBody = document.getElementById('stats-body');
-            statsBody.innerHTML = ''; // Clear current rows
-
-            if (totalHits > 0) {
-                statistics.forEach(stat => {
-                    stat.percentage = (stat.hits / totalHits) * 100; // Calculate actual percentage
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="text-left">${stat.multiplier}x</td>
-                        <td class="text-right">${stat.hits}</td>
-                        <td class="text-right">${stat.percentage.toFixed(2)}%</td>
-                    `;
-                    statsBody.appendChild(row);
-                });
-            }
-        }
-
-        // Start the simulation
-        const runner = Runner.create();
-        Runner.run(runner, engine);
-
-        // Add to the collision handling section
-        Events.on(engine, 'collisionStart', event => {
-            event.pairs.forEach(({ bodyA, bodyB }) => {
-                // Check for ball-peg collisions
-                const ball = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
-                const isPeg = (body) => body.circleRadius === pegRadius;
-
-                if (ball && (isPeg(bodyA) || isPeg(bodyB))) {
-                    const peg = isPeg(bodyA) ? bodyA : bodyB;
-                    
-                    // Add extra force on first impact
-                    if (!ball.hasHitPeg) {
-                        Body.setVelocity(ball, {
-                            x: ball.velocity.x,
-                            y: Math.max(2, ball.velocity.y)
-                        });
-                        ball.hasHitPeg = true;
-                    }
-                    
-                    // Create particle effect
-                    particles.push(new Particle(peg.position.x, peg.position.y));
-                }
-
-                // Existing collision handling code...
-            });
-        });
-
-        // Modify the render event to include particle rendering
-        Events.on(render, 'afterRender', function () {
-            const context = render.context;
-
-            // Update and draw particles with improved filtering
-            particles = particles.filter(particle => {
-                const isAlive = particle.update();
-                if (isAlive) {
-                    particle.draw(context);
-                }
-                return isAlive;
-            });
-
-       
         });
     </script>
 
+    <!-- Add a simplified loading/error indicator -->
+    <script>
+        // Detect if the game fails to initialize properly within 5 seconds
+        setTimeout(function() {
+            const gameContainer = document.getElementById('game-container');
+            const canvas = gameContainer.querySelector('canvas');
+            
+            if (!canvas || canvas.width === 0) {
+                console.error('Game canvas not initialized properly after timeout');
+                gameContainer.innerHTML = 
+                    '<div class="flex items-center justify-center h-full bg-black/80 rounded-lg">' +
+                    '<div class="text-center">' +
+                    '<p class="text-white text-xl mb-4">Game failed to initialize</p>' +
+                    '<button onclick="location.reload()" class="bg-accent px-6 py-2 rounded text-black">' +
+                    'Retry Loading Game</button>' +
+                    '</div></div>';
+            }
+        }, 5000);
+    </script>
 </body>
 </html>
