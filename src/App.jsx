@@ -16,6 +16,7 @@ import LoadingScreen from './components/LoadingScreen';
 import 'vite/modulepreload-polyfill'
 import axios from 'axios';
 import useLoadingState from './hooks/useLoadingState';
+import ErrorBoundary from './components/ErrorBoundary';
 
 
 const App = () => {
@@ -62,10 +63,10 @@ const App = () => {
   const fetchAPI = async () => {
     try {
       const response = await axios.get(apiUrl);
-      console.log(response.data.fruits);
+      // Handle successful response
     } catch (error) {
-      console.error('Error fetching API data:', error);
-      // Handle the error gracefully
+      console.error('API Error:', error.message);
+      // Set error state if needed
     } finally {
       setIsApiLoading(false);
     }
@@ -76,7 +77,7 @@ const App = () => {
   }, []); // Add empty dependency array to run only once
 
   return (
-    <>
+    <ErrorBoundary>
       <LoadingScreen isLoading={isLoading} message="Loading Portfolio..." />
       <BackgroundParticles />
       <Router>
@@ -111,7 +112,7 @@ const App = () => {
           </>
         </div>
       </Router>
-    </>
+    </ErrorBoundary>
   );
 };
 

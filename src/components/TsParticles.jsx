@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Particles from "@tsparticles/react";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 
 const TsParticles = () => {
@@ -8,28 +8,26 @@ const TsParticles = () => {
   useEffect(() => {
     const initParticles = async () => {
       try {
-        // Initialize the engine
-        if (window.tsParticles) {
-          await loadSlim(window.tsParticles);
-          console.log("TsParticles engine initialized successfully");
-          setInitialized(true);
-        }
+        await initParticlesEngine(async (engine) => {
+          await loadSlim(engine);
+        });
+        console.log("TsParticles engine initialized successfully");
+        setInitialized(true);
       } catch (error) {
         console.error("Failed to initialize particles:", error);
       }
     };
     
-    // Remove the stray 's' character that was causing the syntax error
     initParticles();
   }, []);
 
-  // Simple configuration for better compatibility
   const options = {
     background: {
       color: {
         value: "transparent",
       },
     },
+    fpsLimit: 60,
     particles: {
       color: {
         value: "#1B69FA",
@@ -44,12 +42,18 @@ const TsParticles = () => {
       move: {
         enable: true,
         speed: 1,
+        direction: "none",
+        random: false,
+        straight: false,
+        outModes: {
+          default: "bounce"
+        },
       },
       number: {
-        value: 5,  // reduced from 10
+        value: 5,
         density: {
           enable: true,
-          area: 200,  // increased from 100 to spread particles more
+          area: 200,
         },
       },
       opacity: {
@@ -59,11 +63,18 @@ const TsParticles = () => {
         value: { min: 1, max: 2 },
       },
     },
+    detectRetina: true,
     interactivity: {
       events: {
         onHover: {
           enable: true,
           mode: "repulse",
+        },
+      },
+      modes: {
+        repulse: {
+          distance: 100,
+          duration: 0.4,
         },
       },
     },
@@ -79,12 +90,12 @@ const TsParticles = () => {
       zIndex: -1,
       pointerEvents: 'none'
     }}>
-      {initialized ? (
+      {initialized && (
         <Particles
           id="tsparticles"
           options={options}
         />
-      ) : null}
+      )}
     </div>
   );
 };
