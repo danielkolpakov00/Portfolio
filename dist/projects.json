@@ -2,45 +2,49 @@
   {
     "id": 1,
     "title": "Weather API Project",
+    "description": "A Three.js scene that fetches and displays weather data from the OpenWeather API for Vancouver.",
     "htmlFile": "/projects/weatherapi.html",
     "cssFile": "/projects/weatherapi.css",
     "jsFile": "/projects/weatherapi.js",
-    "link": "/projects/weatherapi",
     "demoUrl": "/projects/weatherapi.html",
-    "library": "/assets/three-js-icon.svg",
-    "libraryname": "Three.js"
+    "library": "projects/assets/three-js-icon.svg",
+    "libraryname": "Three.js",
+    "threejs": "A JavaScript 3D library that allows for creating and displaying animated 3D graphics in a web browser."
   },
   {
     "id": 2,
     "title": "Matter.js Plinko",
+    "description": "A physics-based Plinko game built with Matter.js physics engine.",
     "htmlFile": "/projects/mplinko.html",
     "cssFile": "/projects/mplinko.css",
     "jsFile": "/projects/mplinko.js",
-    "link": "/projects/mplinko",
     "demoUrl": "/projects/matterplinkopreview.html",
-    "library": "/assets/matter-js.svg",
-    "libraryname": "Matter.js"
+    "library": "projects/assets/matterjs.svg",
+    "libraryname": "Matter.js",
+    "threejs": "A 2D physics engine for the web that can simulate rigid bodies and their interactions."
   },
   {
     "id": 3,
-    "title": "Three.js Bedroom Scene",
+    "title": "3D Bedroom Scene",
+    "description": "An interactive 3D bedroom scene created with Three.js.",
     "htmlFile": "/projects/3dscene.html",
     "cssFile": "/projects/3dscene.css",
-    "jsFile": "/projects/scripts/main/main.js",
-    "link": "/projects/3dscene",
-    "demoUrl": "/projects/3dscene.html",
-    "library": "/assets/three-js-icon.svg",
-    "libraryname": "Three.js"
+    "jsFile": "/projects/3dscene.js",
+    "demoUrl": "https://room.danielkolpakov.com",
+    "library": "/assets/threejs.svg",
+    "libraryname": "Three.js",
+    "threejs": "A JavaScript 3D library that makes WebGL simpler, allowing for the creation of GPU-accelerated 3D animations."
   },
   {
     "id": 4,
     "title": "Music Visualizer",
+    "description": "A Three.js music visualizer that reacts to audio input using the Web Audio API.",
     "htmlFile": "/projects/musicvis.html",
     "cssFile": "/projects/musicvis.css",
     "jsFile": "/projects/musicvis.js",
-    "link": "/projects/musicvis",
     "demoUrl": "/projects/musicvis.html",
-    "library": "/assets/three-js-icon.svg",
-    "libraryname": "Three.js"
+    "library": "/assets/threejs.svg",
+    "libraryname": "Three.js",
+    "threejs": "A JavaScript 3D library used here to create visual effects that respond to audio analysis."
   }
 ]

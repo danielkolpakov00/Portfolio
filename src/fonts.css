@@ -1,7 +1,9 @@
 @font-face {
   font-family: 'Georama';
-  src: url('../src/assets/fonts/Georama-VariableFont_wdth\,wght.ttf') format('truetype');
-  font-weight: 600;
+  src: url('./assets/fonts/Georama-VariableFont_wdth\,wght.ttf') format('truetype');
+  font-weight: 100 900; /* Variable font weight range */
   font-style: normal;
   font-display: swap;
 }
+
+/* Add other font weights or styles if needed */

@@ -39,14 +39,24 @@ const App = () => {
     }
   }, []);
 
-    const fetchAPI = async () => {
-      const response = await axios.get('http://localhost:8080/api/');
+  // Use relative or environment-based API URL
+  const apiUrl = import.meta.env.MODE === 'development' 
+    ? 'http://localhost:8080/api/'
+    : '/api/'; // This will use the same domain as your frontend in production
+
+  const fetchAPI = async () => {
+    try {
+      const response = await axios.get(apiUrl);
       console.log(response.data.fruits);
+    } catch (error) {
+      console.error('Error fetching API data:', error);
+      // Handle the error gracefully
     }
+  }
  
-    useEffect(() => {
-      fetchAPI();
-    });
+  useEffect(() => {
+    fetchAPI();
+  }, []); // Add empty dependency array to run only once
 
   return (
     <>
