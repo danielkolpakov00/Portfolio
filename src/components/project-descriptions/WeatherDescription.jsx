@@ -56,34 +56,53 @@ const WeatherDescription = () => {
       ease: "back.out(1.7)"
     }, "-=0.4");
     
-    features.forEach(card => {
-      card.addEventListener('mouseenter', () => {
-        gsap.to(card, {
-          y: -5, // Reduced lift
-          scale: 1.05, // Subtle scale
-          backgroundColor: 'rgba(255, 255, 255, 0.45)', // Slightly brighter
-          boxShadow: '0 8px 16px rgba(0,0,0,0.1)', // Enhanced shadow
-          duration: 0.3,
-          ease: "power2.out"
-        });
+    const handleMouseEnter = (card) => {
+      gsap.to(card, {
+        y: -5, // Reduced lift
+        scale: 1.05, // Subtle scale
+        backgroundColor: 'rgba(255, 255, 255, 0.45)', // Slightly brighter
+        boxShadow: '0 8px 16px rgba(0,0,0,0.1)', // Enhanced shadow
+        duration: 0.3,
+        ease: "power2.out"
       });
+    };
     
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          y: 0,
-          scale: 1,
-          backgroundColor: 'rgba(255, 255, 255, 0.3)', // Return to original
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          duration: 0.2,
-          ease: "power2.inOut"
-        });
+    const handleMouseLeave = (card) => {
+      gsap.to(card, {
+        y: 0,
+        scale: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.3)', // Return to original
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        duration: 0.2,
+        ease: "power2.inOut"
       });
+    };
+    
+    // Store event listener references for proper cleanup
+    const enterListeners = [];
+    const leaveListeners = [];
+    
+    features.forEach((card, index) => {
+      if (card) {
+        const enterListener = () => handleMouseEnter(card);
+        const leaveListener = () => handleMouseLeave(card);
+        
+        card.addEventListener('mouseenter', enterListener);
+        card.addEventListener('mouseleave', leaveListener);
+        
+        // Store listeners for cleanup
+        enterListeners[index] = enterListener;
+        leaveListeners[index] = leaveListener;
+      }
     });
     
     return () => {
-      features.forEach(card => {
-        card.removeEventListener('mouseenter', () => {});
-        card.removeEventListener('mouseleave', () => {});
+      // Safe cleanup that won't cause errors if elements are already gone
+      features.forEach((card, index) => {
+        if (card && enterListeners[index] && leaveListeners[index]) {
+          card.removeEventListener('mouseenter', enterListeners[index]);
+          card.removeEventListener('mouseleave', leaveListeners[index]);
+        }
       });
     };
   }, []);

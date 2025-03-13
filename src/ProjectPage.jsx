@@ -156,7 +156,7 @@ const ProjectPage = () => {
   if (error)
     return <p className="text-red-500 text-center mt-4">{error}</p>;
   if (!selectedProject || codeContent === '')
-    return <LoadingScreen />;
+    return <LoadingScreen isLoading={true} />;
 
   const DescriptionComponent = selectedProject ? getProjectDescription(selectedProject.id) : null;
 
@@ -167,13 +167,7 @@ const ProjectPage = () => {
         {selectedProject.title}
       </h1>
 
-      {/* Display Project Icon */}
-      <div className="relative text-center mb-4">
-       
-        <span className="tooltip hidden absolute bg-black text-white text-sm rounded px-2 py-1">
-          Three.js
-        </span>
-      </div>
+     
 
       <div className="project-demo flex justify-center">
         {selectedProject.demoUrl ? (
