@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import Scene from './Scene';
+// import Scene from './Scene'; // Completely disabled as it's unoptimized
 import Hero from './pages/Hero';
 import AboutMe from './pages/AboutMe';
 import Contact from './Contact';
@@ -19,6 +19,8 @@ import useLoadingState from './hooks/useLoadingState';
 
 
 const App = () => {
+  // Comment out Scene-related state
+  /*
   const [showScene, setShowScene] = useState(() => {
     // Check if user has seen the scene before
     const hasSeenScene = localStorage.getItem('hasSeenScene');
@@ -27,6 +29,7 @@ const App = () => {
     return !hasSeenScene && !isDirectAccess;
     
   });
+  */
   const [isNavOpen, setIsNavOpen] = useState(false);
   
   // Use our custom hook for comprehensive loading state
@@ -36,6 +39,8 @@ const App = () => {
   // Combined loading state
   const isLoading = isLoadingAssets || isApiLoading;
 
+  // Comment out Scene-related handler
+  /*
   const handleSceneComplete = () => {
     setShowScene(false);
     localStorage.setItem('hasSeenScene', 'true');
@@ -47,6 +52,7 @@ const App = () => {
       setShowScene(false);
     }
   }, []);
+  */
 
   // Use relative or environment-based API URL
   const apiUrl = import.meta.env.MODE === 'development' 
@@ -86,26 +92,23 @@ const App = () => {
               content="web developer vancouver, daniel kolpakov, react.js developer, front end development, ui/ux designer, daniel kolpakov portfolio, daniel kolpakov projects, bcit new media"
             />
           </Helmet>
-          {showScene ? (
-            <Scene onComplete={handleSceneComplete} />
-          ) : (
-            <>
-              <Navbar isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
-              <div id="page-wrap" className={`${isNavOpen ? 'relative animate-marchingAnts rounded-xl' : ''}`}>
-                <main className="relative">
-                  <Routes>
-                    <Route path="/" element={<Hero />} />
-                    <Route path="/about" element={<AboutMe />} />
-                    <Route path="/portfolio" element={<PortfolioPreview />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/projects/:id" element={<ProjectPage />} />
-                    <Route path="/react-projects/:id" element={<ReactProjectPage />} />
-                    <Route path="*" element={<Navigate to="/" />} />
-                  </Routes>
-                </main>
-              </div>
-            </>
-          )}
+          {/* Scene component removed as it's unoptimized */}
+          <>
+            <Navbar isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
+            <div id="page-wrap" className={`${isNavOpen ? 'relative animate-marchingAnts rounded-xl' : ''}`}>
+              <main className="relative">
+                <Routes>
+                  <Route path="/" element={<Hero />} />
+                  <Route path="/about" element={<AboutMe />} />
+                  <Route path="/portfolio" element={<PortfolioPreview />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/projects/:id" element={<ProjectPage />} />
+                  <Route path="/react-projects/:id" element={<ReactProjectPage />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </main>
+            </div>
+          </>
         </div>
       </Router>
     </>
