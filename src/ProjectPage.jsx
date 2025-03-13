@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { getProjectDescription } from './components/ProjectDescriptions';
-
+import LoadingScreen from './components/LoadingScreen';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -156,7 +156,7 @@ const ProjectPage = () => {
   if (error)
     return <p className="text-red-500 text-center mt-4">{error}</p>;
   if (!selectedProject || codeContent === '')
-    return <p className="text-center mt-4">Loading...</p>;
+    return <LoadingScreen />;
 
   const DescriptionComponent = selectedProject ? getProjectDescription(selectedProject.id) : null;
 
@@ -169,13 +169,7 @@ const ProjectPage = () => {
 
       {/* Display Project Icon */}
       <div className="relative text-center mb-4">
-        <img
-          src={selectedProject.library}
-          alt={`${selectedProject.title} Icon`}
-          title={selectedProject.threejs} // Optional for accessibility
-          className="inline-block h-12 w-12 fill-blue2 hover-trigger"
-          aria-label={selectedProject.libraryname}
-        />
+       
         <span className="tooltip hidden absolute bg-black text-white text-sm rounded px-2 py-1">
           Three.js
         </span>
