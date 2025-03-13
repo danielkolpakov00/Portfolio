@@ -11,9 +11,11 @@ import ProjectPage from './ProjectPage';
 import ReactProjectPage from './ReactProjectPage';
 import Navbar from './Navbar';
 import BackgroundParticles from './components/BackgroundParticles';
+import LoadingScreen from './components/LoadingScreen';
 // add the beginning of your app entry
 import 'vite/modulepreload-polyfill'
 import axios from 'axios';
+import useLoadingState from './hooks/useLoadingState';
 
 
 const App = () => {
@@ -26,6 +28,13 @@ const App = () => {
     
   });
   const [isNavOpen, setIsNavOpen] = useState(false);
+  
+  // Use our custom hook for comprehensive loading state
+  const isLoadingAssets = useLoadingState();
+  const [isApiLoading, setIsApiLoading] = useState(true);
+  
+  // Combined loading state
+  const isLoading = isLoadingAssets || isApiLoading;
 
   const handleSceneComplete = () => {
     setShowScene(false);
@@ -51,6 +60,8 @@ const App = () => {
     } catch (error) {
       console.error('Error fetching API data:', error);
       // Handle the error gracefully
+    } finally {
+      setIsApiLoading(false);
     }
   }
  
@@ -60,6 +71,7 @@ const App = () => {
 
   return (
     <>
+      <LoadingScreen isLoading={isLoading} message="Loading Portfolio..." />
       <BackgroundParticles />
       <Router>
         <div id="outer-container" className="relative min-h-screen bg-transparent z-10">
