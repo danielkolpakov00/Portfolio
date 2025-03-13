@@ -240,11 +240,6 @@
                 <div id="game-container" class="w-full aspect-[3/4] md:aspect-[1/1] max-h-[700px] relative rounded-lg overflow-hidden shadow-xl bg-black border border-accent2/30">
                     <!-- The game canvas will be inserted here by Matter.js -->
                     <div id="scroll" class="absolute top-0"></div>
-                    
-                    <!-- Multiplier zones will be positioned absolutely at the bottom -->
-                    <div id="multiplier-labels" class="absolute bottom-0 left-0 right-0 flex justify-around py-2 border-t border-accent2/50">
-                        <!-- Multiplier labels will be dynamically created here -->
-                    </div>
                 </div>
 
                 <!-- Statistics Panel -->
@@ -383,7 +378,8 @@
                       Bodies = Matter.Bodies,
                       Body = Matter.Body,
                       Events = Matter.Events,
-                      Composite = Matter.Composite;
+                      Composite = Matter.Composite,
+                      Constraint = Matter.Constraint;
 
                 // Global variables
                 let engine, render, world;
@@ -393,28 +389,88 @@
                 let totalBets = 0;
                 let showPath = false;
                 let autoPlayInterval = null;
+                let multiplierBodies = [];
+                let particles = []; // Array to store particle effects
 
-                // Game dimensions - match exactly with the mplinko.js code you provided
+                // Game dimensions
                 const gameContainer = document.getElementById('game-container');
                 const containerWidth = gameContainer.clientWidth;
                 const containerHeight = gameContainer.clientHeight;
                 
+                // Use fixed aspect ratio to ensure consistent layout
                 const canvasWidth = Math.min(800, containerWidth);
                 const canvasHeight = Math.min(800, containerHeight);
-                const pegRadius = 6;
-                const ballRadius = 12;
-                const pegSpacingX = 60;
-                const pegSpacingY = 60;
-                const pegRows = 10;
-                const pegColumns = 11; // Must be odd for proper alignment
-                const pegOffsetX = (canvasWidth - (pegColumns - 1) * pegSpacingX) / 2;
-                const pegOffsetY = 120;
-                const zoneWidth = pegSpacingX;
-                const zoneHeight = 40;
+                
+                // Scale factors based on standard 800x800 reference design
+                const scaleX = canvasWidth / 800;
+                const scaleY = canvasHeight / 800;
+                const scale = Math.min(scaleX, scaleY); // Use the smaller scale to maintain proportions
+                
+                const pegRadius = 6 * scale;
+                const ballRadius = 12 * scale;
+                const pegSpacingX = 45 * scale; // Scale spacing based on canvas size
+                const pegSpacingY = 45 * scale;
+                const pegRows = 12;
+                const pegOffsetY = 120 * scale;
+                const zoneWidth = 40 * scale;
+                const zoneHeight = 25 * scale;
 
-                // Create multipliers evenly distributed - exactly as in mplinko.js
-                const multiplierValues = [1, 2, 0.5, 4, 0.2, 8, 0.2, 4, 0.5, 2, 1];
+                // Create multipliers with specific values and probabilities
+                const multiplierValues = [
+                    { id: 1, multiplier: 76, color: '#FFFF00', probability: 0.02 },
+                    { id: 2, multiplier: 10, color: '#00FF00', probability: 0.04 },
+                    { id: 3, multiplier: 3, color: '#FFA500', probability: 0.08 },
+                    { id: 4, multiplier: 0.9, color: '#FF0000', probability: 0.12 },
+                    { id: 5, multiplier: 0.2, color: '#FF0000', probability: 0.14 },
+                    { id: 6, multiplier: 0.3, color: '#FF0000', probability: 0.16 },
+                    { id: 7, multiplier: 0.2, color: '#FF0000', probability: 0.16 },
+                    { id: 8, multiplier: 0.3, color: '#FF0000', probability: 0.14 },
+                    { id: 9, multiplier: 0.9, color: '#FF0000', probability: 0.12 },
+                    { id: 10, multiplier: 3, color: '#FFA500', probability: 0.08 },
+                    { id: 11, multiplier: 10, color: '#00FF00', probability: 0.04 },
+                    { id: 12, multiplier: 76, color: '#FFFF00', probability: 0.02 }
+                ];
                 const numberOfZones = multiplierValues.length;
+                
+                // Particle class for visual effects when balls hit pegs
+                class Particle {
+                    constructor(x, y) {
+                        this.x = x;
+                        this.y = y;
+                        this.alpha = 0.6;          // Reduced initial opacity
+                        this.expandSpeed = 1.2;    // Faster expansion
+                        this.radius = 4;          // Larger starting radius
+                        this.maxRadius = 15;      // Larger maximum radius
+                        this.color = '#1B69FA';   // Blue color
+                        this.lineWidth = 3;       // Thicker line
+                    }
+
+                    update() {
+                        this.radius += this.expandSpeed;
+                        this.alpha *= 0.94;  // Slower fade out
+                        // Add slight oscillation to line width
+                        this.lineWidth = 3 * (1 + Math.sin(this.radius * 0.3) * 0.2);
+                        return this.radius < this.maxRadius;
+                    }
+
+                    draw(context) {
+                        context.beginPath();
+                        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                        context.strokeStyle = `rgba(27, 105, 250, ${this.alpha})`;
+                        context.lineWidth = this.lineWidth;
+                        context.stroke();
+
+                        // Add inner glow effect
+                        const gradient = context.createRadialGradient(
+                            this.x, this.y, this.radius * 0.4,
+                            this.x, this.y, this.radius
+                        );
+                        gradient.addColorStop(0, `rgba(27, 105, 250, ${this.alpha * 0.1})`);
+                        gradient.addColorStop(1, 'rgba(27, 105, 250, 0)');
+                        context.fillStyle = gradient;
+                        context.fill();
+                    }
+                }
 
                 // Update the range input background as it slides - FIX FOR LINE 370
                 function updateRangeBackground(e) {
@@ -602,25 +658,29 @@
                     return multipliers[multipliers.length - 1];
                 }
 
-                // Create pegs in a triangular pattern - fixing to match EXACTLY what's in mplinko.js
+                // Create pegs in a triangular pattern
                 function createPegs() {
                     if (!world) return;
                     
-                    for (let row = 0; row < pegRows; row++) {
-                        // Offset every other row - exactly as in mplinko.js
-                        const offset = row % 2 === 0 ? 0 : pegSpacingX / 2;
-                        const cols = row % 2 === 0 ? pegColumns : pegColumns - 1;
+                    // Calculate total height of peg structure to center it vertically
+                    const pegStructureHeight = (pegRows - 1) * pegSpacingY;
+                    const verticalOffset = (canvasHeight - pegStructureHeight - zoneHeight - 40 * scale) / 2;
+                    
+                    for (let row = 1; row < pegRows; row++) {
+                        // Calculate number of pegs in this row - more pegs as rows increase
+                        const numberOfPegs = row + 2;
+                        const startX = (canvasWidth - (numberOfPegs - 1) * pegSpacingX) / 2;
                         
-                        for (let col = 0; col < cols; col++) {
-                            const x = pegOffsetX + col * pegSpacingX + offset;
-                            const y = pegOffsetY + row * pegSpacingY;
+                        for (let col = 0; col < numberOfPegs; col++) {
+                            const x = startX + col * pegSpacingX;
+                            const y = verticalOffset + row * pegSpacingY; // Add vertical offset for centering
                             
                             const peg = Bodies.circle(x, y, pegRadius, {
                                 isStatic: true,
+                                friction: 0.0,
                                 restitution: 0.5,
-                                friction: 0.05,
                                 render: {
-                                    fillStyle: '#FFFFFF' // White pegs exactly as in mplinko.js
+                                    fillStyle: '#ffffff' // Blue pegs
                                 },
                                 collisionFilter: {
                                     category: 0x0002,
@@ -631,58 +691,91 @@
                             World.add(world, peg);
                         }
                     }
+                    
+                    // Return the bottom position of pegs to position zones below
+                    return verticalOffset + pegRows * pegSpacingY;
                 }
 
-                // Create walls to contain the balls - matching mplinko.js
+                // Create walls to contain the balls
                 function createWalls() {
                     if (!world) return;
                     
-                    // Left wall
-                    const leftWall = Bodies.rectangle(0, canvasHeight / 2, 2, canvasHeight, {
+                    // Scale wall positions relative to canvas size
+                    const leftWallX = (canvasWidth * 0.3); // 240/800 = 0.3
+                    const rightWallX = (canvasWidth * 0.7); // 560/800 = 0.7
+                    const wallY = canvasHeight * 0.500; // 300/800 = 0.375
+                    const wallLength = canvasHeight * 0.75; // 600/800 = 0.75
+                    
+                    // Left wall - angled
+                    const wallLeft = Bodies.rectangle(leftWallX, wallY, 20, wallLength, {
                         isStatic: true,
-                        render: { fillStyle: '#333333' } // Dark gray
+                        angle: Math.PI / 7,
+                        render: { visible: false },
+                        collisionFilter: {
+                            category: 0x0002,
+                            mask: 0x0001 // Only collide with balls
+                        }
                     });
                     
-                    // Right wall
-                    const rightWall = Bodies.rectangle(canvasWidth, canvasHeight / 2, 2, canvasHeight, {
+                    // Right wall - angled
+                    const wallRight = Bodies.rectangle(rightWallX, wallY, 20, wallLength, {
                         isStatic: true,
-                        render: { fillStyle: '#333333' } // Dark gray
+                        angle: -Math.PI / 7,
+                        render: { visible: false },
+                        collisionFilter: {
+                            category: 0x0002,
+                            mask: 0x0001 // Only collide with balls
+                        }
                     });
                     
-                    // Top wall (invisible, just to bounce balls back if they go too high)
+                    // Top wall (invisible)
                     const topWall = Bodies.rectangle(canvasWidth / 2, -50, canvasWidth, 100, {
                         isStatic: true,
                         render: { fillStyle: '#000000' } // Black (invisible)
                     });
                     
-                    World.add(world, [leftWall, rightWall, topWall]);
+                    World.add(world, [wallLeft, wallRight, topWall]);
                 }
 
-                // Create multiplier zones at the bottom - matching mplinko.js
-                function createMultiplierZones() {
+                // Create multiplier zones at the bottom with bounce effect
+                function createMultiplierZones(pegBottomY) {
                     if (!world) return;
                     
-                    const zoneY = canvasHeight - zoneHeight / 2 - 20; // Position zones at the bottom
-                    const zoneWidth = canvasWidth / numberOfZones;
+                    // Position zones just below the bottom row of pegs
+                    const zoneY = pegBottomY + zoneHeight / 10; 
                     
-                    // Create multiplier labels in the DOM
-                    const multiplierLabelsContainer = document.getElementById('multiplier-labels');
-                    if (!multiplierLabelsContainer) return;
-                    
-                    multiplierLabelsContainer.innerHTML = ''; // Clear any existing labels
                     multipliers = []; // Reset multipliers array
+                    multiplierBodies = []; // Store bodies for later reference
+                    
+                    // Calculate zone positions relative to canvas width instead of hardcoding
+                    // Reference positions were [150, 195, 240, 285, 330, 375, 420, 465, 510, 555, 600, 645]
+                    // For 800px width, now calculate relative positions
+                    const zoneCount = multiplierValues.length;
+                    const zonePositions = [];
+                    
+                    // Calculate total width needed for all zones
+                    const totalWidth = (zoneCount * zoneWidth) + ((zoneCount - 1) * (zoneWidth * 0.125)); // Add 12.5% of zoneWidth as spacing
+                    const startX = (canvasWidth - totalWidth) / 2 + (zoneWidth / 2);
+                    
+                    // Calculate each zone position based on even spacing
+                    for (let i = 0; i < zoneCount; i++) {
+                        zonePositions.push(startX + i * (zoneWidth * 1.125)); // 1.125 = 1 + 0.125 spacing
+                    }
                     
                     for (let i = 0; i < numberOfZones; i++) {
-                        const x = i * zoneWidth + zoneWidth / 2;
-                        const multiplier = multiplierValues[i];
+                        const x = zonePositions[i];
+                        const multiplierValue = multiplierValues[i];
+                        const chamferRadius = 5 * scale; // Scale rounded corners
                         
-                        // Create a physics body for the zone
-                        const zone = Bodies.rectangle(x, zoneY, zoneWidth - 2, zoneHeight, {
-                            isStatic: true,
-                            label: `Zone-${i}`,
+                        // Create a physics body for the zone that can bounce
+                        const zone = Bodies.rectangle(x, zoneY, zoneWidth, zoneHeight, {
+                            restitution: 0.3, // Some bounce
+                            friction: 0.1,
+                            chamfer: { radius: chamferRadius },
+                            label: `Zone-${multiplierValue.id}`,
+                            isStatic: false, // Make it movable so it can bounce
                             render: {
-                                fillStyle: 'transparent', // Make zones invisible
-                                lineWidth: 0
+                                fillStyle: multiplierValue.color
                             },
                             collisionFilter: {
                                 category: 0x0004,
@@ -690,28 +783,30 @@
                             }
                         });
                         
+                        // Create a constraint to anchor the zone in place but allow bouncing
+                        const constraint = Constraint.create({
+                            pointA: { x: x, y: zoneY },
+                            bodyB: zone,
+                            stiffness: 0.1,
+                            damping: 0.5,
+                            render: {
+                                visible: false
+                            }
+                        });
+                        
                         // Store zone information for later use
                         const zoneInfo = {
-                            id: i,
+                            id: multiplierValue.id,
                             x: x,
-                            multiplier: multiplier,
-                            probability: 1 / numberOfZones, // Equal probability for each zone by default
+                            multiplier: multiplierValue.multiplier,
+                            probability: multiplierValue.probability,
+                            color: multiplierValue.color,
                             body: zone
                         };
                         
                         multipliers.push(zoneInfo);
-                        World.add(world, zone);
-                        
-                        // Create label in the DOM
-                        const labelElement = document.createElement('div');
-                        labelElement.className = 'multiplier-label';
-                        labelElement.id = `zone-label-${i}`;
-                        labelElement.textContent = `${multiplier}x`;
-                        
-                        // Store reference to the label element
-                        zone.labelElement = labelElement;
-                        
-                        multiplierLabelsContainer.appendChild(labelElement);
+                        multiplierBodies.push(zone);
+                        World.add(world, [zone, constraint]);
                     }
                 }
 
@@ -759,45 +854,56 @@
                     plays.textContent = (parseInt(plays.textContent) + 1).toString();
                 }
 
-                // Handle highlighting of multiplier zone when ball hits it
+                // Modified to work with bouncy zones instead of labels
                 function highlightZone(zoneId) {
-                    // Remove highlight from all labels
-                    const labels = document.querySelectorAll('.multiplier-label');
-                    labels.forEach(label => label.classList.remove('multiplier-label-active'));
-                    
-                    // Add highlight to the hit zone
-                    const hitLabel = document.getElementById(`zone-label-${zoneId}`);
-                    if (hitLabel) {
-                        hitLabel.classList.add('multiplier-label-active');
+                    const zoneBody = multiplierBodies.find(body => body.label === `Zone-${zoneId}`);
+                    if (zoneBody) {
+                        // Store the original color
+                        const originalColor = zoneBody.render.fillStyle;
                         
-                        // Remove highlight after animation completes
+                        // Highlight with bright white flash
+                        zoneBody.render.fillStyle = '#FFFFFF';
+                        
+                        // Apply a stronger bounce effect with upward force
+                        Body.applyForce(zoneBody, zoneBody.position, { x: 0, y: -0.1 });
+                        
+                        // Reset color after animation completes with a fade effect
                         setTimeout(() => {
-                            hitLabel.classList.remove('multiplier-label-active');
-                        }, 800);
+                            // Set to bright white
+                            zoneBody.render.fillStyle = '#FFFFFF';
+                            
+                            // Fade back to original color
+                            setTimeout(() => {
+                                const multiplierValue = multipliers.find(m => m.id === zoneId);
+                                zoneBody.render.fillStyle = multiplierValue ? multiplierValue.color : originalColor;
+                            }, 200);
+                        }, 100);
                     }
                 }
 
-                // Modified dropBall function to match mplinko.js exactly
+                // Modified dropBall function with blue ball and improved physics
                 function dropBall(betAmount = 10) {
                     if (!world) return null;
                     
                     totalBets++;
                     const targetZone = selectTargetZone();
 
-                    // Drop from a random position within a narrower center area - exact mplinko.js value
-                    const minX = 350;
-                    const maxX = 450;
-                    const randomXPosition = Math.random() * (maxX - minX) + minX;
-                    const initialYPosition = pegSpacingY / 2; // Slightly above the first row of pegs
+                    // Adjust drop position to match the new centered peg layout
+                    const centerX = canvasWidth / 2;
+                    const dropRange = canvasWidth / 24;
+                    const randomXPosition = centerX + (Math.random() * 2 - 1) * dropRange;
+                    const initialYPosition = pegSpacingY / 1; // Higher initial position
 
                     const ball = Bodies.circle(randomXPosition, initialYPosition, ballRadius, {
-                        restitution: 0.7, // More bounce
-                        friction: 0.001, // Less friction for smoother movement
-                        density: 0.8, // Adjusted for better physics feel
+                        restitution: 0.4,    // Slightly increased bounce
+                        friction: 0.002,     // Very low friction
+                        density: 0.6,        // Lighter ball
+                        slop: 0,            // Prevent sinking
+                        frictionAir: 0.001,  // Add minimal air friction
                         label: 'Ball',
                         render: { 
-                            fillStyle: '#FFFFFF', // White ball
-                            strokeStyle: '#AAAAAA', // Light gray outline
+                            fillStyle: '#ffffff',  // Blue ball
+                            strokeStyle: '#1B44FA', // Darker blue outline
                             lineWidth: 1
                         },
                         collisionFilter: {
@@ -806,15 +912,27 @@
                         }
                     });
                     
+                    // Add initial downward velocity
+                    Body.setVelocity(ball, { x: 0, y: 2 });
+                    
                     // Store data with the ball
                     ball.targetX = targetZone.x; // For steering
                     ball.targetZoneId = targetZone.id; // Track which zone we're targeting
                     ball.betAmount = betAmount; // Store bet amount with the ball
                     ball.pathPoints = []; // For path drawing
+                    ball.createdAt = Date.now(); // Add timestamp
+                    ball.hasHitPeg = false; // Track if ball has hit a peg
                     
                     // Update UI
                     const betCounter = document.getElementById('bet-counter');
                     if (betCounter) betCounter.textContent = `Total Balls: ${totalBets}`;
+                    
+                    // Add cleanup timeout for stuck balls
+                    setTimeout(() => {
+                        if (ball && ball.position) {
+                            Composite.remove(world, ball);
+                        }
+                    }, 10000); // 10 seconds
                     
                     // Add ball to world
                     Composite.add(world, ball);
@@ -903,13 +1021,13 @@
                     try {
                         console.log('Setting up game...');
                         
-                        // Create engine and world exactly like mplinko.js
+                        // Create engine and world with increased gravity
                         engine = Engine.create({
                             enableSleeping: true // Enable sleeping for better performance
                         });
                         
                         world = engine.world;
-                        engine.gravity.y = 0.5; // Match mplinko.js gravity
+                        engine.gravity.y = 1; // Increased gravity for more realistic fall
 
                         // Create renderer with black background
                         render = Render.create({
@@ -922,24 +1040,25 @@
                                 background: '#000000',
                                 showSleeping: false,
                                 showDebug: false,
+                                pixelRatio: window.devicePixelRatio
                             }
                         });
 
-                        // Create game elements in the same order as mplinko.js
+                        // Create game elements in the same order
                         console.log('Creating pegs...');
-                        createPegs();
+                        const pegBottomY = createPegs();
                         
                         console.log('Creating walls...');
                         createWalls();
                         
                         console.log('Creating multiplier zones...');
-                        createMultiplierZones();
+                        createMultiplierZones(pegBottomY);
 
                         // Start the engine and renderer
                         console.log('Starting engine and renderer...');
                         Render.run(render);
                         
-                        // Run the engine at fixed timestep for better physics simulation, like mplinko.js
+                        // Run the engine at fixed timestep for better physics simulation
                         let lastTime = performance.now();
                         const fixedTimeStep = 1000 / 60; // 60 FPS
                         
@@ -975,45 +1094,99 @@
                     }
                 }
                 
-                // Setup collision handlers exactly as in mplinko.js
+                // Setup collision handlers with particle effects
                 function setupCollisionHandlers() {
                     if (!engine) return;
                     
-                    // Steering mechanism to guide the ball towards the target zone
+                    // Constants for stuck ball detection
+                    const STUCK_VELOCITY_THRESHOLD = 0.1;
+                    
+                    // Steering mechanism and stuck ball detection
                     Events.on(engine, 'beforeUpdate', function() {
+                        const currentTime = Date.now();
+                        
+                        // Keep multiplier zones level (prevent rotation)
+                        multiplierBodies.forEach(zone => {
+                            // Reset any rotation to keep zones level
+                            Body.setAngle(zone, 0);
+                            Body.setAngularVelocity(zone, 0);
+                        });
+                        
                         Composite.allBodies(world).forEach(body => {
-                            if (body.label === 'Ball' && body.targetX !== undefined) {
-                                // Apply steering force to guide the ball
-                                const steeringForce = 0.00005; // Same as mplinko.js
-                                
-                                const distanceToTarget = body.position.y;
-                                if (distanceToTarget > pegSpacingY && distanceToTarget < canvasHeight) {
-                                    const distanceX = body.targetX - body.position.x;
-                                    const distanceY = canvasHeight - body.position.y;
-
-                                    const steeringX = (distanceX / distanceY) * steeringForce;
-                                    Body.applyForce(body, body.position, { x: steeringX, y: 0 });
+                            if (body.label === 'Ball') {
+                                // Check for stuck balls
+                                if (Math.abs(body.velocity.x) < STUCK_VELOCITY_THRESHOLD && 
+                                    Math.abs(body.velocity.y) < STUCK_VELOCITY_THRESHOLD) {
+                                    
+                                    // If ball is stuck for more than 2 seconds, apply a small impulse
+                                    if (!body.lastMoving || currentTime - body.lastMoving > 2000) {
+                                        Body.applyForce(body, body.position, {
+                                            x: (Math.random() - 0.5) * 0.001,
+                                            y: 0.001
+                                        });
+                                    }
+                                } else {
+                                    body.lastMoving = currentTime;
                                 }
+                                
+                                // Remove balls that have fallen below the canvas
+                                if (body.position.y > canvasHeight + 100) {
+                                    Composite.remove(world, body);
+                                }
+                                
+                                // Apply steering force
+                                if (body.targetX !== undefined) {
+                                    const steeringForce = 0.00005;
+                                    
+                                    const distanceToTarget = body.position.y;
+                                    if (distanceToTarget > pegSpacingY && distanceToTarget < canvasHeight) {
+                                        const distanceX = body.targetX - body.position.x;
+                                        const distanceY = canvasHeight - body.position.y;
 
-                                // Record the ball's position for path drawing
-                                if (showPath) {
-                                    body.pathPoints = body.pathPoints || [];
-                                    body.pathPoints.push({ x: body.position.x, y: body.position.y });
+                                        const steeringX = (distanceX / distanceY) * steeringForce;
+                                        Body.applyForce(body, body.position, { x: steeringX, y: 0 });
+                                    }
+
+                                    // Record the ball's position for path drawing
+                                    if (showPath) {
+                                        body.pathPoints = body.pathPoints || [];
+                                        body.pathPoints.push({ x: body.position.x, y: body.position.y });
+                                    }
                                 }
                             }
                         });
                     });
 
-                    // Handle collision and determine winnings
+                    // Handle collisions with particle effects
                     Events.on(engine, 'collisionStart', event => {
                         event.pairs.forEach(({ bodyA, bodyB }) => {
+                            // Check for ball-peg collisions
                             const ball = bodyA.label === 'Ball' ? bodyA : bodyB.label === 'Ball' ? bodyB : null;
+                            const isPeg = (body) => body.circleRadius === pegRadius;
+                            
+                            if (ball && (isPeg(bodyA) || isPeg(bodyB))) {
+                                const peg = isPeg(bodyA) ? bodyA : bodyB;
+                                
+                                // Add extra force on first impact
+                                if (!ball.hasHitPeg) {
+                                    Body.setVelocity(ball, {
+                                        x: ball.velocity.x,
+                                        y: Math.max(2, ball.velocity.y)
+                                    });
+                                    ball.hasHitPeg = true;
+                                }
+                                
+                                // Create particle effect
+                                particles.push(new Particle(peg.position.x, peg.position.y));
+                            }
+                            
+                            // Check for ball-zone collisions
                             const zone = bodyA.label && bodyA.label.startsWith('Zone-') ? bodyA : bodyB.label && bodyB.label.startsWith('Zone-') ? bodyB : null;
 
                             if (ball && zone) {
                                 const zoneId = parseInt(zone.label.split('-')[1]);
                                 const matchedMultiplier = multipliers.find(z => z.id == zoneId)?.multiplier || 1;
-                                const bet = ball.betAmount || 10; // Use the bet amount stored in the ball or default to 10
+                                const bet = ball.betAmount || 10;
                                 const winnings = bet * matchedMultiplier;
                                 
                                 // Update balance
@@ -1036,18 +1209,20 @@
                                 // Remove the ball after a short delay
                                 setTimeout(() => {
                                     Composite.remove(world, ball);
-                                }, 300); // Same as mplinko.js
+                                }, 0);
                             }
                         });
                     });
 
-                    // Render event to draw the path lines
+                    // Render event for paths, particles, and multiplier text
                     Events.on(render, 'afterRender', function() {
                         if (!render || !render.context) return;
                         
+                        const context = render.context;
+                        
+                        // Draw path if enabled
                         if (showPath) {
-                            const context = render.context;
-                            context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Same as mplinko.js
+                            context.strokeStyle = 'rgba(255, 0, 0, 0.5)';
                             context.lineWidth = 2;
 
                             Composite.allBodies(world).forEach(body => {
@@ -1063,10 +1238,48 @@
                                 }
                             });
                         }
+                        
+                        // Update and draw particles
+                        particles = particles.filter(particle => {
+                            const isAlive = particle.update();
+                            if (isAlive) {
+                                particle.draw(context);
+                            }
+                            return isAlive;
+                        });
+                        
+                        // Draw multiplier text on zones, keeping text horizontal regardless of zone rotation
+                        multiplierBodies.forEach(body => {
+                            if (body.label && body.label.startsWith('Zone-')) {
+                                const zoneId = parseInt(body.label.split('-')[1]);
+                                const multiplier = multipliers.find(m => m.id === zoneId)?.multiplier;
+                                
+                                if (multiplier !== undefined) {
+                                    // Save context state before rotation
+                                    context.save();
+                                    
+                                    // Translate to zone position
+                                    context.translate(body.position.x, body.position.y);
+                                    
+                                    // Scale font size based on canvas scale
+                                    const fontSize = 13 * scale;
+                                    
+                                    // Draw the text (keeping it horizontal)
+                                    context.font = `bold ${fontSize}px Arial`;
+                                    context.fillStyle = '#000000'; // Black text for better contrast
+                                    context.textAlign = 'center';
+                                    context.textBaseline = 'middle';
+                                    context.fillText(`${multiplier}x`, 0, 0);
+                                    
+                                    // Restore context state
+                                    context.restore();
+                                }
+                            }
+                        });
                     });
                 }
 
-                // Initialize the game safely - FIX FOR LINE 878
+                // Initialize the game safely
                 console.log('Document loaded, initializing game...');
                 if (setupGame()) {
                     // Set up UI after successful game initialization

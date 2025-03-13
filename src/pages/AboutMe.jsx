@@ -1,48 +1,37 @@
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { motion } from "framer-motion";
 import { Helmet } from "react-helmet";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
-import {  
-  FaUser, FaBook, FaGraduationCap, FaBriefcase, 
-  FaTrophy, FaCogs, FaLightbulb, FaImages, 
-  FaSmile, FaHandsHelping, FaEnvelope, FaStar,
-  FaChevronUp, FaExternalLinkAlt, FaCopy, FaReact, FaJs, FaCss3Alt, FaGitAlt
-} from "react-icons/fa";
-import DanielImage from "../assets/images/daniel2.png";
+import confetti from 'canvas-confetti';
 import "../index.css";
 import "../App.css";
-// Import needed shadcn components below
-// You'll need to install shadcn UI first: https://ui.shadcn.com/docs/installation
 
-// Keep the text animation utils
-import { splitTextIntoLetters } from "../utils";
-import ProjectWidget from "../components/ProjectWidget";
-import YellowSphere from "../YellowSphere";
+// Import AboutMe components
+import AboutMeHero from "../components/AboutMe/AboutMeHero";
+import AboutMeIntroSection from "../components/AboutMe/AboutMeIntroSection";
+import AboutMeGenericSection from "../components/AboutMe/AboutMeGenericSection";
+import AboutMePortfolioSection from "../components/AboutMe/AboutMePortfolioSection";
+import AboutMeContactSection from "../components/AboutMe/AboutMeContactSection";
+import SectionNavigation from "../components/AboutMe/SectionNavigation";
+import ScrollToTop from "../components/AboutMe/ScrollToTop";
+
+// Import data and other components
+import DanielImage from "../assets/images/daniel2.png";
+import projectsData from '../data/projects.json';
+
+// Import visual components directly
+import WeatherPreview from "../WeatherPreview";
 import PlinkoPreview from "../PlinkoPreview";
 import BedroomPreview from "../BedroomScenePreview";
 import MusicPreview from "../MusicPreview";
-import confetti from 'canvas-confetti';
-import { FaHtml5 } from "react-icons/fa";
 
-// Animated Text component - keep as is
-const AnimatedText = ({ text, className = "", delay = 0, staggerTime = 0.05, animationType = "fade" }) => {
-  const textRef = useRef(null);
-  const letters = splitTextIntoLetters(text);
+// Import ProjectWidget (update this import)
+import ProjectWidget from "../components/ProjectWidget";
 
-  
-  return (
-    <div ref={textRef} className={`overflow-hidden perspective-text ${className}`}>
-      {letters}
-    </div>
-  );
-};
-
-// Keep your content structure
+// Keep the content structure
 const aboutContent = {
   // Landing section
   landing: {
-    title: "Hey, I'm Daniel",
+    title: "I'm Daniel",
     subtitle: "I make cool things on the web. Let's create something extraordinary together.",
     image: DanielImage
   },
@@ -57,26 +46,26 @@ const aboutContent = {
         {
           heading: "A bit about me",
           icon: "user",
-          description: "I'm a web developer passionate about creating interactive experiences. When I'm not coding, I enjoy video games, cooking, and DJing in my bedroom.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          description: "I'm a web developer passionate about creating interactive experiences. In my off time, I enjoy playing video games, browsing the web, and coming up with new ideas for projects.",
+          className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
-          heading: "My background",
-          icon: "book",
-          description: "I love creating and I love design. Learning code is something that I've always wanted to do as it allows me to bring my ideas to life.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          heading: "My path",
+          icon: "graduation-cap",
+          description: "My learning adventure began at BCIT, where I studied New Media Design and Web Development. I've always been really interested in the creative side of web dev. ",
+          className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
           heading: "My philosophy",
-          icon: "star",
-          description: "I believe that the best design is made with the user in mind. I enjoy making interactive experiences that everyone can enjoy. I think building for the web is really good because you can reach a wider audience than you could for programs or applications.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          icon: "lightbulb",
+          description: "I believe that the best design is made with the user in mind. I enjoy making interactive experiences that everyone can enjoy. Building for the web allows me to reach a wider audience.",
+          className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
-          heading: "Personal journey",
-          icon: "star",
-          description: "I started learning a bit of code in high school and took a few bootcamp courses here and there, but I really tied those skills together when I started my web development program at BCIT.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          heading: "My approach",
+          icon: "cogs",
+          description: "I love creating and I love design. Learning to code has empowered me to bring my creative ideas to life through interactive web experiences.",
+          className: "bg-gradient-to-br from-white to-offwhite"
         }
       ]
     },
@@ -86,22 +75,22 @@ const aboutContent = {
       description: "The skills and knowledge I've gained along the way",
       boxes: [
         {
-          heading: "Education",
+          heading: "What I've learned so far",
           icon: "graduation-cap",
           description: "During 2024 and a bit of 2025, I attended BCIT's New Media Design and Web Development program. My main areas of focus were web development and design.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          className: "bg-none"
         },
         {
           heading: "Continuous learning",
           icon: "book",
           description: "I always want to learn more, so I like reading articles, taking quizzes, and watching tutorials to keep my skills sharp.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
-          heading: "Professional development",
-          icon: "star",
-          description: "Building my portfolio and working on projects has been a great way to learn new things and apply my skills in a real-world setting. I'm really into designing web interactions, like interfaces that people can do stuff with, and I hope to continue doing that in the future.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          heading: "Hands-on Experience",
+          icon: "null",
+          description: "Building my portfolio and working on projects has been a great way to learn new things and apply my skills in a real-world setting. I'm really into designing web interactions.",
+          className: "bg-gradient-to-br from-white to-offwhite"
         }
       ]
     },
@@ -113,98 +102,34 @@ const aboutContent = {
         {
           heading: "Building Cool Stuff",
           icon: "briefcase",
-          description: "From sleek websites to interactive apps, I’ve worked on projects that push creativity and functionality. Always experimenting, always leveling up!",
-         className: "bg-gradient-to-br from-white to-blue-50"
+          description: "From sleek websites to interactive apps, I've worked on projects that push creativity and functionality. Always experimenting, always leveling up!",
+         className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
           heading: "Milestones & Wins",
           icon: "trophy",
-          description: "Whether it’s nailing a complex animation, optimizing performance, or launching a big project, I take pride in the little (and big) victories.",
-         className: "bg-gradient-to-br from-white to-blue-50"
+          description: "I always take pride in achievements and milestones, whether it's launching a new project or learning a new skill.",
+         className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
           heading: "What I've Worked on",
           icon: "star",
           description: "I've tackled projects of a bunch of different types, but I really enjoy being able to work on projects that involve a lot of creativity and design.",
-          className: "bg-gradient-to-br from-white to-blue-50"
+          className: "bg-gradient-to-br from-white to-offwhite"
         },
-        ,
         {
           heading: "Project management",
           icon: "star",
           description: "I've gained valuable experience during my time at BCIT, working with agile scrum methodologies on group projects and constantly working on improving my skills in time management, communication, and collaboration.",
-         className: "bg-gradient-to-br from-white to-blue-50"
+         className: "bg-gradient-to-br from-white to-offwhite"
         }
-      ]
-    },
-    {
-      id: "skills",
-      title: "Technical Toolkit",
-      description: "The technologies and methodologies I use to create",
-      boxes: [
-        {
-          heading: "Core skills",
-          icon: "cogs",
-          description: [
-            "I specialize in modern web technologies to build powerful, responsive applications.",
-            <div className="flex flex-wrap justify-center gap-4 mt-4 py-3">
-              <div className="flex flex-col items-center p-2 hover:bg-blue-100 rounded-lg transition-colors">
-                <FaReact className="text-3xl text-blue-500 animate-spin-slow" />
-                <span className="text-sm mt-1 font-medium">React</span>
-              </div>
-              <div className="flex flex-col items-center p-2 hover:bg-yellow-100 rounded-lg transition-colors">
-                <FaJs className="text-3xl text-yellow-500" />
-                <span className="text-sm mt-1 font-medium">JavaScript</span>
-              </div>
-              <div className="flex flex-col items-center p-2 hover:bg-orange-100 rounded-lg transition-colors">
-                <FaHtml5 className="text-3xl text-orange-600" />
-                <span className="text-sm mt-1 font-medium">HTML5</span>
-              </div>
-              <div className="flex flex-col items-center p-2 hover:bg-blue-100 rounded-lg transition-colors">
-                <FaCss3Alt className="text-3xl text-blue-600" />
-                <span className="text-sm mt-1 font-medium">CSS3</span>
-              </div>
-              <div className="flex flex-col items-center p-2 hover:bg-red-100 rounded-lg transition-colors">
-                <FaGitAlt className="text-3xl text-red-500" />
-                <span className="text-sm mt-1 font-medium">Git</span>
-              </div>
-            </div>
-          ],
-          className: "bg-gradient-to-br from-white to-blue-50"
-        },
-    
       ]
     },
     {
       id: "portfolio",
       title: "Selected Works",
       description: "Highlights from my creative portfolio",
-      boxes: [
-        {
-          heading: "Project highlights",
-          icon: "images",
-          description: "My portfolio showcases immersive 3D projects, modern web applications, and interactive digital experiences.",
-          className: "backdrop-blur-sm bg-white/80"
-        },
-        {
-          heading: "Client impact",
-          icon: "smile",
-          description: "Clients appreciate my attention to detail, reliability, and commitment to exceeding expectations on every project.",
-          className: "border-l-2 border-r-2 border-blue2/40"
-        },
-        {
-          heading: "Featured project: Interactive Gallery",
-          icon: "star",
-          description: "A WebGL-powered art showcase featuring custom shaders, interactive camera controls, and optimized asset loading for a smooth browsing experience across all devices.",
-          className: "bg-gradient-to-br from-blue-50 via-white to-blue-50"
-        },
-        {
-          heading: "Featured project: E-commerce Platform",
-          icon: "star",
-          description: "A full-stack online shopping experience with real-time inventory management, secure payment processing, and a responsive design that increased mobile conversions by 45%.",
-          className: "border-b-4 border-blue2/40"
-        }
-      ]
+      boxes: []
     },
     {
       id: "contact",
@@ -215,118 +140,23 @@ const aboutContent = {
   ]
 };
 
-// Navigation item component
-const NavItem = ({ active, onClick, children }) => (
-  <button
-    onClick={onClick}
-    className={`px-4 py-2 rounded-md transition-all ${
-      active ? "bg-blue2 text-white shadow-md" : "text-blue2 hover:bg-blue2/10"
-    }`}
-  >
-    {children}
-  </button>
-);
-
-// Section header component
-const SectionHeader = ({ title, description }) => (
-  <div className="mb-8 text-center">
-    <h2 className="text-3xl md:text-4xl font-bold text-blue2 mb-2">{title}</h2>
-    <p className="text-blue2/80 text-lg max-w-2xl mx-auto">{description}</p>
-    <div className="w-20 h-1 bg-blue2/40 mx-auto mt-4 rounded-full"></div>
-  </div>
-);
-
-// Card component with shadcn-inspired styling
-const Card = ({ heading, description, icon, image, className = "" }) => {
-  return (
-    <div className={`bg-white bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all p-6 w-full h-full flex flex-col ${className}`}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="text-blue2 text-2xl">
-          {getIconForHeading(heading)}
-        </div>
-        <h3 className="text-xl font-semibold text-gray-900">{heading}</h3>
-      </div>
-      
-      {image && (
-        <div className="mb-4 rounded-md overflow-hidden">
-          <img 
-            src={image} 
-            alt={heading}
-            className="w-full h-auto object-cover"
-          />
-        </div>
-      )}
-      
-      <div className="text-gray-700 space-y-2 text-center flex-grow">
-        {Array.isArray(description) ? (
-          description.map((para, i) => <p key={i}>{para}</p>)
-        ) : (
-          <p>{description}</p>
-        )}
-      </div>
-    </div>
-  );
+// Map visual components to their imported references
+const visualComponents = {
+  "WeatherPreview": WeatherPreview,
+  "PlinkoPreview": PlinkoPreview,
+  "BedroomPreview": BedroomPreview,
+  "MusicPreview": MusicPreview
 };
 
-// Helper function for icons (simplified)
-const getIconForHeading = (heading) => {
-  switch (heading) {
-    case "A bit about me": 
-    case "My background": return <FaUser />;
-    case "Education": 
-    case "Continuous learning": return <FaGraduationCap />;
-    case "Work history": return <FaBriefcase />;
-    case "Achievements": return <FaTrophy />;
-    case "Core skills": return <FaCogs />;
-    case "Creative approach": return <FaLightbulb />;
-    case "Project highlights": return <FaImages />;
-    case "Client impact": return <FaSmile />;
-    case "Collaboration opportunities": return <FaHandsHelping />;
-    case "Get in touch": return <FaEnvelope />;
-    default: return <FaStar />;
-  }
-};
+// Replace hardcoded projects with data from JSON
+const projects = projectsData.vanillaProjects.map(project => ({
+  ...project,
+  visual: visualComponents[project.visualComponent],
+  // Ensure category is always set for consistent UI
+  category: project.category || "web"
+}));
 
-// Add projects array from PortfolioPreview.jsx
-const projects = [
-  {
-    id: 1,
-    title: "Weather API Project",
-    description:
-      "I built a Three.js scene that grabs weather data from OpenWeather API and displays the current temperature in Vancouver.",
-    buttonText: "Check it out!",
-    color: "#284af7",
-    visual: YellowSphere,
-  },
-  {
-    id: 2,
-    title: "Matter.js Plinko",
-    description:
-      "Using a physics engine, I made a Plinko game and balanced it as much as possible using y-axis forces and testing peg layouts.",
-    buttonText: "Check it out!",
-    color: "#284af7",
-    visual: PlinkoPreview,
-  },
-  {
-    id: 3,
-    title: "3D Bedroom Scene",
-    description:
-      "As I have a desire for learning 3D design, I created a Three.js scene that resembles a bedroom.",
-    buttonText: "Check it out!",
-    color: "#284af7",
-    visual: BedroomPreview,
-  },
-  {
-    id: 4,
-    title: "Music Visualizer",
-    description:
-      "I created a music visualizer using Three.js and Web Audio API. The visualizer reacts to the music and creates a unique visual experience.",
-    buttonText: "Check it out!",
-    color: "#284af7",
-    visual: MusicPreview,
-  },
-];
-
+// Trigger confetti effect
 const triggerConfetti = () => {
   const duration = 2000;
   const animationEnd = Date.now() + duration;
@@ -365,7 +195,6 @@ export default function AboutMe() {
   const [activeSection, setActiveSection] = useState("hero");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const sectionRefs = useRef({});
-  const [copied, setCopied] = useState(false);
 
   // Handle scroll to observe which section is in view
   useEffect(() => {
@@ -406,212 +235,72 @@ export default function AboutMe() {
       setActiveSection(sectionId);
     }
   };
-  
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText('danielkolpakov00@gmail.com')
-      .then(() => {
-        setCopied(true);
-        // Trigger the confetti animation when copied successfully
-        triggerConfetti();
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy email: ', err);
-      });
-  };
 
   return (
-    <div className="relative min-h-screen z-10">
+    <div className="relative min-h-screen z-10 bg-gradient-to-b from-transparent to-blue-50/20">
       
       <Helmet>
         <title>About Me | Daniel Kolpakov</title>
         <meta name="description" content="Discover Daniel Kolpakov, a web developer who blends creativity with technology to deliver remarkable digital experiences." />
       </Helmet>
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
-        <section 
-          ref={(el) => (sectionRefs.current.hero = el)}
-          className="py-16 md:py-24"
-        >
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-            <div className="w-full md:w-1/2 flex justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <img 
-                  src={aboutContent.landing.image} 
-                  alt="Daniel Kolpakov" 
-                  className="w-64 h-64 md:w-80 md:h-80 object-cover rounded-2xl shadow-lg border-4 border-blue2"
-                />
-              </motion.div>
-            </div>
-            
-            <div className="w-full md:w-1/2 text-center md:text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <h1 className="text-4xl md:text-5xl font-bold text-blue2 mb-4">
-                  {aboutContent.landing.title}
-                </h1>
-                <p className="text-xl md:text-2xl text-gray-600 mb-8">
-                  {aboutContent.landing.subtitle}
-                </p>
-                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                  <button 
-                    onClick={() => scrollToSection("contact")}
-                    className="bg-blue2 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all"
-                  >
-                    Get in Touch
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection("portfolio")}
-                    className="bg-white hover:bg-gray-100 text-blue2 border border-blue2 px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all"
-                  >
-                    View My Work
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
+        <AboutMeHero 
+          landingContent={aboutContent.landing}
+          scrollToSection={scrollToSection}
+          sectionRef={(el) => (sectionRefs.current.hero = el)}
+        />
         
-        {/* Content Sections - one for each topic */}
-        {aboutContent.sections.map((section) => (
-          <section
-            key={section.id}
-            id={section.id}
-            ref={(el) => (sectionRefs.current[section.id] = el)}
-            className="py-16 border-t border-gray-200"
-          >
-            <SectionHeader title={section.title} description={section.description} />
-            
-            {/* Use projects data for portfolio section, regular content for others */}
-            {section.id === "portfolio" ? (
-              <div className="flex flex-wrap justify-center">
-                {projects.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.5, delay: project.id * 0.1 }}
-                    className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(50%-1.5rem)] p-3"
-                  >
-                    <div className="relative min-h-[400px]">
-                      <ProjectWidget {...project} />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-wrap justify-center">
-                {section.boxes.map((box, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.5, delay: idx * 0.1 }}
-                    className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(50%-1.5rem)] p-3 flex"
-                  >
-                    <Card
-                      heading={box.heading}
-                      description={box.description}
-                      image={box.image}
-                      className={box.className || ""}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-            
-            {section.id === "contact" && (
-              <motion.div
-                className="mt-8 flex flex-col items-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                {/* Display the card first (if any) */}
-                {section.boxes.length > 0 && (
-                  <div className="mb-8 w-full max-w-md mx-auto">
-                    <Card 
-                      heading={section.boxes[0].heading}
-                      description={section.boxes[0].description}
-                      className="text-center"
-                    />
-                  </div>
-                )}
-                
-                {/* Email with copy functionality - cleaned up version */}
-                <div className="mb-6 w-full max-w-md mx-auto">
-                  <div 
-                    onClick={handleCopyEmail}
-                    className="relative bg-white p-5 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue2 transition-colors text-center"
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCopyEmail()}
-                    aria-label="Click to copy email address"
-                  >
-                    <div className="flex items-center justify-center gap-3">
-                      <FaEnvelope className="text-blue2 text-xl" />
-                      <span className="text-lg font-medium select-all text-gray-700">danielkolpakov00@gmail.com</span>
-                      <FaCopy className="text-gray-400 hover:text-blue2" />
-                    </div>
-                    
-                    {/* Copy notification */}
-                    <AnimatePresence>
-                      {copied && (
-                        <motion.div 
-                          className="absolute top-0 left-0 right-0 -mt-8 bg-green-100 text-green-700 text-sm py-1 px-2 rounded shadow-sm text-center"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          Copied to clipboard!
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-                
-                <a 
-                  href="mailto:danielkolpakov00@gmail.com" 
-                  className="bg-blue2 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-medium shadow-lg hover:shadow-xl transition-all text-lg flex items-center gap-2"
-                >
-                  <FaEnvelope /> Send Email
-                </a>
-              </motion.div>
-            )}
-          </section>
-        ))}
+        {/* Content Sections */}
+        {aboutContent.sections.map((section, sectionIdx) => {
+          if (section.id === "introduction") {
+            return (
+              <AboutMeIntroSection 
+                key={section.id}
+                section={section}
+                sectionRef={(el) => (sectionRefs.current[section.id] = el)}
+              />
+            );
+          } else if (section.id === "portfolio") {
+            return (
+              <AboutMePortfolioSection 
+                key={section.id}
+                section={section}
+                projects={projects}
+                sectionRef={(el) => (sectionRefs.current[section.id] = el)}
+              />
+            );
+          } else if (section.id === "contact") {
+            return (
+              <AboutMeContactSection 
+                key={section.id}
+                section={section}
+                sectionRef={(el) => (sectionRefs.current[section.id] = el)}
+                triggerConfetti={triggerConfetti}
+              />
+            );
+          } else {
+            return (
+              <AboutMeGenericSection 
+                key={section.id}
+                section={section}
+                sectionRef={(el) => (sectionRefs.current[section.id] = el)}
+                sectionIdx={sectionIdx}
+              />
+            );
+          }
+        })}
       </main>
       
-      {/* Scroll to top button */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            onClick={scrollToTop}
-            className="fixed bottom-6 right-6 bg-blue2 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
-            aria-label="Scroll to top"
-          >
-            <FaChevronUp />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Section Navigation */}
+      <SectionNavigation 
+        activeSection={activeSection} 
+        sections={aboutContent.sections}
+      />
+      
+      {/* Scroll To Top Button */}
+      <ScrollToTop showScrollTop={showScrollTop} />
     </div>
   );
 }

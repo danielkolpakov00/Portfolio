@@ -11,6 +11,10 @@ import ProjectPage from './ProjectPage';
 import ReactProjectPage from './ReactProjectPage';
 import Navbar from './Navbar';
 import BackgroundParticles from './components/BackgroundParticles';
+// add the beginning of your app entry
+import 'vite/modulepreload-polyfill'
+import axios from 'axios';
+
 
 const App = () => {
   const [showScene, setShowScene] = useState(() => {
@@ -34,6 +38,15 @@ const App = () => {
       setShowScene(false);
     }
   }, []);
+
+    const fetchAPI = async () => {
+      const response = await axios.get('http://localhost:8080/api/');
+      console.log(response.data.fruits);
+    }
+ 
+    useEffect(() => {
+      fetchAPI();
+    });
 
   return (
     <>

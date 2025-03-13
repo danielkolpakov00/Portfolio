@@ -19,6 +19,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
+    manifest: true,
     rollupOptions: {
       input: './index.html',
       output: {
@@ -40,6 +41,10 @@ export default defineConfig({
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.glb', '.gltf']
   },
   server: {
+    cors: {
+      // the origin you will be accessing via browser
+      origin: 'http://my-backend.example.com',
+    },
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',

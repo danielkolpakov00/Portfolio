@@ -20,12 +20,13 @@ const ProjectPage = () => {
 
   const fetchCodeFile = async (fileUrl) => {
     try {
+      // Update file references to use the actual files in the public directory
       const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error('File not found');
+      if (!response.ok) throw new Error(`Failed to fetch ${fileUrl}`);
       return await response.text();
-    } catch (err) {
-      setError('Could not load code file.');
-      return '';
+    } catch (error) {
+      console.error('Error fetching code file:', error);
+      return `// Error loading ${fileUrl}\n// ${error.message}`;
     }
   };
 
@@ -45,32 +46,36 @@ const ProjectPage = () => {
   );
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchProjects = async () => {
+    const loadProject = async () => {
       try {
-        const response = await fetch('/projects.json'); // Fetching from public/projects.json
-        if (!response.ok) throw new Error('Failed to load projects data');
-        const data = await response.json();
-
-        const project = data.find((proj) => proj.id === parseInt(id, 10));
-        if (!project) throw new Error('Project not found.');
-
-        if (isMounted) {
+        // Update to fetch from the correct projects.json file
+        const response = await fetch('/projects.json');
+        if (!response.ok) throw new Error('Failed to load projects');
+        
+        const projects = await response.json();
+        const project = projects.find(p => p.id === parseInt(id));
+        
+        if (project) {
           setSelectedProject(project);
+          // Default to showing HTML if available
+          if (project.htmlFile) {
+            setActiveTab('html');
+            const htmlContent = await fetchCodeFile(project.htmlFile);
+            setCodeContent(htmlContent);
+          }
+        } else {
+          setError(`Project with ID ${id} not found`);
         }
-      } catch (err) {
-        if (isMounted) {
-          setError(err.message);
-        }
+        
+        setIsContentLoading(false);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error.message);
+        setIsContentLoading(false);
       }
     };
-
-    fetchProjects();
-
-    return () => {
-      isMounted = false;
-    };
+    
+    loadProject();
   }, [id]);
 
   useEffect(() => {
@@ -258,7 +263,7 @@ const ProjectPage = () => {
         </div>
       </div>
 
-      <div className="project-description w-full max-w-2xl text-gray-700 mt-8 mx-auto">
+      <div className="project-description w-full max-w-8xl text-gray-700 mt-8 mx-auto">
         <h3 className="text-2xl font-semibold mb-6 text-center">About {selectedProject.title}</h3>
         {DescriptionComponent && <DescriptionComponent />}
       </div>

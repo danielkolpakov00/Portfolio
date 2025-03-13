@@ -46,17 +46,17 @@ const TsParticles = () => {
         speed: 1,
       },
       number: {
-        value: 40,
+        value: 5,  // reduced from 10
         density: {
           enable: true,
-          area: 800,
+          area: 200,  // increased from 100 to spread particles more
         },
       },
       opacity: {
         value: 0.3,
       },
       size: {
-        value: { min: 1, max: 3 },
+        value: { min: 1, max: 2 },
       },
     },
     interactivity: {

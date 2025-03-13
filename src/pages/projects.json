@@ -1,0 +1,37 @@
+{
+  "vanillaProjects": [
+    {
+      "id": 1,
+      "title": "Weather API Project",
+      "description": "I built a Three.js scene that grabs weather data from OpenWeather API and displays the current temperature in Vancouver.",
+      "buttonText": "Check it out!",
+      "color": "#284af7",
+      "visualComponent": "WeatherPreview"
+    },
+    {
+      "id": 2,
+      "title": "Matter.js Plinko",
+      "description": "Using a physics engine, I made a Plinko game and balanced it as much as possible using y-axis forces and testing peg layouts.",
+      "buttonText": "Check it out!",
+      "color": "#284af7",
+      "visualComponent": "PlinkoPreview"
+    },
+    {
+      "id": 3,
+      "title": "3D Bedroom Scene",
+      "description": "As I have a desire for learning 3D design, I created a Three.js scene that resembles a bedroom.",
+      "buttonText": "Check it out!",
+      "color": "#284af7",
+      "visualComponent": "BedroomPreview"
+    },
+    {
+      "id": 4,
+      "title": "Music Visualizer",
+      "description": "I created a music visualizer using Three.js and Web Audio API. The visualizer reacts to the music and creates a unique visual experience.",
+      "buttonText": "Check it out!",
+      "color": "#284af7",
+      "visualComponent": "MusicPreview"
+    }
+  ],
+  "reactProjects": []
+}

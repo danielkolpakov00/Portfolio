@@ -7,7 +7,8 @@
       "componentFile": "/reactprojects/gradient-generator/App.jsx",
       "description": "A simple React.js project that generates gradients, with a friendly companion.",
       "demoUrl": "https://color.danielkolpakov.com",
-      "image": "/assets/grad.png"
+      "image": "/assets/grad.png",
+      "category": "design"
     },
     {
       "id": "lastfm-app",
@@ -16,7 +17,8 @@
       "componentFile": "/reactprojects/lastfm-app/App.jsx",
       "description": "A really cool React.js project that imitates the Windows XP interace and displays data from the Last.fm API.",
       "demoUrl": "https://xp.danielkolpakov.com",
-      "image": "/assets/bliss.jpg"
+      "image": "/assets/bliss.jpg",
+      "category": "api"
     }
   ]
 }
