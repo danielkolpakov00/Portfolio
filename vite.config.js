@@ -5,15 +5,15 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  base: './', // Ensures relative paths
   assetsInclude: [
     '**/*.png', 
     '**/*.jpg', 
     '**/*.jpeg', 
     '**/*.gif', 
     '**/*.svg', 
-    '**/*.glb',  // Added GLB support
-    '**/*.gltf',  // Added GLTF support as well
+    '**/*.glb',
+    '**/*.gltf',
     '**/*.ttf', 
     '**/*.woff', 
     '**/*.woff2'
@@ -23,21 +23,24 @@ export default defineConfig({
     assetsDir: 'assets',
     emptyOutDir: true,
     manifest: true,
+    // Ensure that import.meta.env.BASE_URL is properly set
+    copyPublicDir: true,
     rollupOptions: {
       input: './index.html',
       output: {
+        // Simplified asset naming scheme
         assetFileNames: (assetInfo) => {
-          // Store font files in a separate directory
+          const info = assetInfo.name.split('.');
+          let extType = info[info.length - 1];
+          
           if (/\.(woff|woff2|ttf|otf)$/.test(assetInfo.name)) {
-            return 'assets/fonts/[name].[hash][extname]';
+            return 'assets/fonts/[name][extname]';
           }
-          return 'assets/[name].[hash][extname]';
+          
+          return `assets/[name][extname]`;
         },
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js',
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) return 'vendor';
-        },
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
       },
     },
   },
@@ -49,15 +52,12 @@ export default defineConfig({
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.glb', '.gltf']
   },
+  // Remove or update development server settings that won't apply in production
   server: {
-    cors: {
-      // the origin you will be accessing via browser
-      origin: 'http://my-backend.example.com',
-    },
+    // These CORS settings only affect development
+    cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Authorization'
     }
   },
   optimizeDeps: {

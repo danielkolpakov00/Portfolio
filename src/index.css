@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Georama";
-  src: url('../src/assets/fonts/Georama-VariableFont_wdth\,wght.ttf') format('truetype');
+  src: url('./src/assets/fonts/Georama-VariableFont_wdth\,wght.ttf') format('truetype');
 }
 
 @tailwind base;
@@ -128,21 +128,4 @@ html, body {
 /* Add any offwhite backgrounds to components that need it */
 .bg-offwhite {
   background-color: transparent;
-}
-
-/* Add these classes if Tailwind's line-clamp plugin isn't enabled */
-@layer utilities {
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
 }
