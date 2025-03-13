@@ -1,12 +1,11 @@
-import React, { Suspense, lazy } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import TiltedCard from '../../components/ReactBits/TiltedCard';
 import AboutMeSectionHeader from "./AboutMeSectionHeader";
-
-const LetterGlitch = lazy(() => import('../../components/ReactBits/LetterGlitch'));
-const Hyperspeed = lazy(() => import('../../components/ReactBits/Hyperspeed'));
-const Balatro = lazy(() => import('../../components/ReactBits/Balatro'));
-const Iridescence = lazy(() => import('../../components/ReactBits/Iridescence'));
+import LetterGlitch from '../../components/ReactBits/LetterGlitch';
+import Hyperspeed from '../../components/ReactBits/Hyperspeed';
+import Balatro from '../../components/ReactBits/Balatro';
+import Iridescence from '../../components/ReactBits/Iridescence';
 
 // Visibility wrapper component
 const VisibilityWrapper = ({ children }) => {
@@ -121,80 +120,72 @@ const AboutMeIntroSection = ({ section, sectionRef }) => {
                 }
                 imageSrc={
                   box.heading === "A bit about me" ? 
-                    <Suspense fallback={<div className="w-full h-full bg-[#F5FDFF] rounded-[15px]"></div>}>
-                      <VisibilityWrapper>
-                        <LetterGlitch
-                          glitchSpeed={50}
-                          centerVignette={true}
-                          outerVignette={false}
-                          smooth={true}
-                          glitchColors={['#F5FDFF', '#1B69FA', '#1B44FA']}
-                        />
-                      </VisibilityWrapper>
-                    </Suspense> : box.heading === "My path" ?
-                    <Suspense fallback={<div className="w-full h-full bg-[#0a1f3d] rounded-[15px]"></div>}>
-                      <VisibilityWrapper>
-                        <Hyperspeed
-                          effectOptions={{
-                            distortion: 'turbulentDistortion',
-                            length: 600,
-                            roadWidth: 50,
-                            islandWidth: 2,
-                            lanesPerRoad: 2,
-                            fov: 80,
-                            fovSpeedUp: 150,
-                            speedUp: 2,
-                            carLightsFade: 0.4,
-                            totalSideLightSticks: 20,
-                            lightPairsPerRoadWay: 40,
-                            shoulderLinesWidthPercentage: 0.05,
-                            brokenLinesWidthPercentage: 0.1,
-                            brokenLinesLengthPercentage: 0.5,
-                            lightStickWidth: [0.12, 0.5],
-                            lightStickHeight: [1.3, 1.7],
-                            movingAwaySpeed: [60, 80],
-                            movingCloserSpeed: [-120, -160],
-                            carLightsLength: [400 * 0.03, 400 * 0.2],
-                            carLightsRadius: [0.05, 0.14],
-                            carWidthPercentage: [0.3, 0.5],
-                            carShiftX: [-0.8, 0.8],
-                            carFloorSeparation: [0, 5],
-                            colors: {
-                              roadColor: 0xF5FDFF,
-                              islandColor: 0x1B69FA,
-                              background: 0xF5FDFF,
-                              shoulderLines: 0x1B44FA,
-                              brokenLines: 0x1B59FA,
-                              leftCars: [0x1B69FA, 0x1B44FA, 0x1B59FA],
-                              rightCars: [0x1B69FA, 0x1B44FA, 0x1B59FA],
-                              sticks: 0x03B3C3,
-                            }
-                          }}
-                        />
-                      </VisibilityWrapper>
-                    </Suspense> : box.heading === "My philosophy" ?
-                    <Suspense fallback={<div className="w-full h-full bg-[#F5FDFF] rounded-[15px]"></div>}>
-                      <VisibilityWrapper>
-                        <Balatro
-                          isRotate={false}
-                          mouseInteraction={false}
-                          pixelFilter={700}
-                          color1={"#F5FDFF"}
-                          color2={"#1B69FA"}
-                          color3={"#1B44FA"}
-                        />
-                      </VisibilityWrapper>
-                    </Suspense> : box.heading === "My approach" ?
-                    <Suspense fallback={<div className="w-full h-full bg-[#F5FDFF] rounded-[15px]"></div>}>
-                      <VisibilityWrapper>
-                        <Iridescence
-                          color={[0.5, 0.5, 0.9]}
-                          mouseReact={false}
-                          amplitude={4}
-                          speed={1.0}
-                        />
-                      </VisibilityWrapper>
-                    </Suspense> : null
+                    <VisibilityWrapper>
+                      <LetterGlitch
+                        glitchSpeed={50}
+                        centerVignette={true}
+                        outerVignette={false}
+                        smooth={true}
+                        glitchColors={['#F5FDFF', '#1B69FA', '#1B44FA']}
+                      />
+                    </VisibilityWrapper> : box.heading === "My path" ?
+                    <VisibilityWrapper>
+                      <Hyperspeed
+                        effectOptions={{
+                          distortion: 'turbulentDistortion',
+                          length: 600,
+                          roadWidth: 50,
+                          islandWidth: 2,
+                          lanesPerRoad: 2,
+                          fov: 80,
+                          fovSpeedUp: 150,
+                          speedUp: 2,
+                          carLightsFade: 0.4,
+                          totalSideLightSticks: 20,
+                          lightPairsPerRoadWay: 40,
+                          shoulderLinesWidthPercentage: 0.05,
+                          brokenLinesWidthPercentage: 0.1,
+                          brokenLinesLengthPercentage: 0.5,
+                          lightStickWidth: [0.12, 0.5],
+                          lightStickHeight: [1.3, 1.7],
+                          movingAwaySpeed: [60, 80],
+                          movingCloserSpeed: [-120, -160],
+                          carLightsLength: [400 * 0.03, 400 * 0.2],
+                          carLightsRadius: [0.05, 0.14],
+                          carWidthPercentage: [0.3, 0.5],
+                          carShiftX: [-0.8, 0.8],
+                          carFloorSeparation: [0, 5],
+                          colors: {
+                            roadColor: 0xF5FDFF,
+                            islandColor: 0x1B69FA,
+                            background: 0xF5FDFF,
+                            shoulderLines: 0x1B44FA,
+                            brokenLines: 0x1B59FA,
+                            leftCars: [0x1B69FA, 0x1B44FA, 0x1B59FA],
+                            rightCars: [0x1B69FA, 0x1B44FA, 0x1B59FA],
+                            sticks: 0x03B3C3,
+                          }
+                        }}
+                      />
+                    </VisibilityWrapper> : box.heading === "My philosophy" ?
+                    <VisibilityWrapper>
+                      <Balatro
+                        isRotate={false}
+                        mouseInteraction={false}
+                        pixelFilter={700}
+                        color1={"#F5FDFF"}
+                        color2={"#1B69FA"}
+                        color3={"#1B44FA"}
+                      />
+                    </VisibilityWrapper> : box.heading === "My approach" ?
+                    <VisibilityWrapper>
+                      <Iridescence
+                        color={[0.5, 0.5, 0.9]}
+                        mouseReact={false}
+                        amplitude={4}
+                        speed={1.0}
+                      />
+                    </VisibilityWrapper> : null
                 }
               />
             </motion.div>

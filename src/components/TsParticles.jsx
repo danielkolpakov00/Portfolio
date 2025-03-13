@@ -5,16 +5,46 @@ import { memo } from 'react';
 
 const TsParticles = () => {
   const [init, setInit] = useState(false);
+  const [engine, setEngine] = useState(null);
   
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
-      console.log("TsParticles engine initialized successfully");
-      setInit(true);
-    }).catch(error => {
-      console.error("Failed to initialize particles:", error);
-    });
+    let isMounted = true;
+    
+    const initializeEngine = async () => {
+      try {
+        console.log("Initializing TsParticles engine...");
+        
+        await initParticlesEngine(async (engineInstance) => {
+          await loadSlim(engineInstance);
+          if (isMounted) {
+            setEngine(engineInstance);
+          }
+        });
+        
+        if (isMounted) {
+          console.log("TsParticles engine initialized successfully");
+          setInit(true);
+        }
+      } catch (error) {
+        console.error("Failed to initialize particles:", error);
+        // Try to reinitialize after a delay
+        setTimeout(initializeEngine, 1500);
+      }
+    };
+    
+    initializeEngine();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      console.log("TsParticles component unmounted, cleaning up");
+      setInit(false);
+      // Release engine resources if needed
+      if (engine) {
+        console.log("Cleaning up TsParticles engine");
+        // Any necessary cleanup for the engine
+      }
+    };
   }, []);
 
   const particlesLoaded = (container) => {
@@ -117,7 +147,7 @@ const TsParticles = () => {
       pointerEvents: 'none', // Ensures that mouse events pass through to elements below
       willChange: 'transform', // Optimization for fixed elements
     }}>
-      {init && (
+      {init && engine && (
         <Particles
           id="tsparticles"
           particlesLoaded={particlesLoaded}
