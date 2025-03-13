@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Georama";
-  src: url('./src/assets/fonts/Georama-VariableFont_wdth\,wght.ttf') format('truetype');
+  src: url('@assets/fonts/georama.ttf') format('truetype');
 }
 
 @tailwind base;
