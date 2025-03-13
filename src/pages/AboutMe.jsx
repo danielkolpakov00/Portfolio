@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import confetti from 'canvas-confetti';
 import "../index.css";
 import "../App.css";
-
+import TsParticles from "@/components/TsParticles";
 // Import AboutMe components
 import AboutMeHero from "../components/AboutMe/AboutMeHero";
 import AboutMeIntroSection from "../components/AboutMe/AboutMeIntroSection";
@@ -237,8 +237,9 @@ export default function AboutMe() {
   };
 
   return (
+
     <div className="relative min-h-screen z-10 bg-gradient-to-b from-transparent to-blue-50/20">
-      
+      <TsParticles />
       <Helmet>
         <title>About Me | Daniel Kolpakov</title>
         <meta name="description" content="Discover Daniel Kolpakov, a web developer who blends creativity with technology to deliver remarkable digital experiences." />
