@@ -10,7 +10,7 @@ import PortfolioPreview from './PortfolioPreview';
 import ProjectPage from './ProjectPage';
 import ReactProjectPage from './ReactProjectPage';
 import Navbar from './Navbar';
-import BackgroundParticles from './components/BackgroundParticles';
+import TsParticles from './components/TsParticles';
 import LoadingScreen from './components/LoadingScreen';
 // add the beginning of your app entry
 import 'vite/modulepreload-polyfill'
@@ -79,7 +79,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <LoadingScreen isLoading={isLoading} message="Loading Portfolio..." />
-      <BackgroundParticles />
+      <TsParticles />
       <Router>
         <div id="outer-container" className="relative min-h-screen bg-transparent z-10">
           <Helmet>

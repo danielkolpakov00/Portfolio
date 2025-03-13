@@ -1,33 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
+import { memo } from 'react';
 
 const TsParticles = () => {
-  const [initialized, setInitialized] = useState(false);
+  const [init, setInit] = useState(false);
   
   useEffect(() => {
-    const initParticles = async () => {
-      try {
-        await initParticlesEngine(async (engine) => {
-          await loadSlim(engine);
-        });
-        console.log("TsParticles engine initialized successfully");
-        setInitialized(true);
-      } catch (error) {
-        console.error("Failed to initialize particles:", error);
-      }
-    };
-    
-    initParticles();
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      console.log("TsParticles engine initialized successfully");
+      setInit(true);
+    }).catch(error => {
+      console.error("Failed to initialize particles:", error);
+    });
   }, []);
 
-  const options = {
+  const particlesLoaded = (container) => {
+    console.log("Particles container loaded:", container);
+  };
+
+  const options = useMemo(() => ({
     background: {
       color: {
         value: "transparent",
       },
     },
-    fpsLimit: 60,
+    fpsLimit: 30, // Reduced from 60 to improve performance
     particles: {
       color: {
         value: "#1B69FA",
@@ -36,49 +36,75 @@ const TsParticles = () => {
         color: "#1B69FA",
         distance: 150,
         enable: true,
-        opacity: 0.3,
+        opacity: 0.5,
         width: 1,
       },
       move: {
-        enable: true,
-        speed: 1,
         direction: "none",
-        random: false,
-        straight: false,
+        enable: true,
         outModes: {
-          default: "bounce"
+          default: "out", // Changed from "bounce" to reduce calculations
         },
+        random: false,
+        speed: 1, // Reduced speed to decrease CPU usage
+        straight: false,
       },
       number: {
-        value: 5,
         density: {
           enable: true,
-          area: 200,
+          area: 800,
         },
+        value: 40, // Reduced from 80 to improve performance
       },
       opacity: {
-        value: 0.3,
+        value: 0.5,
+      },
+      shape: {
+        type: "circle",
       },
       size: {
-        value: { min: 1, max: 2 },
+        value: { min: 1, max: 2 }, // Reduced max size
       },
     },
-    detectRetina: true,
+    detectRetina: false, // Disabled to improve performance
     interactivity: {
+      detectsOn: "canvas", // Use canvas instead of window for better performance
       events: {
+        onClick: {
+          enable: false, // Disabled to avoid conflicts with page clicks
+        },
         onHover: {
           enable: true,
-          mode: "repulse",
+          mode: "light", // Changed to lighter interaction mode
+          parallax: {
+            enable: false, // Disabled parallax to improve performance
+          },
+        },
+        resize: {
+          delay: 500, // Add delay to handle resize events better
+          enable: true,
         },
       },
       modes: {
+        light: {
+          area: {
+            gradient: {
+              start: "#1B69FA",
+              stop: "transparent",
+            },
+          },
+          shadow: {
+            color: "#1B69FA",
+          },
+        },
         repulse: {
-          distance: 100,
-          duration: 0.4,
+          distance: 100, // Reduced distance
+          duration: 0.2, // Shorter duration
         },
       },
     },
-  };
+    pauseOnBlur: true, // Pause when tab is not active
+  }), []);
 
   return (
     <div style={{
@@ -87,17 +113,20 @@ const TsParticles = () => {
       left: 0,
       width: '100%',
       height: '100%',
-      zIndex: -1,
-      pointerEvents: 'none'
+      zIndex: 0,
+      pointerEvents: 'none', // Ensures that mouse events pass through to elements below
+      willChange: 'transform', // Optimization for fixed elements
     }}>
-      {initialized && (
+      {init && (
         <Particles
           id="tsparticles"
+          particlesLoaded={particlesLoaded}
           options={options}
+          className="particles-canvas" // Added class for potential CSS optimizations
         />
       )}
     </div>
   );
 };
 
-export default TsParticles;
+export default memo(TsParticles);
