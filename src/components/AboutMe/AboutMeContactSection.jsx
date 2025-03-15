@@ -111,7 +111,7 @@ const AboutMeContactSection = ({ section, sectionRef, triggerConfetti }) => {
           <FaEnvelope /> Send Email
         </a>
 
-        {/* <form onSubmit={handleFormSubmit} className="mt-10 w-full max-w-md sm:max-w-lg mx-auto">
+        <form onSubmit={handleFormSubmit} className="mt-10 w-full max-w-md sm:max-w-lg mx-auto">
           <div>
             <label>Email:</label>
             <input name="email" type="email" value={formData.email} onChange={handleFormChange} />
@@ -121,7 +121,7 @@ const AboutMeContactSection = ({ section, sectionRef, triggerConfetti }) => {
             <input name="message" type="text" value={formData.message} onChange={handleFormChange} />
           </div>
           <input type="submit" value="Submit" />
-        </form> */}
+        </form>
       </motion.div>
     </section>
   );

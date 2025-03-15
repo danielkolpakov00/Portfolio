@@ -6,6 +6,7 @@ import WeatherPreview from "./WeatherPreview";
 import PlinkoPreview from "./PlinkoPreview";
 import BedroomPreview from "./BedroomScenePreview";
 import MusicPreview from "./MusicPreview";
+import MailPreview from "./MailPreview";
 import TsParticles from "./components/TsParticles";
 import { Link } from "react-router-dom";
 import "./index.css";
@@ -20,7 +21,8 @@ const visualComponents = {
   "WeatherPreview": WeatherPreview,
   "PlinkoPreview": PlinkoPreview,
   "BedroomPreview": BedroomPreview,
-  "MusicPreview": MusicPreview
+  "MusicPreview": MusicPreview,
+  "MailPreview": MailPreview
 };
 
 // Replace hardcoded projects with data from JSON
@@ -52,6 +54,11 @@ const PortfolioPreview = () => {
 
   // Define available frameworks
   const frameworks = ["all", "vanilla", "react"];
+
+  // Function to determine if the filtered projects are odd in count
+  const isOddCount = (projectsList) => {
+    return filterProjects(projectsList, projectsList === projects ? "vanilla" : "react").length % 2 !== 0;
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -330,8 +337,13 @@ const PortfolioPreview = () => {
           ref={vanillaContainerRef}
           className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl transition-all duration-500 ease-in-out"
         >
-          {filterProjects(projects, "vanilla").map((project) => (
-            <div key={project.id} className="relative h-[500px] project-card transition-all duration-300">
+          {filterProjects(projects, "vanilla").map((project, index, array) => (
+            <div 
+              key={project.id} 
+              className={`relative h-[500px] project-card transition-all duration-300 ${
+                index === array.length - 1 && array.length % 2 !== 0 ? 'md:col-span-2 md:w-[calc(50%-1.5rem)] md:mx-auto' : ''
+              }`}
+            >
               <ProjectWidget 
                 {...project} 
                 showCategory={true}
@@ -357,8 +369,13 @@ const PortfolioPreview = () => {
           ref={reactContainerRef}
           className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl transition-all duration-500 ease-in-out"
         >
-          {filterProjects(reactProjects, "react").map((project) => (
-            <div key={project.id} className="relative h-[500px] project-card transition-all duration-300">
+          {filterProjects(reactProjects, "react").map((project, index, array) => (
+            <div 
+              key={project.id} 
+              className={`relative h-[500px] project-card transition-all duration-300 ${
+                index === array.length - 1 && array.length % 2 !== 0 ? 'md:col-span-2 md:w-[calc(50%-1.5rem)] md:mx-auto' : ''
+              }`}
+            >
               <div className="absolute bottom-1/ right-2 z-10">
                 <FaReact className="text-blue-400" size={24} />
               </div>

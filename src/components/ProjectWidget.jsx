@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from 'react-router-dom';
 
+
+
 const ProjectWidget = ({
   title,
   description,
@@ -27,6 +29,7 @@ const ProjectWidget = ({
           </span>
         </div>
       )}
+      
       <div className="p-6 border-t border-offwhite border-dashed border-opacity-50 backdrop-blur-sm flex flex-col flex-grow">
         <h3 className="text-3xl font-georama leading-tight mb-3 text-blue2 line-clamp-2">
           {title}

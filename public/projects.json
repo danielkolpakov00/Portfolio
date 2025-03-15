@@ -46,5 +46,17 @@
     "library": "/assets/threejs.svg",
     "libraryname": "Three.js",
     "threejs": "A JavaScript 3D library used here to create visual effects that respond to audio analysis."
+  },
+  {
+    "id": 5,
+    "title": "Simple Backend for Emails (NodeMailer, MongoDB)",
+    "description": "I made a simple backend for an email form with Express.js and Nodemailer",
+    "buttonText": "Check it out!",
+    "color": "#284af7",
+    "visualComponent": "MailPreview",
+    "demoUrl": "https://glitch.com/edit/#!/detailed-different-coyote",
+    "stack": "backend",
+    "framework": "vanilla"
+
   }
 ]

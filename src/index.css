@@ -11,6 +11,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  
+}
+
+ul li {
+  color: #1B44FA;
 }
 
 html, body {

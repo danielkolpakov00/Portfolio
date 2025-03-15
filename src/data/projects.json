@@ -39,6 +39,17 @@
       "visualComponent": "MusicPreview",
       "category": "audio",
       "framework": "vanilla"
+    },
+    {
+      "id": 5,
+      "title": "Simple Backend for Emails (NodeMailer, MongoDB)",
+      "description": "I made a simple backend for an email form with Express.js and Nodemailer",
+      "buttonText": "Check it out!",
+      "color": "#284af7",
+      "visualComponent": "MailPreview",
+      "category": "backend",
+      "framework": "vanilla",
+      "code": "backend"
     }
   ],
   "reactProjects": []

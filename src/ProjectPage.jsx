@@ -48,25 +48,18 @@ const ProjectPage = () => {
   useEffect(() => {
     const loadProject = async () => {
       try {
-        // Update to fetch from the correct projects.json file
         const response = await fetch('/projects.json');
         if (!response.ok) throw new Error('Failed to load projects');
-        
         const projects = await response.json();
         const project = projects.find(p => p.id === parseInt(id));
         
         if (project) {
           setSelectedProject(project);
-          // Default to showing HTML if available
-          if (project.htmlFile) {
-            setActiveTab('html');
-            const htmlContent = await fetchCodeFile(project.htmlFile);
-            setCodeContent(htmlContent);
+          if (project.stack === 'backend' && codeBlockRef.current) {
+           codeBlockRef.current.classList.add('display-none');
           }
-        } else {
-          setError(`Project with ID ${id} not found`);
+    
         }
-        
         setIsContentLoading(false);
       } catch (error) {
         console.error('Error:', error);
@@ -74,41 +67,37 @@ const ProjectPage = () => {
         setIsContentLoading(false);
       }
     };
-    
     loadProject();
   }, [id]);
 
   useEffect(() => {
     const loadTabContent = async () => {
       if (!selectedProject || !activeTab) return;
-      
       setIsContentLoading(true);
-      const currentTab = activeTab;
-
       let fileUrl;
-      switch (currentTab) {
-        case 'html':
-          fileUrl = selectedProject.htmlFile;
-          break;
-        case 'css':
-          fileUrl = selectedProject.cssFile;
-          break;
-        case 'js':
-          fileUrl = selectedProject.jsFile;
-          break;
-        default:
-          return;
+      if (selectedProject.stack === 'backend') {
+        fileUrl = activeTab;
+      } else {
+        switch (activeTab) {
+          case 'html':
+            fileUrl = selectedProject.htmlFile;
+            break;
+          case 'css':
+            fileUrl = selectedProject.cssFile;
+            break;
+          case 'js':
+            fileUrl = selectedProject.jsFile;
+            break;
+          default:
+            return;
+        }
       }
-
       const content = await fetchCodeFile(fileUrl);
-
-      if (currentTab === activeTab) {
+      if (activeTab) {
         setCodeContent(content);
-        // Add small delay to ensure smooth transition
         setTimeout(() => setIsContentLoading(false), 300);
       }
     };
-
     loadTabContent();
   }, [activeTab, selectedProject]);
 
@@ -153,6 +142,11 @@ const ProjectPage = () => {
     }
   `;
 
+  const tabs =
+    selectedProject && selectedProject.stack === 'backend'
+      ? selectedProject.jsFiles || []
+      : ['html', 'css', 'js'];
+
   if (error)
     return <p className="text-red-500 text-center mt-4">{error}</p>;
   if (!selectedProject || codeContent === '')
@@ -185,23 +179,24 @@ const ProjectPage = () => {
           </p>
         )}
       </div>
-
+      
+      {selectedProject.stack !== 'backend' && (
       <div className="flex justify-center -mt-[1px]">
         <div className="code-block w-full max-w-6xl bg-gray-900 shadow-lg overflow-hidden">
           <div className="flex">
-            {['html', 'css', 'js'].map((tab) => {
-              const icons = {
-                html: faHtml5,
-                css: faCss3Alt,
-                js: faJs,
-              };
-
-              const textColors = {
-                html: 'text-orange-500',
-                css: 'text-blue-400',
-                js: 'text-yellow-500',
-              };
-
+            {tabs.map((tab) => {
+              let label, icon, textColor;
+              if (selectedProject?.stack === 'backend') {
+                label = tab.split('/').pop(); // extract filename
+                icon = faJs;
+                textColor = 'text-yellow-500';
+              } else {
+                label = tab.toUpperCase();
+                const icons = { html: faHtml5, css: faCss3Alt, js: faJs };
+                const textColors = { html: 'text-orange-500', css: 'text-blue-400', js: 'text-yellow-500' };
+                icon = icons[tab];
+                textColor = textColors[tab];
+              }
               return (
                 <button
                   key={tab}
@@ -210,16 +205,13 @@ const ProjectPage = () => {
                     activeTab === tab ? 'bg-gray-800' : 'bg-gray-700'
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={icons[tab]}
-                    className={textColors[tab]}
-                  />
-                  <span className={textColors[tab]}>{tab.toUpperCase()}</span>
+                  <FontAwesomeIcon icon={icon} className={textColor} />
+                  <span className={textColor}>{label}</span>
                 </button>
               );
             })}
           </div>
-
+  
           <div className={`relative p-4 text-white transition-[height] duration-300 ease-in-out ${
             isExpanded ? 'h-[800px]' : 'h-[400px]'
           }`}>
@@ -229,7 +221,7 @@ const ProjectPage = () => {
               ) : (
                 <code 
                   ref={codeBlockRef} 
-                  className={`language-${activeTab === 'js' ? 'javascript' : activeTab} block`}
+                  className={`language-${selectedProject?.stack === 'backend' ? 'javascript' : (activeTab === 'js' ? 'javascript' : activeTab)} block`}
                 >
                   {codeContent}
                 </code>
@@ -250,6 +242,7 @@ const ProjectPage = () => {
           </div>
         </div>
       </div>
+      )}
 
       <div className="project-description w-full max-w-8xl text-gray-700 mt-8 mx-auto">
         <h3 className="text-2xl font-semibold mb-6 text-center">About {selectedProject.title}</h3>

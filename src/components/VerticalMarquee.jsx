@@ -1,6 +1,6 @@
 import React from 'react';
 
-const marqueeText = "dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · ";
+const marqueeText = "dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · ";
 
 const VerticalMarquee = () => {
   const containerStyle = {
@@ -46,7 +46,6 @@ const VerticalMarquee = () => {
       `}</style>
       <div style={textStyle}>
         <div style={marqueeWrapperStyle}>
-          <span>{marqueeText}</span>
           <span>{marqueeText}</span>
         </div>
       </div>
