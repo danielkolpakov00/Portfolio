@@ -84,7 +84,7 @@ const AboutMeContactSection = ({ section, sectionRef, triggerConfetti }) => {
           >
             <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
               <FaEnvelope className="text-blue2 text-xl sm:text-2xl" />
-              <span className="text-base sm:text-xl font-medium select-all text-gray-700">danielkolpakov00@gmail.com</span>
+              <span className="text-base sm:text-xl font-medium select-all text-gray-700">me@danielkolpakov.com</span>
               <FaCopy className="text-gray-400 hover:text-blue2 text-lg" />
             </div>
             
@@ -105,7 +105,7 @@ const AboutMeContactSection = ({ section, sectionRef, triggerConfetti }) => {
         </div>
         
         <a 
-          href="mailto:danielkolpakov00@gmail.com" 
+          href="mailto:me@danielkolpakov.com" 
           className="bg-blue2 hover:bg-blue-700 text-white px-6 sm:px-10 py-3 sm:py-4 rounded-full font-medium shadow-lg hover:shadow-xl transition-all text-base sm:text-lg flex items-center gap-3 transform hover:-translate-y-1"
         >
           <FaEnvelope /> Send Email
