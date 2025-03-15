@@ -25,8 +25,8 @@ const Hero = ({ isOpen }) => {
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const messages = [
     "Hello! I'm Daniel. I am a web designer looking to kickstart my career.",
-    "I have a passion for creating super cool website designs. I'm always looking to learn new things that will help me grow as a developer.",
-    "My hobbies include playing video games, DJing, and cooking delicious meals.",
+    "I have a passion for creating super cool web experiences. I'm always looking to learn new things that will help me grow as a developer.",
+    "My hobbies include playing video games, and cooking delicious meals.",
     <>
       <div>Click the icon below to open my LinkedIn.</div>
       <Link to="https://www.linkedin.com/in/daniel-kolpakov-829901221/">
@@ -34,7 +34,7 @@ const Hero = ({ isOpen }) => {
       </Link>
     </>,
     <>
-      <div>Check out my github!</div>
+      <div>Check out my Github!</div>
       <Link to="https://github.com/danielkolpakov00">
         <FontAwesomeIcon icon={faGithub} size="2x" className="mt-4" />
       </Link>
@@ -44,11 +44,14 @@ const Hero = ({ isOpen }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const dialogueTextRef = useRef(null);
   const dkModelRef = useRef(null);
+  window.dkModelRef = dkModelRef;
 
+  
   const updateDialogue = (newIndex) => {
     // Play talking animation on DKModel when dialogue changes
     if (dkModelRef.current) {
       dkModelRef.current.playTalking();
+     
     }
     // Animate out the current text
     gsap.to(dialogueTextRef.current, {
@@ -146,7 +149,7 @@ const Hero = ({ isOpen }) => {
         <div 
           className="title-area" 
           ref={canvasContainerRef}
-          style={{ width: '100vw' /* height set in adjustCanvasSize */ }}
+          style={{ width: '100vw' }}
         >
           <Canvas
             style={{ width: '100%', height: '100%' }}
@@ -167,22 +170,27 @@ const Hero = ({ isOpen }) => {
 
         {/* Dialogue Box */}
         <div 
-          className="dialogue-container p-8 sm:p-8 rounded-lg max-w-[400px] sm:max-w-[600px] min-h-[150px] md:min-h-[200px]"
+          className="dialogue-container p-4 sm:p-8 rounded-lg max-w-[300px] sm:max-w-[400px] min-h-[120px] md:min-h-[200px]"
           onClick={() => { if(isMobile) updateDialogue((dialogueIndex + 1) % messages.length); }}
           style={{
             backgroundColor: 'rgba(255,255,255,0.8)',
             border: '2px dashed #1B44FA',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            margin: '2rem auto',
+            margin: '1rem auto 1.5rem',
             position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '150px'
+            minHeight: isMobile ? '120px' : '150px'
           }}>
-          <div ref={dialogueTextRef} className="text-center text-md sm:text-lg text-blue2 font-medium">
+          <div ref={dialogueTextRef} className="text-center text-sm sm:text-md md:text-lg text-blue2 font-medium">
             {displayedText}
           </div>
+
+        
+
+
+
           
           {!isMobile && (
             <>
@@ -237,5 +245,10 @@ const Hero = ({ isOpen }) => {
     </div>
   );
 };
+
+
+
+
+
 
 export default Hero;

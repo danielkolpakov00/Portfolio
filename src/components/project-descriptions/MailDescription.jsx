@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/default.css';
+import '../../dk-blue.css';
 
 const MailDescription = () => {
     const codeRef = useRef(null);
