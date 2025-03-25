@@ -56,9 +56,9 @@ const App = () => {
   */
 
   // Use relative or environment-based API URL
-  const apiUrl = import.meta.env.MODE === 'development' 
-    ? 'http://localhost:8080/api/'
-    : '/api/'; // This will use the same domain as your frontend in production
+  // const apiUrl = import.meta.env.MODE === 'development' 
+  //   ? 'http://localhost:8080/api/'
+  //   : '/api/'; // This will use the same domain as your frontend in production
 
   const fetchAPI = async () => {
     try {

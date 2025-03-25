@@ -15,7 +15,7 @@ import SectionNavigation from "../components/AboutMe/SectionNavigation";
 import ScrollToTop from "../components/AboutMe/ScrollToTop";
 
 // Import data and other components
-import DanielImage from "../assets/images/daniel2.png";
+import DanielImage from "../assets/images/daniel2.webp";
 import projectsData from '../data/projects.json';
 
 // Import visual components directly
@@ -33,7 +33,8 @@ const aboutContent = {
   landing: {
     title: "I'm Daniel",
     subtitle: "I make cool things on the web. Let's create something extraordinary together.",
-    image: DanielImage
+    image: DanielImage, // Use smaller image for initial load
+    imageLarge: DanielImage // Use larger image for lazy loading
   },
   
   // Main sections organized by narrative progression
@@ -252,6 +253,9 @@ export default function AboutMe() {
           scrollToSection={scrollToSection}
           sectionRef={(el) => (sectionRefs.current.hero = el)}
         />
+        
+        {/* Lazy load the larger image */}
+        <img src={aboutContent.landing.imageLarge} loading="lazy" alt="Daniel Kolpakov" style={{ display: 'none' }} />
         
         {/* Content Sections */}
         {aboutContent.sections.map((section, sectionIdx) => {

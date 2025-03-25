@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
 const springValues = {
@@ -21,6 +21,7 @@ export default function TiltedCard({
   showTooltip = true,
   overlayContent = null,
   displayOverlayContent = false,
+  border,
 }) {
   const ref = useRef(null);
   const x = useMotionValue(0);
@@ -71,6 +72,8 @@ export default function TiltedCard({
     rotateFigcaption.set(0);
   }
 
+  const isReactComponent = typeof imageSrc !== 'string' && imageSrc !== null;
+
   return (
     <figure
       ref={ref}
@@ -83,43 +86,38 @@ export default function TiltedCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {showMobileWarning && (
-        <div className="absolute top-4 text-center text-sm block sm:hidden">
-          This effect is not optimized for mobile. Check on desktop.
-        </div>
-      )}
-
       <motion.div
-        className="relative [transform-style:preserve-3d]"
+        className="relative [transform-style:preserve-3d] rounded-[15px] overflow-hidden"
         style={{
           width: imageWidth,
           height: imageHeight,
           rotateX,
           rotateY,
           scale,
+          border,
         }}
       >
-        {typeof imageSrc === 'string' ? (
+        {isReactComponent ? (
+          // Render React component
+          <div className="absolute top-0 left-0 w-full h-full">
+            {imageSrc}
+          </div>
+        ) : (
+          // Render image from URL
           <motion.img
             src={imageSrc}
             alt={altText}
-            className="absolute top-0 left-0 object-cover rounded-[15px] will-change-transform [transform:translateZ(0)] opacity-80"
+            className="absolute top-0 left-0 object-cover rounded-[15px] will-change-transform [transform:translateZ(0)]"
             style={{
               width: imageWidth,
               height: imageHeight,
             }}
           />
-        ) : (
-          <div className="absolute top-0 left-0 w-full h-full rounded-[15px] overflow-hidden">
-            {React.cloneElement(imageSrc, {
-              key: "tilted-card-content"
-            })}
-          </div>
         )}
 
         {displayOverlayContent && overlayContent && (
           <motion.div
-            className="absolute top-0 left-0 z-[2] will-change-transform [transform:translateZ(30px)]"
+            className="absolute top-0 left-0 z-[2] w-full h-full will-change-transform [transform:translateZ(30px)]"
           >
             {overlayContent}
           </motion.div>

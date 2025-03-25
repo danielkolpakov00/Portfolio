@@ -16,14 +16,21 @@ const nightColor = new THREE.Color(0x0a1428);   // Darker night blue
 let isPlaying = false;
 let currentTime = 0;
 
-// Add after other constants
+// Enhanced responsive radius calculation
 const getResponsiveRadius = () => {
     const screenWidth = window.innerWidth;
-    // Base radius on screen width with minimum and maximum values
-    const baseRadius = Math.min(Math.max(screenWidth / 200, 4), 8.5);
+    const screenHeight = window.innerHeight;
+    const smallestDimension = Math.min(screenWidth, screenHeight);
+    
+    // Use the smallest screen dimension to ensure proper fitting in any orientation
+    const baseRadius = Math.min(Math.max(smallestDimension / 200, 4), 8.5);
+    
+    // Adjust aspect ratio based on screen proportions
+    const aspectRatio = screenHeight < screenWidth * 0.8 ? 0.35 : 0.47;
+    
     return {
         radius: baseRadius,
-        maxY: baseRadius * 0.47, // Maintain aspect ratio
+        maxY: baseRadius * aspectRatio, // Maintain aspect ratio
         minX: -baseRadius,
         maxX: baseRadius
     };
@@ -41,26 +48,28 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer({ 
-    antialias: true,
+    antialias: window.devicePixelRatio < 2, // Only use antialias for higher-end devices
     powerPreference: "high-performance",
     precision: "highp"
 });
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.3;
 document.body.appendChild(renderer.domElement);
 
-// Setup postprocessing
+// Setup postprocessing with responsive quality
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
+// Adjust bloom quality based on device capability
+const isLowPowerDevice = window.devicePixelRatio < 2 || window.innerWidth < 768;
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.4,    // strength
-    0.5,    // radius
-    0.1     // threshold
+    isLowPowerDevice ? 0.3 : 0.4,    // strength
+    isLowPowerDevice ? 0.4 : 0.5,    // radius
+    isLowPowerDevice ? 0.2 : 0.1     // threshold
 );
 composer.addPass(bloomPass);
 
@@ -122,11 +131,15 @@ scene.add(sunLight);
 const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
 scene.add(ambientLight);
 
-// Update cloud creation function
+// Update cloud creation function with more responsive scaling
 function createCloud(size, x, y, direction) {
   const loader = new SVGLoader();
   const cloud = new THREE.Group();
   cloud.meshes = []; // Store references to cloud meshes
+  
+  // Scale cloud size based on screen dimensions
+  const responsiveFactor = Math.min(window.innerWidth, window.innerHeight) / 1000;
+  const adjustedSize = size * Math.max(0.8, responsiveFactor);
   
   loader.load('./assets/cloud.svg', function(data) {
     const paths = data.paths;
@@ -145,20 +158,23 @@ function createCloud(size, x, y, direction) {
         });
         
         const mesh = new THREE.Mesh(geometry, material);
+        // Apply slight random rotation to avoid squared appearance
+        mesh.rotation.z = (Math.random() - 0.5) * 0.2;
         cloud.add(mesh);
         cloud.meshes.push(mesh); // Store reference to mesh
       });
     });
     
-    // Scale and position the cloud group
-    cloud.scale.set(size * 0.001, size * 0.001, 1);
+    // Use non-uniform scaling to avoid squared appearance
+    const randomWidthScale = 0.9 + Math.random() * 0.2;
+    cloud.scale.set(adjustedSize * 0.001 * randomWidthScale, adjustedSize * 0.001, 1);
     cloud.position.set(x, -3, 1);
   });
   
   cloud.direction = direction;
   
-  // Add glow effect
-  const glowGeometry = new THREE.PlaneGeometry(size, size * 0.6);
+  // Add rounded glow effect
+  const glowGeometry = new THREE.CircleGeometry(adjustedSize/2, 32);
   const glowMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -367,6 +383,7 @@ function animateWeatherParticles() {
 }
 
 // 6. Event Listeners
+// Enhanced resize handler for responsive adjustments
 window.addEventListener('resize', () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -375,9 +392,27 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     
     renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
     composer.setSize(width, height);
+    
+    // Adjust bloom quality based on screen size
+    const isSmallScreen = width < 768;
+    bloomPass.strength = isSmallScreen ? 0.3 : 0.4;
+    bloomPass.radius = isSmallScreen ? 0.4 : 0.5;
+    
+    // Update cloud positions and sizes
+    clouds.forEach(cloud => {
+      if (cloud.meshes && cloud.meshes.length > 0) {
+        const responsiveFactor = Math.min(width, height) / 1000;
+        const adjustedScale = Math.max(0.8, responsiveFactor) * 0.001;
+        
+        // Adjust scale based on new dimensions
+        const randomWidthScale = 0.9 + Math.random() * 0.2;
+        cloud.scale.x = adjustedScale * randomWidthScale * (cloud.originalSize || 2);
+        cloud.scale.y = adjustedScale * (cloud.originalSize || 2);
+      }
+    });
 
     // Update celestial positions when screen size changes
     updateTime(currentTime);
@@ -391,24 +426,48 @@ window.onload = () => {
   // Ensure slider is hidden and debug button styles are set
   timeSlider.style.display = 'none';
   debugButton.style.backgroundColor = 'white';
-  debugButton.querySelector('svg').style.fill = 'black';
+  
+  // Initialize debug button icon
+  const bugIcon = debugButton.querySelector('i');
+  bugIcon.style.color = 'black';
 
-  // Initialize play button state
+  // Initialize play button state and icon
   playButton.style.backgroundColor = 'white';
-  playButton.querySelector('svg').style.fill = 'black';
+  const playIcon = playButton.querySelector('i');
+  playIcon.style.color = 'black';
+  
+  // Initialize precip button icon
+  const precipIcon = precipButton.querySelector('i');
+  precipIcon.style.color = 'black';
+  
+  // Setup responsive event handlers
+  setupTouchEvents();
+  
   isPlaying = false;
   currentTime = getVancouverTime() * 60;
+  
+  // Store original cloud sizes for responsive scaling
+  clouds.forEach(cloud => {
+    const originalSize = Math.random() * 1.5 + 2;
+    cloud.originalSize = originalSize;
+  });
 };
 
 debugButton.addEventListener('click', () => {
   if (timeSlider.style.display === 'none') {
     timeSlider.style.display = 'block';
     debugButton.style.backgroundColor = 'black';
-    debugButton.querySelector('svg').style.fill = 'white';
+    
+    // Update the bug icon color
+    const bugIcon = debugButton.querySelector('i');
+    bugIcon.style.color = 'white';
   } else {
     timeSlider.style.display = 'none';
     debugButton.style.backgroundColor = 'white';
-    debugButton.querySelector('svg').style.fill = 'black';
+    
+    // Update the bug icon color
+    const bugIcon = debugButton.querySelector('i');
+    bugIcon.style.color = 'black';
   }
 });
 
@@ -416,7 +475,19 @@ debugButton.addEventListener('click', () => {
 playButton.addEventListener('click', () => {
   isPlaying = !isPlaying;
   playButton.style.backgroundColor = isPlaying ? 'black' : 'white';
-  playButton.querySelector('svg').style.fill = isPlaying ? 'white' : 'black';
+  
+  // Update the icon color and content
+  const playIcon = playButton.querySelector('i');
+  playIcon.style.color = isPlaying ? 'white' : 'black';
+  
+  // Change icon from play to pause and vice versa
+  if (isPlaying) {
+    playIcon.classList.remove('fa-play');
+    playIcon.classList.add('fa-pause');
+  } else {
+    playIcon.classList.remove('fa-pause');
+    playIcon.classList.add('fa-play');
+  }
 });
 
 timeSlider.addEventListener('input', () => {
@@ -428,7 +499,10 @@ precipButton.addEventListener('click', () => {
     const isVisible = precipControls.style.display === 'flex';
     precipControls.style.display = isVisible ? 'none' : 'flex';
     precipButton.style.backgroundColor = isVisible ? 'white' : 'black';
-    precipButton.querySelector('svg').style.fill = isVisible ? 'black' : 'white';
+    
+    // Update the icon color
+    const precipIcon = precipButton.querySelector('i');
+    precipIcon.style.color = isVisible ? 'black' : 'white';
 });
 
 // Add precipitation control handlers
@@ -582,6 +656,15 @@ function updateTime(simulatedTime) {
         bloomPass.strength = 0.4;
         timeDisplay.style.color = 'black';
         updateCloudBloom(true);
+        
+        // Update weather message text color for day
+        if (window.weatherMessages) {
+            window.weatherMessages.forEach(msg => {
+                msg.style.color = 'black';
+                // Add subtle shadow for better visibility against light background
+                msg.style.textShadow = '0px 0px 4px rgba(255, 255, 255, 0.7)';
+            });
+        }
     } else {
         // Enhanced night lighting
         const moonHeight = -sunHeight;
@@ -601,6 +684,15 @@ function updateTime(simulatedTime) {
         bloomPass.strength = 1; // Stronger bloom at night
         timeDisplay.style.color = 'white';
         updateCloudBloom(false);
+        
+        // Update weather message text color for night
+        if (window.weatherMessages) {
+            window.weatherMessages.forEach(msg => {
+                msg.style.color = 'white';
+                // Add subtle shadow for better visibility against dark background
+                msg.style.textShadow = '0px 0px 4px rgba(0, 0, 0, 0.7)';
+            });
+        }
     }
 
     // Update background color using calculated light factor
@@ -633,6 +725,7 @@ function updateCloudBloom(isDaytime) {
   bloomPass.threshold = isDaytime ? 0.1 : 0.05;
 }
 
+// Update the displayWeatherData function for better responsiveness
 function displayWeatherData(data = null) {
   const weatherDisplay = document.getElementById('weatherDisplay');
 
@@ -681,6 +774,8 @@ function displayWeatherData(data = null) {
     const div = document.createElement('div');
     div.className = 'weatherMessage';
     div.textContent = text;
+    // Add text-shadow for better visibility in all conditions
+    div.style.textShadow = '0px 0px 4px rgba(0, 0, 0, 0.5)';
     return div;
   });
 
@@ -688,6 +783,9 @@ function displayWeatherData(data = null) {
   messageElements.forEach((div) => {
     weatherDisplay.appendChild(div);
   });
+
+  // Make global reference to access messages in updateTime
+  window.weatherMessages = messageElements;
 
   // Use GSAP to create the vertical carousel effect
   gsap.set(messageElements, { yPercent: 100, opacity: 0 });
@@ -707,8 +805,9 @@ function displayWeatherData(data = null) {
     currentIndex = nextIndex;
   }
 
-  // Rotate messages every 3 seconds
-  setInterval(rotateMessages, 3000);
+  // Adjust rotation interval based on screen size
+  const rotationInterval = window.innerWidth < 768 ? 4000 : 3000;
+  setInterval(rotateMessages, rotationInterval);
 }
 
 function validateWeatherData(temperature, precipitationValue) {
@@ -725,6 +824,32 @@ function validateWeatherData(temperature, precipitationValue) {
   }
 
   return { temperature, precipitationValue };
+}
+
+// Create touch event handling for mobile devices
+function setupTouchEvents() {
+  const canvas = renderer.domElement;
+  
+  // Add touch event for precipitation toggle on swipe down
+  let touchStartY = 0;
+  canvas.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  canvas.addEventListener('touchend', (e) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaY = touchEndY - touchStartY;
+    
+    // Swipe down to toggle precipitation
+    if (deltaY > 100) {
+      const isVisible = precipControls.style.display === 'flex';
+      precipControls.style.display = isVisible ? 'none' : 'flex';
+      precipButton.style.backgroundColor = isVisible ? 'white' : 'black';
+      
+      const precipIcon = precipButton.querySelector('i');
+      precipIcon.style.color = isVisible ? 'black' : 'white';
+    }
+  }, { passive: true });
 }
 
 // Start the animation

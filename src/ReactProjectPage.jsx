@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faMobileAlt } from '@fortawesome/free-solid-svg-icons';
 import TsParticles from './components/TsParticles'; // Updated import for default export
 
 const ReactProjectPage = () => {
   const { id } = useParams();
   const [selectedProject, setSelectedProject] = useState(null);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Shared tooltip state
   const [tooltip, setTooltip] = useState({
@@ -16,6 +17,20 @@ const ReactProjectPage = () => {
     y: 0,
     content: null
   });
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // Project descriptions
   const glslExplanations = {
@@ -231,10 +246,62 @@ void main() {
     }
   `;
 
+  const renderProjectDemo = () => {
+    if (!selectedProject) return null;
+    
+    // Show warning for non-mobile-friendly sites on mobile devices
+    if (isMobile && !selectedProject.isMobileFriendly) {
+      return (
+        <div className="bg-blue-50 border-l-4 border-blue2 p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <FontAwesomeIcon icon={faMobileAlt} className="h-5 w-5 text-blue2" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm md:text-base text-blue2">
+                This project is not optimized for mobile devices. For the best experience, please view on a desktop or laptop computer.
+              </p>
+              <div className="mt-4">
+                <a 
+                  href={selectedProject.demoUrl} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-150 ease-in-out"
+                >
+                  Open anyway
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Otherwise show the iframe
+    return (
+      <div className="bg-white shadow-lg overflow-hidden">
+        {selectedProject.demoUrl ? (
+          <div className="h-[1200px]">
+            <iframe
+              src={selectedProject.demoUrl}
+              title={`${selectedProject.title} Demo`}
+              className="w-full h-full border-0"
+              allow="fullscreen"
+            />
+          </div>
+        ) : (
+          <div className="h-[1200px] flex items-center justify-center bg-gray-100">
+            <p className="text-gray-500">Demo not available</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <> 
-      <div className="relative">
       <TsParticles/>
+      <div className="relative">
         <style>{codeAnimations}</style>
         <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
           
@@ -260,22 +327,7 @@ void main() {
             </header>
 
             {/* Project Demo iFrame */}
-            <div className="bg-white shadow-lg overflow-hidden">
-              {selectedProject?.demoUrl ? (
-                <div className="h-[1200px]">
-                  <iframe
-                    src={selectedProject.demoUrl}
-                    title={`${selectedProject.title} Demo`}
-                    className="w-full h-full border-0"
-                    allow="fullscreen"
-                  />
-                </div>
-              ) : (
-                <div className="h-[1200px] flex items-center justify-center bg-gray-100">
-                  <p className="text-gray-500">Demo not available</p>
-                </div>
-              )}
-            </div>
+            {renderProjectDemo()}
 
             {/* Description */}
             <div className="bg-white/80 bg-blur-lg rounded-xl shadow-lg p-8">

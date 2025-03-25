@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const marqueeText = "dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · ";
+const fullMarqueeText = "dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · ";
 
 const VerticalMarquee = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const marqueeRef = useRef(null);
   
-  // Delay marquee rendering until after main content load
+  // Initial load delay
   useEffect(() => {
-    // Use requestIdleCallback for non-critical UI elements if available
-    const renderMarquee = () => setIsLoaded(true);
+    const initialRender = () => setIsLoaded(true);
     
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(renderMarquee, { timeout: 2000 });
+      window.requestIdleCallback(initialRender, { timeout: 2000 });
     } else {
-      // Fallback to setTimeout for browsers that don't support requestIdleCallback
-      const timeoutId = setTimeout(renderMarquee, 1000);
+      const timeoutId = setTimeout(initialRender, 1000);
       return () => clearTimeout(timeoutId);
     }
   }, []);
@@ -28,8 +27,7 @@ const VerticalMarquee = () => {
     display: 'flex',
     alignItems: 'center',
     pointerEvents: 'none',
-    // Add CSS containment to limit repaint area
-    contain: 'content',
+    // Remove the contain property that might be causing issues
     visibility: isLoaded ? 'visible' : 'hidden',
   };
 
@@ -42,21 +40,20 @@ const VerticalMarquee = () => {
     overflow: 'visible',
     width: '100vw',
     opacity: '0.5',
-    // Add will-change to optimize animation rendering
-    willChange: 'transform',
   };
 
   const marqueeWrapperStyle = {
     display: 'inline-block',
-    // Only apply animation when component is loaded
     animation: isLoaded ? 'marquee 120s linear infinite' : 'none',
     animationDelay: '-10s',
     height: '100%',
+    // Only use willChange without the other performance optimizations that might be causing issues
+    willChange: isLoaded ? 'transform' : 'auto',
   };
 
-  // If not loaded yet, return null or a minimal placeholder
+  // If not loaded yet, return null
   if (!isLoaded) {
-    return null; // Don't render anything until main content is loaded
+    return null;
   }
 
   return (
@@ -68,8 +65,13 @@ const VerticalMarquee = () => {
         }
       `}</style>
       <div style={textStyle}>
-        <div style={marqueeWrapperStyle}>
-          <span>{marqueeText}</span>
+        <div 
+          style={marqueeWrapperStyle}
+          ref={marqueeRef}
+        >
+          <span>{fullMarqueeText}</span>
+          {/* Add a duplicate span to ensure continuous looping */}
+          <span>{fullMarqueeText}</span>
         </div>
       </div>
     </div>

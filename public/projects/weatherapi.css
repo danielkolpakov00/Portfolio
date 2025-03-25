@@ -1,18 +1,24 @@
 body { 
   margin: 0; 
+  overflow: hidden;
+  touch-action: manipulation;
+  font-family: 'Inter', sans-serif;
 }
+
+/* Weather display with responsive improvements */
 #weatherDisplay { 
   position: absolute;
-  top: 50%;
+  top: min(50%, calc(50% - 40px));
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: 'Abril Fatface', sans-serif;
-  letter-spacing: 2px;
-  font-size: clamp(18px, 4vw, 36px);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  letter-spacing: max(0.2px, min(0.5px, 0.3vw));
+  font-size: clamp(16px, 3.5vw, 28px);
   color: rgb(255, 255, 255);
   transition: color 1s ease;
   text-align: center;
-  width: 90%;
+  width: min(90%, 600px);
   max-width: 800px;
   overflow: hidden;
   height: auto;
@@ -20,26 +26,45 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: min(12px, 3vw);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  padding: min(15px, 4vw);
+  z-index: 10;
 }
+
 .weatherMessage {
   position: absolute;
   width: 100%;
   padding: 0 10px;
   box-sizing: border-box;
   line-height: 1.4;
+  transition: color 1s ease, opacity 0.8s ease;
 }
-canvas { display: block; }
+
+canvas { 
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+}
+
+/* Time display with responsive settings */
 #timeDisplay {
   position: absolute;
-  top: 100px;
+  top: min(100px, 12vh);
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Abril Fatface', sans-serif;
-  letter-spacing: 9px;
-  font-size: 90px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: clamp(3px, 1.5vw, 6px);
+  font-size: clamp(40px, 10vw, 90px);
   color: black;
   transition: color 1s ease;
+  z-index: 10;
 }
+
 #gradientOverlay {
   position: absolute;
   bottom: 0;
@@ -51,9 +76,11 @@ canvas { display: block; }
   transition: opacity 3s ease;
   pointer-events: none;
 }
+
+/* Responsive time slider */
 #timeSlider {
   position: relative;
-  width: 200px;
+  width: min(90%, 200px);
   margin-bottom: 5px;
   display: none;
   -webkit-appearance: none;
@@ -82,23 +109,28 @@ canvas { display: block; }
   border: none;
 }
 
-#debugButton {
+/* Button styling with responsive adjustments */
+.control-button {
   position: relative;
-  font-size: 16px;
-  padding: 15px 20px;
+  font-size: clamp(14px, 3vw, 16px);
+  padding: min(15px, 3.5vw) min(20px, 4.5vw);
   border-radius: 100px;
   cursor: pointer;
   background-color: white;
   border: none;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background-color 0.5s ease;
 }
-.icon {
-  width: 2em;
-  height: 2em;
-  vertical-align: -0.125em;
-  transition: fill 0.5s ease;
+
+#debugButton, #playButton, #precipButton {
+  composes: control-button;
 }
+
+.icon {
+  font-size: clamp(1.2em, 5vw, 1.5em);
+  transition: color 0.5s ease;
+}
+
 #sunriseOverlay {
   position: absolute;
   bottom: 0;
@@ -110,81 +142,118 @@ canvas { display: block; }
   transition: opacity 3s ease;
   pointer-events: none;
 }
-#playButton {
-  position: relative;
-  font-size: 16px;
-  padding: 15px 20px;
-  border-radius: 100px;
-  cursor: pointer;
-  background-color: white;
-  border: none;
-  font-family: Arial, sans-serif;
-  transition: background-color 0.5s ease;
-}
 
+/* Controls positioning and layout */
 #controlGroup {
   position: absolute;
-  bottom: 20px;
+  bottom: min(20px, 5vh);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: min(10px, 2vh);
+  z-index: 20;
 }
 
 .buttonRow {
   display: flex;
-  gap: 10px;
-}
-
-#precipButton {
-  position: relative;
-  font-size: 16px;
-  padding: 15px 20px;
-  border-radius: 100px;
-  cursor: pointer;
-  background-color: white;
-  border: none;
-  font-family: Arial, sans-serif;
-  transition: background-color 0.5s ease;
+  gap: min(10px, 3vw);
 }
 
 #precipControls {
   position: absolute;
-  bottom: 80px;
+  bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
   display: none;
   gap: 15px;
   align-items: center;
   background: rgba(255, 255, 255, 0.9);
-  padding: 10px 20px;
+  padding: min(8px, 2vw) min(15px, 3.5vw);
   border-radius: 100px;
 }
 
 #precipType {
-  padding: 8px 12px;
+  padding: min(6px, 1.5vw) min(10px, 2.5vw);
   border-radius: 20px;
   border: none;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(12px, 2.5vw, 14px);
   cursor: pointer;
 }
 
 #precipIntensity {
-  width: 120px;
+  width: clamp(80px, 25vw, 120px);
   cursor: pointer;
 }
 
-/* Add media query for very small screens */
+/* Media queries for different device sizes */
 @media (max-width: 480px) {
   #weatherDisplay {
-    letter-spacing: 1px;
-    min-height: 80px;
+    letter-spacing: 0.3px;
+    min-height: 70px;
+    top: 45%;
   }
   
   #timeDisplay {
-    font-size: clamp(40px, 15vw, 90px);
-    letter-spacing: 4px;
+    top: 15vh;
+  }
+  
+  .buttonRow button {
+    padding: 10px 15px;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  #weatherDisplay {
+    font-size: clamp(14px, 2.5vw, 18px);
+    min-height: 50px;
+    padding: 10px;
+    top: 40%;
+  }
+  
+  #timeDisplay {
+    top: 8vh;
+    font-size: clamp(30px, 8vw, 60px);
+  }
+  
+  #controlGroup {
+    bottom: 10px;
+  }
+  
+  .buttonRow button {
+    padding: 8px 12px;
+  }
+  
+  .icon {
+    font-size: 1.2em;
+  }
+  
+  #precipControls {
+    padding: 5px 10px;
+    bottom: calc(100% + 5px);
+  }
+}
+
+/* Touch device optimizations */
+@media (pointer: coarse) {
+  .control-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  #precipType, #precipIntensity {
+    height: 36px;
+  }
+  
+  #timeSlider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  #timeSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
   }
 }

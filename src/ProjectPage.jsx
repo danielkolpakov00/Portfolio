@@ -4,9 +4,10 @@ import hljs from 'highlight.js';
 import './dk-blue.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { faCaretDown, faExpand, faMobileAlt as faMobileAltSolid } from '@fortawesome/free-solid-svg-icons';
 import { getProjectDescription } from './components/ProjectDescriptions';
 import LoadingScreen from './components/LoadingScreen';
+import TsParticles from './components/TsParticles';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -17,6 +18,22 @@ const ProjectPage = () => {
   const codeBlockRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isContentLoading, setIsContentLoading] = useState(true);
+  const iframeRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const fetchCodeFile = async (fileUrl) => {
     try {
@@ -142,6 +159,19 @@ const ProjectPage = () => {
     }
   `;
 
+  const handleFullscreen = () => {
+    const iframe = iframeRef.current;
+    if (iframe) {
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) { /* Safari */
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) { /* IE11 */
+        iframe.msRequestFullscreen();
+      }
+    }
+  };
+
   const tabs =
     selectedProject && selectedProject.stack === 'backend'
       ? selectedProject.jsFiles || []
@@ -154,24 +184,61 @@ const ProjectPage = () => {
 
   const DescriptionComponent = selectedProject ? getProjectDescription(selectedProject.id) : null;
 
-  return (
-    <div className="project-page max-w-7xl mx-auto p-4 lg:p-8">
-      <style>{tailwindAnimations}</style>
-      <h1 className="text-4xl font-bold text-blue-600 text-center my-8">
-        {selectedProject.title}
-      </h1>
-
-     
-
+  const renderProjectDemo = () => {
+    if (!selectedProject) return null;
+    
+    // Show warning for non-mobile-friendly sites on mobile devices
+    if (isMobile && !selectedProject.isMobileFriendly) {
+      return (
+        <div className="flex justify-center">
+          <div className="w-full max-w-6xl bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 shadow-md">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <FontAwesomeIcon icon={faMobileAltSolid} className="h-5 w-5 text-yellow-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm md:text-base text-yellow-700">
+                  This project is not optimized for mobile devices. For the best experience, please view on a desktop or laptop computer.
+                </p>
+                <div className="mt-4">
+                  <a 
+                    href={selectedProject.demoUrl} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-150 ease-in-out"
+                  >
+                    Open anyway
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Otherwise show the iframe
+    return (
+      
       <div className="project-demo flex justify-center">
         {selectedProject.demoUrl ? (
-          <div className="w-full max-w-6xl aspect-[4/3] md:aspect-[16/9] lg:h-[800px] overflow-hidden shadow-lg mb-0">
+          <div className="w-full max-w-6xl aspect-[4/3] md:aspect-[16/9] lg:h-[800px] overflow-hidden shadow-lg mb-0 relative">
             <iframe
+              ref={iframeRef}
               src={selectedProject.demoUrl}
               title={`${selectedProject.title} Demo`}
               className="w-full h-full border-0"
               allow="fullscreen"
+              allowFullScreen
             ></iframe>
+            <button
+              onClick={handleFullscreen}
+              className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium"
+              aria-label="View fullscreen"
+            >
+              <FontAwesomeIcon icon={faExpand} />
+              <span>Fullscreen</span>
+            </button>
           </div>
         ) : (
           <p className="text-gray-500">
@@ -179,76 +246,92 @@ const ProjectPage = () => {
           </p>
         )}
       </div>
-      
-      {selectedProject.stack !== 'backend' && (
-      <div className="flex justify-center -mt-[1px]">
-        <div className="code-block w-full max-w-6xl bg-gray-900 shadow-lg overflow-hidden">
-          <div className="flex">
-            {tabs.map((tab) => {
-              let label, icon, textColor;
-              if (selectedProject?.stack === 'backend') {
-                label = tab.split('/').pop(); // extract filename
-                icon = faJs;
-                textColor = 'text-yellow-500';
-              } else {
-                label = tab.toUpperCase();
-                const icons = { html: faHtml5, css: faCss3Alt, js: faJs };
-                const textColors = { html: 'text-orange-500', css: 'text-blue-400', js: 'text-yellow-500' };
-                icon = icons[tab];
-                textColor = textColors[tab];
-              }
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 font-semibold ${
-                    activeTab === tab ? 'bg-gray-800' : 'bg-gray-700'
+    );
+  };
+
+  return (
+    <>
+      <TsParticles />
+      <div className="project-page max-w-7xl mx-auto p-4 lg:p-8">
+        <style>{tailwindAnimations}</style>
+        <h1 className="text-4xl font-bold text-blue-600 text-center my-8">
+          {selectedProject.title}
+        </h1>
+
+        <div className="project-description w-full max-w-4xl mx-auto px-4 md:px-8 py-6 mb-10 bg-offwhite rounded-lg shadow-sm">
+          {DescriptionComponent && <div className="prose prose-lg max-w-none text-gray-700"><DescriptionComponent /></div>}
+          
+        </div>
+
+        {renderProjectDemo()}
+        
+        {selectedProject.stack !== 'backend' && (
+        <div className="flex justify-center -mt-[1px]">
+          <div className="code-block w-full max-w-6xl bg-gray-900 shadow-lg overflow-hidden">
+            <div className="flex">
+              {tabs.map((tab) => {
+                let label, icon, textColor;
+                if (selectedProject?.stack === 'backend') {
+                  label = tab.split('/').pop(); // extract filename
+                  icon = faJs;
+                  textColor = 'text-yellow-500';
+                } else {
+                  label = tab.toUpperCase();
+                  const icons = { html: faHtml5, css: faCss3Alt, js: faJs };
+                  const textColors = { html: 'text-orange-500', css: 'text-blue-400', js: 'text-yellow-500' };
+                  icon = icons[tab];
+                  textColor = textColors[tab];
+                }
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex items-center justify-center gap-2 flex-1 px-4 py-2 font-semibold ${
+                      activeTab === tab ? 'bg-gray-800' : 'bg-gray-700'
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={icon} className={textColor} />
+                    <span className={textColor}>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+    
+            <div className={`relative p-4 text-white transition-[height] duration-300 ease-in-out ${
+              isExpanded ? 'h-[800px]' : 'h-[400px]'
+            }`}>
+              <pre className="hljs h-full overflow-x-auto overflow-y-auto [&>code>div]:leading-6" key={`${activeTab}-${codeContent}`}>
+                {isContentLoading ? (
+                  <CodeSkeleton />
+                ) : (
+                  <code 
+                    ref={codeBlockRef} 
+                    className={`language-${selectedProject?.stack === 'backend' ? 'javascript' : (activeTab === 'js' ? 'javascript' : activeTab)} block`}
+                  >
+                    {codeContent}
+                  </code>
+                )}
+              </pre>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="sticky left-[calc(100%-2.5rem)] bottom-2 bg-gray-800 hover:bg-gray-700 rounded-full p-2 transition-colors duration-200"
+                title={isExpanded ? "Collapse" : "Expand"}
+              >
+                <FontAwesomeIcon
+                  icon={faCaretDown}
+                  className={`text-gray-400 transition-transform duration-300 ${
+                    isExpanded ? 'rotate-180' : ''
                   }`}
-                >
-                  <FontAwesomeIcon icon={icon} className={textColor} />
-                  <span className={textColor}>{label}</span>
-                </button>
-              );
-            })}
-          </div>
-  
-          <div className={`relative p-4 text-white transition-[height] duration-300 ease-in-out ${
-            isExpanded ? 'h-[800px]' : 'h-[400px]'
-          }`}>
-            <pre className="hljs h-full overflow-x-auto overflow-y-auto [&>code>div]:leading-6" key={`${activeTab}-${codeContent}`}>
-              {isContentLoading ? (
-                <CodeSkeleton />
-              ) : (
-                <code 
-                  ref={codeBlockRef} 
-                  className={`language-${selectedProject?.stack === 'backend' ? 'javascript' : (activeTab === 'js' ? 'javascript' : activeTab)} block`}
-                >
-                  {codeContent}
-                </code>
-              )}
-            </pre>
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="sticky left-[calc(100%-2.5rem)] bottom-2 bg-gray-800 hover:bg-gray-700 rounded-full p-2 transition-colors duration-200"
-              title={isExpanded ? "Collapse" : "Expand"}
-            >
-              <FontAwesomeIcon
-                icon={faCaretDown}
-                className={`text-gray-400 transition-transform duration-300 ${
-                  isExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
+                />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      )}
+        )}
 
-      <div className="project-description w-full max-w-8xl text-gray-700 mt-8 mx-auto">
-        <h3 className="text-2xl font-semibold mb-6 text-center">About {selectedProject.title}</h3>
-        {DescriptionComponent && <DescriptionComponent />}
+     
       </div>
-    </div>
+    </>
   );
 };
 

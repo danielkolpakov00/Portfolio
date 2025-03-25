@@ -134,3 +134,30 @@ html, body {
 .bg-offwhite {
   background-color: transparent;
 }
+
+/* Make React icons visible */
+.project-card h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.project-card h3 svg {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Add this to your existing CSS */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}

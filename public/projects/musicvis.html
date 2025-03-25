@@ -19,58 +19,58 @@
 </head>
 <body class="bg-black text-white font-georama">
   <!-- Navigation Bar -->
-  <nav class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-40 p-4 rounded-full flex space-x-6 items-center z-10 shadow-xl backdrop-blur-md">
+  <nav class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-transparent p-4 rounded-full flex space-x-6 items-center z-10">
     <!-- Settings Button with Tooltip -->
     <div class="relative group">
-      <button id="settings-btn" class="text-gray-300 hover:text-green-400 text-xl">
+      <button id="settings-btn" class="text-white hover:text-[#1B69FA] text-xl bg-black hover:bg-gray-900 p-3 rounded-full transition-all duration-200 shadow-md">
         <i class="fas fa-cog"></i>
       </button>
       <span
-        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg border border-gray-700 whitespace-nowrap">
         Settings
       </span>
     </div>
 
     <!-- Volume Button with Tooltip -->
     <div class="relative group">
-      <button id="volume-btn" class="text-gray-300 hover:text-green-400 text-xl">
+      <button id="volume-btn" class="text-white hover:text-[#1B69FA] text-xl bg-black hover:bg-gray-900 p-3 rounded-full transition-all duration-200 shadow-md">
         <i class="fas fa-volume-up" id="volume-icon"></i>
       </button>
       <span
-        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg border border-gray-700 whitespace-nowrap">
         Volume
       </span>
     </div>
 
     <!-- Upload Button with Tooltip -->
     <div class="relative group">
-      <button id="upload-btn" class="text-gray-300 hover:text-green-400 text-xl">
+      <button id="upload-btn" class="text-white hover:text-[#1B69FA] text-xl bg-black hover:bg-gray-900 p-3 rounded-full transition-all duration-200 shadow-md">
         <i class="fas fa-upload"></i>
       </button>
       <span
-        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg border border-gray-700 whitespace-nowrap">
         Upload
       </span>
     </div>
 
     <!-- Playlist Button with Tooltip -->
     <div class="relative group">
-      <button id="playlist-btn" class="text-gray-300 hover:text-green-400 text-xl">
+      <button id="playlist-btn" class="text-white hover:text-[#1B69FA] text-xl bg-black hover:bg-gray-900 p-3 rounded-full transition-all duration-200 shadow-md">
         <i class="fas fa-list"></i>
       </button>
       <span
-        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg border border-gray-700 whitespace-nowrap">
         Playlist
       </span>
     </div>
 
     <!-- Color Cycle Button with Tooltip -->
     <div class="relative group">
-      <button class="cycle-btn" class="text-gray-300 hover:text-green-400 text-xl">
+      <button class="cycle-btn text-white hover:text-[#1B69FA] text-xl bg-black hover:bg-gray-900 p-3 rounded-full transition-all duration-200 shadow-md">
         <i class="fas fa-palette"></i>
       </button>
       <span
-        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg border border-gray-700 whitespace-nowrap max-w-xs text-center">
         Toggle Color Cycle (currently broken)
       </span>
     </div>
@@ -83,10 +83,10 @@
   </div>
 
   <!-- Now Playing Section -->
-  <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between w-[90%] sm:w-[600px] md:w-[700px] lg:w-[800px]">
+  <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between w-[90%] sm:w-[600px] md:w-[700px] lg:w-[800px]">
     <div class="flex items-center space-x-4 w-full sm:w-auto">
       <!-- Play/Pause Button -->
-      <button id="play-btn" class="flex-shrink-0 text-gray-300 hover:text-white transition-colors duration-200 bg-white bg-opacity-5 hover:bg-opacity-10 rounded-full p-3">
+      <button id="play-btn" class="flex-shrink-0 text-white hover:text-[#1B69FA] transition-colors duration-200 bg-black hover:bg-gray-900 rounded-full p-3 shadow-md">
         <i class="fas fa-play text-xl sm:text-2xl" id="play-icon"></i>
       </button>
       
@@ -105,7 +105,7 @@
                  min="0" 
                  max="100" 
                  value="0" 
-                 class="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-white hover:accent-gray-300 transition-all" />
+                 class="w-full h-1.5 bg-white rounded-full appearance-none cursor-pointer accent-white hover:accent-gray-300 border-transparent transition-all" />
         </div>
         <span id="total-time" class="text-gray-400 text-xs sm:text-sm font-medium">0:00</span>
       </div>
@@ -113,10 +113,10 @@
   </div>
 
   <!-- Playlist Panel -->
-  <div id="playlist-panel" class="fixed right-4 sm:right-8 top-20 sm:top-24 bg-black bg-opacity-30 p-4 sm:p-6 rounded-lg shadow-xl backdrop-blur-md w-[90%] sm:w-80 md:w-96 opacity-0 pointer-events-none transition-opacity duration-300">
-    <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-white border-b border-gray-500 pb-2">Playlist</h2>
+  <div id="playlist-panel" class="fixed right-4 sm:right-8 top-20 sm:top-24 bg-gray-900 bg-opacity-90 p-4 sm:p-6 rounded-lg shadow-xl backdrop-blur-md w-[90%] sm:w-80 md:w-96 opacity-0 pointer-events-none transition-opacity duration-300 border border-gray-700">
+    <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-white border-b border-gray-600 pb-2">Playlist</h2>
     <ul id="playlist-items" class="space-y-2 sm:space-y-3 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
-      <li class="text-gray-300 cursor-pointer p-2 sm:p-3 rounded bg-white bg-opacity-5 text-sm sm:text-base hover:bg-opacity-10 transition-all" data-song="assets/Demo_Track.wav">
+      <li class="text-white cursor-pointer p-2 sm:p-3 rounded bg-gray-800 bg-opacity-60 text-sm sm:text-base hover:bg-gray-700 transition-all" data-song="assets/Demo_Track.wav">
         Demo Track (AI)
       </li>
      
@@ -128,15 +128,15 @@
 
   <!-- Settings Modal -->
   <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-black bg-opacity-40 p-4 sm:p-6 rounded-lg w-[90%] sm:w-80 md:w-96 text-center shadow-xl mx-4">
-      <h2 class="text-xl font-bold mb-4 text-white">Settings</h2>
+    <div class="bg-black bg-opacity-20 p-4 sm:p-6 rounded-lg w-[90%] sm:w-80 md:w-96 text-center shadow-xl mx-4 border border-gray-700 backdrop-blur-md">
+      <h2 class="text-xl font-bold mb-4 text-white border-b border-gray-600 pb-2">Settings</h2>
       <div class="mb-4">
-        <label for="color-picker" class="block text-sm mb-2 text-gray-300">Visualizer Color</label>
-        <input type="color" id="color-picker" class="w-16 h-16 rounded-full shadow-inner" value="#0000FF" />
+        <label for="color-picker" class="block text-sm mb-2 text-white">Visualizer Color</label>
+        <input type="color" id="color-picker" class="w-16 h-16 rounded-full shadow-inner border border-gray-600" value="#0000FF" />
       </div>
       <div class="mb-4">
-        <label for="bg-color-picker" class="block text-sm mb-2 text-gray-300">Background Color</label>
-        <input type="color" id="bg-color-picker" class="w-16 h-16 rounded-full shadow-inner" value="#FFFFFF" />
+        <label for="bg-color-picker" class="block text-sm mb-2 text-white">Background Color</label>
+        <input type="color" id="bg-color-picker" class="w-16 h-16 rounded-full shadow-inner border border-gray-600" value="#FFFFFF" />
       </div>
     </div>
   </div>

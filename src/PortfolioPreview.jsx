@@ -10,8 +10,8 @@ import MailPreview from "./MailPreview";
 import TsParticles from "./components/TsParticles";
 import { Link } from "react-router-dom";
 import "./index.css";
-import ProjectWidget from "./components/ProjectWidget";  // Fix import path
-import { FaReact } from "react-icons/fa";
+import ProjectWidget from "./components/ProjectWidget";
+import { FaReact, FaJs } from "react-icons/fa"; // Added FaJs import
 import projectsData from './data/projects.json';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -267,71 +267,34 @@ const PortfolioPreview = () => {
     <div className="relative">
       <TsParticles />
       <h2
-        className="text-center text-6xl text-blue2 font-bold mb-6"
+        className="text-center text-6xl text-blue2 font-bold mb-6 flex items-center justify-center gap-2"
       >
         My Work
       </h2>
       
       <div className="mb-4">
-        <h4 className="text-center text-white text-lg mb-2">Filter by Category</h4>
+       
         <FilterPills />
       </div>
       
       <div className="mb-8">
-        <h4 className="text-center text-white text-lg mb-2">Filter by Framework</h4>
+    
         <FrameworkFilterPills />
       </div>
 
-      <aside className="fixed top-1/2 right-4 z-50 flex items-center justify-center">
-        <div
-          className={`cursor-pointer flex flex-col items-center transition-opacity duration-300 ${showIndicator ? "opacity-80" : "opacity-0 pointer-events-none"}`}
-          onClick={() => {
-            setShowIndicator(false);
-            document
-              .getElementById("react-projects")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-          role="link"
-          tabIndex={0}
-          aria-label="Scroll to React Projects"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              setShowIndicator(false);
-              document
-                .getElementById("react-projects")
-                ?.scrollIntoView({ behavior: "smooth" });
-            }
-          }}
-        >
-          <div className="w-10 h-10 rounded-full border-2 border-blue-600 flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-blue-600 transform rotate-90"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </div>
-          <span className="mt-2 text-sm text-blue-600">React Projects</span>
-        </div>
-      </aside>
-
-      {/* Both sections always present for animation purposes, but visually hidden when not active */}
       <section 
         aria-labelledby="vanilla-projects" 
-        className="mb-16 px-4"
+        className="mb-16 px-4 py-10"
         style={{ 
           display: (activeFrameworkFilter === "all" || activeFrameworkFilter === "vanilla") ? "block" : "none" 
         }}
       >
-        <h3 id="vanilla-projects" className="text-3xl text-white mb-6">
-          Vanilla JavaScript Projects
+        <h3 id="vanilla-projects" className="text-3xl text-white mb-6 flex items-center justify-center gap-3">
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent w-1/2"></div>
+          <div className="mx-4 p-2  flex items-center justify-center">
+            <FaJs className="text-blue-500" size={32} />
+          </div>
+          <div className="h-0.5 bg-gradient-to-r from-blue-500/50 via-blue-500/50 to-transparent w-1/2"></div>
         </h3>
         <div 
           ref={vanillaContainerRef}
@@ -354,16 +317,30 @@ const PortfolioPreview = () => {
         </div>
       </section>
 
+      {/* Visual divider when both sections are visible */}
+      {(activeFrameworkFilter === "all" && 
+        filterProjects(projects, "vanilla").length > 0 && 
+        filterProjects(reactProjects, "react").length > 0) && (
+        <div className="flex items-center justify-center my-14">
+          <div className="h-0.5 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent w-1/2"></div>
+          <div className="mx-4 p-2 rounded-full bg-blue-500/10 flex items-center justify-center">
+            <FaReact className="text-blue-500 animate-spin-slow" size={32} />
+          </div>
+          <div className="h-0.5 bg-gradient-to-r from-blue-500/50 via-blue-500/50 to-transparent w-1/2"></div>
+        </div>
+      )}
+
       <section 
         aria-labelledby="react-projects" 
         id="react-projects" 
-        className="mb-16 px-4"
+        className="mb-16 px-4 py-10"
         style={{ 
           display: (activeFrameworkFilter === "all" || activeFrameworkFilter === "react") ? "block" : "none" 
         }}
       >
-        <h3 id="react-projects" className="text-3xl text-white mb-6">
-          React Projects
+        <h3 id="react-projects-heading" className="text-3xl text-white mb-6 flex items-center justify-center gap-3">
+          
+         
         </h3>
         <div 
           ref={reactContainerRef}
@@ -376,15 +353,13 @@ const PortfolioPreview = () => {
                 index === array.length - 1 && array.length % 2 !== 0 ? 'md:col-span-2 md:w-[calc(50%-1.5rem)] md:mx-auto' : ''
               }`}
             >
-              <div className="absolute bottom-1/ right-2 z-10">
-                <FaReact className="text-blue-400" size={24} />
-              </div>
               <ProjectWidget
                 {...project}
                 buttonText="View Project"
                 color="#284af7"
                 routePrefix="/react-projects"
                 showCategory={true}
+                titleExtra={<FaReact className="text-blue-500 flex-shrink-0" size={24} />}
                 visual={project.visual || (() => (
                   <img
                     src={project.image || "/path/to/default/react-image.png"}

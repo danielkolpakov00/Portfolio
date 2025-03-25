@@ -107,7 +107,7 @@ const AboutMeIntroSection = ({ section, sectionRef }) => {
                 captionText={box.heading}
                 displayOverlayContent={true}
                 overlayContent={
-                  <div className="w-full h-2/3 flex flex-col justify-center items-center bg-gradient-to-b from-[#1B69FA]/95 to-[#1B44FA]/95 backdrop-blur-md p-3 sm:p-4 md:p-6 rounded-[15px]">
+                  <div className="w-full h-full flex flex-col justify-center items-center bg-gradient-to-b from-[#1B69FA]/95 to-[#1B44FA]/95 backdrop-blur-md p-3 sm:p-4 md:p-6 rounded-[15px]">
                     <h3 className="absolute text-xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-6xl font-black tracking-tight text-[#F5FDFF]/20 top-2 sm:top-4 text-center pointer-events-none w-full px-2 sm:px-4">
                       {box.heading.toUpperCase()}
                     </h3>
@@ -148,28 +148,7 @@ const AboutMeIntroSection = ({ section, sectionRef }) => {
                               carLightsFade: 0.4,
                               totalSideLightSticks: 20,
                               lightPairsPerRoadWay: 40,
-                              shoulderLinesWidthPercentage: 0.05,
-                              brokenLinesWidthPercentage: 0.1,
-                              brokenLinesLengthPercentage: 0.5,
-                              lightStickWidth: [0.12, 0.5],
-                              lightStickHeight: [1.3, 1.7],
-                              movingAwaySpeed: [60, 80],
-                              movingCloserSpeed: [-120, -160],
-                              carLightsLength: [400 * 0.03, 400 * 0.2],
-                              carLightsRadius: [0.05, 0.14],
-                              carWidthPercentage: [0.3, 0.5],
-                              carShiftX: [-0.8, 0.8],
-                              carFloorSeparation: [0, 5],
-                              colors: {
-                                roadColor: 0xF5FDFF,
-                                islandColor: 0x1B69FA,
-                                background: 0xF5FDFF,
-                                shoulderLines: 0x1B44FA,
-                                brokenLines: 0x1B59FA,
-                                leftCars: [0x1B69FA, 0x1B44FA, 0x1B59FA],
-                                rightCars: [0x1B69FA, 0x1B44FA, 0x1B59FA],
-                                sticks: 0x03B3C3,
-                              }
+                              // ...existing code...
                             }}
                           />
                         </VisibilityWrapper>

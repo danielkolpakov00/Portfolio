@@ -700,16 +700,21 @@
                 function createWalls() {
                     if (!world) return;
                     
-                    // Scale wall positions relative to canvas size
-                    const leftWallX = (canvasWidth * 0.3); // 240/800 = 0.3
-                    const rightWallX = (canvasWidth * 0.7); // 560/800 = 0.7
-                    const wallY = canvasHeight * 0.500; // 300/800 = 0.375
-                    const wallLength = canvasHeight * 0.75; // 600/800 = 0.75
+                    // Calculate wall positions based on peg layout rather than fixed ratios
+                    // This ensures proper alignment on both desktop and mobile screens
+                    const pegStructureWidth = pegSpacingX * (pegRows + 1); // Width of the entire peg structure
+                    const horizontalPadding = 0.7 * pegSpacingX; // Padding from outer pegs to walls
+                    
+                    // Position walls based on the peg structure width
+                    const leftWallX = (canvasWidth - pegStructureWidth) / 2 + horizontalPadding;
+                    const rightWallX = (canvasWidth + pegStructureWidth) / 2 - horizontalPadding;
+                    const wallY = canvasHeight * 0.5; // Center height
+                    const wallLength = canvasHeight * 0.58;
                     
                     // Left wall - angled
-                    const wallLeft = Bodies.rectangle(leftWallX, wallY, 20, wallLength, {
+                    const wallLeft = Bodies.rectangle(leftWallX, wallY, 75, wallLength, {
                         isStatic: true,
-                        angle: Math.PI / 7,
+                        angle: Math.PI / 6.5,
                         render: { visible: false },
                         collisionFilter: {
                             category: 0x0002,
@@ -718,9 +723,9 @@
                     });
                     
                     // Right wall - angled
-                    const wallRight = Bodies.rectangle(rightWallX, wallY, 20, wallLength, {
+                    const wallRight = Bodies.rectangle(rightWallX, wallY, 70, wallLength, {
                         isStatic: true,
-                        angle: -Math.PI / 7,
+                        angle: -Math.PI / 6.3,
                         render: { visible: false },
                         collisionFilter: {
                             category: 0x0002,
@@ -892,7 +897,7 @@
                     const centerX = canvasWidth / 2;
                     const dropRange = canvasWidth / 24;
                     const randomXPosition = centerX + (Math.random() * 2 - 1) * dropRange;
-                    const initialYPosition = pegSpacingY / 1; // Higher initial position
+                    const initialYPosition = pegSpacingY / 100; // Higher initial position
 
                     const ball = Bodies.circle(randomXPosition, initialYPosition, ballRadius, {
                         restitution: 0.4,    // Slightly increased bounce
@@ -955,15 +960,8 @@
                         dropBall(betAmount);
                     });
                     
-                    // Half/Double buttons for manual mode
-                    document.getElementById('half-button')?.addEventListener('click', () => adjustBet(0.5, 'manual'));
-                    document.getElementById('double-button')?.addEventListener('click', () => adjustBet(2, 'manual'));
-                    
-                    // Half/Double buttons for auto mode
-                    document.getElementById('auto-half-button')?.addEventListener('click', () => adjustBet(0.5, 'auto'));
-                    document.getElementById('auto-double-button')?.addEventListener('click', () => adjustBet(2, 'auto'));
-                    
-                    // Drop multiple balls button
+                    // Mobile drop button - Add this new event listener
+                
                     document.getElementById('drop-balls-btn')?.addEventListener('click', () => {
                         const betAmount = parseInt(document.getElementById('bet')?.value || "10");
                         for (let i = 0; i < 10; i++) {
@@ -1014,6 +1012,13 @@
                         // Safe event handler for input changes
                         speedRange.addEventListener('input', updateRangeBackground);
                     }
+
+                    // Mobile drop button
+                    document.getElementById('mobile-drop-button')?.addEventListener('click', () => {
+                        const betAmount = parseInt(document.getElementById('bet')?.value || "10");
+                        updateBalance(-betAmount);
+                        dropBall(betAmount);
+                    });
                 }
 
                 // Set up Matter.js engine
@@ -1346,6 +1351,37 @@
                     '</div></div>';
             }
         }, 5000);
+    </script>
+
+    <!-- Fixed drop ball button for mobile -->
+    <div class="fixed bottom-6 right-4 left-4 z-50 lg:hidden">
+        <button id="mobile-drop-button" class="bg-accent hover:bg-light text-black py-4 px-6 rounded-lg font-bold text-lg shadow-lg transition-colors w-full backdrop-blur-sm backdrop-brightness-110 border border-white/20 animate-pulse">
+            <div class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                </svg>
+                <span>Drop Ball</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- Add scroll tracking for mobile button -->
+    <script>
+        // Show/hide animation for mobile drop button based on scroll
+        window.addEventListener('scroll', function() {
+            const mobileButton = document.getElementById('mobile-drop-button');
+            if (!mobileButton) return;
+            
+            if (window.scrollY > 200) {
+                // When scrolled down, make button more opaque
+                mobileButton.classList.add('shadow-xl');
+                mobileButton.classList.remove('animate-pulse');
+            } else {
+                // Near top, use pulse animation
+                mobileButton.classList.remove('shadow-xl');
+                mobileButton.classList.add('animate-pulse');
+            }
+        });
     </script>
 </body>
 </html>

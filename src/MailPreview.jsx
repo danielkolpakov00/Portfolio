@@ -2,24 +2,30 @@ import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-const MailPreview = () => {
+const MailPreview = ({ containerRef }) => {
   const mountRef = useRef(null);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const rendererRef = useRef(null);
 
   useEffect(() => {
     // Make sure mount exists before proceeding
     const mount = mountRef.current;
     if (!mount) return;
+    const container = containerRef?.current || mount;
 
     // Scene setup - match PlinkoPreview's transparent background
     const scene = new THREE.Scene();
+    sceneRef.current = scene;
     scene.background = null; // Make background transparent like PlinkoPreview
     
     const camera = new THREE.PerspectiveCamera(
       75, 
-      mount.clientWidth / mount.clientHeight, 
+      container.clientWidth / container.clientHeight, 
       0.1, 
       1000
     );
+    cameraRef.current = camera;
     camera.position.z = 0.3;
     camera.position.y = +0.1;
     
@@ -27,17 +33,15 @@ const MailPreview = () => {
       antialias: true,
       alpha: true  // Match PlinkoPreview's alpha setting
     });
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
+    rendererRef.current = renderer;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
     mount.appendChild(renderer.domElement);
     
     // Add lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
     
-
-    // Animation to shake the mail model every second
-   
-
     // Load the 3D model
     let mailModel;
     const loader = new GLTFLoader();
@@ -87,32 +91,58 @@ const MailPreview = () => {
       renderer.render(scene, camera);
     };
     
-    animate();
+    const animateId = requestAnimationFrame(animate);
     
-    // Handle window resize
-    const handleResize = () => {
-      if (!mount) return;
+    // Handle container resize with the custom event
+    const handleContainerResize = (e) => {
+      if (!cameraRef.current || !rendererRef.current) return;
       
-      camera.aspect = mount.clientWidth / mount.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(mount.clientWidth, mount.clientHeight);
+      const { width, height } = e.detail;
+      
+      // Update camera
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      
+      // Update renderer
+      rendererRef.current.setSize(width, height);
+      rendererRef.current.setPixelRatio(window.devicePixelRatio);
     };
     
-    window.addEventListener('resize', handleResize);
+    // Listen for the custom resize event dispatched by ProjectWidget
+    if (containerRef?.current) {
+      containerRef.current.addEventListener('container-resize', handleContainerResize);
+    }
+    
+    // Also handle standard window resize as a fallback
+    const handleWindowResize = () => {
+      if (!cameraRef.current || !rendererRef.current || !container) return;
+      
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(width, height);
+    };
+    
+    window.addEventListener('resize', handleWindowResize);
     
     // Clean up
     return () => {
-      window.removeEventListener('resize', handleResize);
-      if (mount && mount.contains(renderer.domElement)) {
-        mount.removeChild(renderer.domElement);
+      cancelAnimationFrame(animateId);
+      window.removeEventListener('resize', handleWindowResize);
+      if (containerRef?.current) {
+        containerRef.current.removeEventListener('container-resize', handleContainerResize);
+      }
+      if (mount && rendererRef.current?.domElement) {
+        mount.removeChild(rendererRef.current.domElement);
       }
       scene.clear();
-      renderer.dispose();
     };
-  }, []);
+  }, [containerRef]);
   
-  // Match PlinkoPreview's container dimensions exactly
-  return <div ref={mountRef} style={{ width: '100%', height: '200px' }} />;
+  // Match container dimensions
+  return <div ref={mountRef} style={{ width: '100%', height: '100%', borderRadius: '8px', overflow: 'hidden' }} />;
 };
 
 export default MailPreview;

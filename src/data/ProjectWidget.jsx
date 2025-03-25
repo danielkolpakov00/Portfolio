@@ -14,7 +14,7 @@ const ProjectWidget = ({
   showCategory = false,
 }) => {
   return (
-    <div className="bg-whit/30 opacity-70 rounded-xl shadow-lg hover:shadow-[0_8px_12px_-3px_rgba(27,105,250,0.3)] transition-all duration-300 overflow-hidden shine-effect backdrop-blur-md relative">
+    <div className="bg-white/30 opacity-70 rounded-xl shadow-lg hover:shadow-[0_8px_12px_-3px_rgba(27,105,250,0.3)] transition-all duration-300 overflow-hidden shine-effect backdrop-blur-md relative">
       <div className="h-[300px] relative overflow-hidden bg-transparent backdrop-blur-sm">
         {Visual && <Visual />}
       </div>
@@ -61,6 +61,7 @@ ProjectWidget.propTypes = {
 
 ProjectWidget.defaultProps = {
   routePrefix: "/projects",
+  showCategory: false,
 };
 
 export default ProjectWidget;

@@ -1,20 +1,30 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
-const WeatherPreview = () => {
+const WeatherPreview = ({ containerRef }) => {
   const mountRef = useRef(null);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const rendererRef = useRef(null);
 
   useEffect(() => {
     const mount = mountRef.current;
+    const container = containerRef?.current || mount;
 
     // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    sceneRef.current = scene;
+    
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    cameraRef.current = camera;
+    
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true,
       alpha: true 
     });
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    rendererRef.current = renderer;
     mount.appendChild(renderer.domElement);
 
     // Create sky backdrop - ensure same width as ground (10 units)
@@ -203,24 +213,55 @@ const WeatherPreview = () => {
 
       renderer.render(scene, camera);
     };
-    animate();
+    const animateId = requestAnimationFrame(animate);
 
-    // Handle window resize
-    const handleResize = () => {
-      camera.aspect = mount.clientWidth / mount.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(mount.clientWidth, mount.clientHeight);
+    // Handle container resize with the custom event
+    const handleContainerResize = (e) => {
+      if (!cameraRef.current || !rendererRef.current) return;
+      
+      const { width, height } = e.detail;
+      
+      // Update camera
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      
+      // Update renderer
+      rendererRef.current.setSize(width, height);
+      rendererRef.current.setPixelRatio(window.devicePixelRatio);
     };
-    window.addEventListener('resize', handleResize);
+    
+    // Listen for the custom resize event dispatched by ProjectWidget
+    if (containerRef?.current) {
+      containerRef.current.addEventListener('container-resize', handleContainerResize);
+    }
+
+    // Also handle standard window resize as a fallback
+    const handleWindowResize = () => {
+      if (!cameraRef.current || !rendererRef.current || !mount) return;
+      
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(width, height);
+    };
+    window.addEventListener('resize', handleWindowResize);
 
     // Cleanup on unmount
     return () => {
-      window.removeEventListener('resize', handleResize);
-      mount.removeChild(renderer.domElement);
+      cancelAnimationFrame(animateId);
+      window.removeEventListener('resize', handleWindowResize);
+      if (containerRef?.current) {
+        containerRef.current.removeEventListener('container-resize', handleContainerResize);
+      }
+      if (mount && rendererRef.current?.domElement) {
+        mount.removeChild(rendererRef.current.domElement);
+      }
     };
-  }, []);
+  }, [containerRef]);
 
-  return <div ref={mountRef} style={{ width: '100%', height: '250px', borderRadius: '8px', overflow: 'hidden' }} />;
+  return <div ref={mountRef} style={{ width: '100%', height: '100%', borderRadius: '8px', overflow: 'hidden' }} />;
 };
 
 export default WeatherPreview;

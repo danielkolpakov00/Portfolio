@@ -9,7 +9,8 @@
     "demoUrl": "/projects/weatherapi.html",
     "library": "projects/assets/three-js-icon.svg",
     "libraryname": "Three.js",
-    "threejs": "A JavaScript 3D library that allows for creating and displaying animated 3D graphics in a web browser."
+    "threejs": "A JavaScript 3D library that allows for creating and displaying animated 3D graphics in a web browser.",
+    "isMobileFriendly": true
   },
   {
     "id": 2,
@@ -21,7 +22,8 @@
     "demoUrl": "/projects/matterplinkopreview.html",
     "library": "projects/assets/matterjs.svg",
     "libraryname": "Matter.js",
-    "threejs": "A 2D physics engine for the web that can simulate rigid bodies and their interactions."
+    "threejs": "A 2D physics engine for the web that can simulate rigid bodies and their interactions.",
+    "isMobileFriendly": true
   },
   {
     "id": 3,
@@ -33,7 +35,8 @@
     "demoUrl": "https://room.danielkolpakov.com",
     "library": "/assets/threejs.svg",
     "libraryname": "Three.js",
-    "threejs": "A JavaScript 3D library that makes WebGL simpler, allowing for the creation of GPU-accelerated 3D animations."
+    "threejs": "A JavaScript 3D library that makes WebGL simpler, allowing for the creation of GPU-accelerated 3D animations.",
+    "isMobileFriendly": false
   },
   {
     "id": 4,
@@ -45,7 +48,8 @@
     "demoUrl": "/projects/musicvis.html",
     "library": "/assets/threejs.svg",
     "libraryname": "Three.js",
-    "threejs": "A JavaScript 3D library used here to create visual effects that respond to audio analysis."
+    "threejs": "A JavaScript 3D library used here to create visual effects that respond to audio analysis.",
+    "isMobileFriendly": false
   },
   {
     "id": 5,
@@ -56,7 +60,7 @@
     "visualComponent": "MailPreview",
     "demoUrl": "https://glitch.com/edit/#!/detailed-different-coyote",
     "stack": "backend",
-    "framework": "vanilla"
-
+    "framework": "vanilla",
+    "isMobileFriendly": true
   }
 ]
