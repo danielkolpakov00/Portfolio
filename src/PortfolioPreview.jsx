@@ -162,18 +162,18 @@ const PortfolioPreview = () => {
 
   // Components for the filter pills
   const FilterPills = () => (
-    <div className="flex flex-wrap gap-3 mb-6 justify-center">
+    <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 justify-center px-2 sm:px-4">
       {allCategories.map((category) => (
         <motion.button
           key={category}
           onClick={() => setActiveFilter(category)}
-          className={`px-5 py-2 rounded-full text-sm font-medium transition-all backdrop-blur-sm border-2 ${
+          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all backdrop-blur-md border-2 ${
             activeFilter === category
-              ? "bg-blue2 text-white border-blue2 shadow-lg shadow-blue2/30"
-              : "bg-white text-blue2 border-blue2 hover:bg-blue2/10"
+              ? "bg-blue2 text-white border-blue2 shadow-md shadow-blue2/20"
+              : "bg-white/90 text-blue2 border-blue2/70 hover:bg-blue2/5 hover:border-blue2/90"
           }`}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
           {category.charAt(0).toUpperCase() + category.slice(1)}
         </motion.button>
@@ -182,18 +182,18 @@ const PortfolioPreview = () => {
   );
 
   const FrameworkFilterPills = () => (
-    <div className="flex flex-wrap gap-3 mb-6 justify-center">
+    <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-10 justify-center px-2 sm:px-4">
       {frameworks.map((framework) => (
         <motion.button
           key={framework}
           onClick={() => setActiveFrameworkFilter(framework)}
-          className={`px-5 py-2 rounded-full text-sm font-medium transition-all backdrop-blur-sm border-2 ${
+          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all backdrop-blur-md border-2 ${
             activeFrameworkFilter === framework
-              ? "bg-blue2 text-white border-blue2 shadow-lg shadow-blue2/30"
-              : "bg-white text-blue2 border-blue2 hover:bg-blue2/10"
+              ? "bg-blue2 text-white border-blue2 shadow-md shadow-blue2/20"
+              : "bg-white/90 text-blue2 border-blue2/70 hover:bg-blue2/5 hover:border-blue2/90"
           }`}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
           {framework.charAt(0).toUpperCase() + framework.slice(1)}
         </motion.button>
@@ -218,7 +218,7 @@ const PortfolioPreview = () => {
       <TsParticles />
 
       <motion.h2
-        className="text-center text-6xl text-blue2 font-bold mb-10 mt-12 flex items-center justify-center gap-2"
+        className="text-center text-4xl sm:text-5xl md:text-6xl text-blue2 font-bold mb-6 sm:mb-10 mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-4"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
