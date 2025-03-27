@@ -1,10 +1,10 @@
 // src/PortfolioPreview.jsx
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import { motion } from "framer-motion";
 
-// Project previews
 import WeatherPreview from "./WeatherPreview";
 import PlinkoPreview from "./PlinkoPreview";
 import BedroomPreview from "./BedroomScenePreview";
@@ -13,281 +13,363 @@ import MailPreview from "./MailPreview";
 import TsParticles from "./components/TsParticles";
 import ProjectWidget from "./components/ProjectWidget";
 import { FaReact } from "react-icons/fa";
-import projectsData from './data/projects.json';
+import projectsData from "./data/projects.json";
+import Iridescence from "./components/ReactBits/Iridescence";
 
-// Set up responsive grid layout with width provider
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-// Map visual components to their imported references
 const visualComponents = {
   "WeatherPreview": WeatherPreview,
   "PlinkoPreview": PlinkoPreview,
   "BedroomPreview": BedroomPreview,
   "MusicPreview": MusicPreview,
-  "MailPreview": MailPreview
+  "MailPreview": MailPreview,
 };
 
 const PortfolioPreview = () => {
-  // Create layout state to store and persist grid positions
   const [layouts, setLayouts] = useState(() => {
-    const savedLayouts = localStorage.getItem('portfolioLayouts');
+    const savedLayouts = localStorage.getItem("portfolioLayouts");
     return savedLayouts ? JSON.parse(savedLayouts) : null;
   });
-  
   const [allProjects, setAllProjects] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeFrameworkFilter, setActiveFrameworkFilter] = useState("all");
-  
-  // Generate combined projects array
+  const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Load and map projects
   useEffect(() => {
-    // Process vanilla projects from projectsData
-    const vanillaProjects = projectsData.vanillaProjects.map(project => ({
+    // Map vanilla projects and attach their visual component and framework
+    const vanillaProjects = projectsData.vanillaProjects.map((project) => ({
       ...project,
       visual: visualComponents[project.visualComponent],
-      framework: "vanilla"
+      framework: "vanilla",
     }));
-    
-    // Fetch React projects from public folder
+
     const fetchReactProjects = async () => {
       try {
-        const response = await fetch('/react-projects.json');
-        if (!response.ok) throw new Error('Failed to load projects');
+        setIsLoading(true);
+        const response = await fetch("/react-projects.json");
+        if (!response.ok) throw new Error("Failed to load projects");
         const data = await response.json();
-        
-        // Create image-based visual components for React projects
-        const reactProjects = data.projects.map(project => {
-          // Create a custom visual component for each React project
-          const ImageVisual = () => (
-            <div className="w-full h-full flex items-center justify-center bg-gray-800">
-              {project.image ? (
-                <img 
-                  src={project.image} 
-                  alt={project.title}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-blue-600 to-blue-900">
-                  <FaReact className="text-white" size={60} />
-                </div>
-              )}
-            </div>
-          );
 
-          return {
-            ...project,
-            framework: "react",
-            visual: ImageVisual
+        const reactProjects = data.projects.map((project) => {
+          if (project.id === "gradient-generator") {
+            const GradientVisual = ({ containerRef, containerSize }) => (
+              <div className="w-full h-full" style={{ overflow: 'hidden' }}>
+                <Iridescence color={[0.4, 0.4, 1]} speed={0.8} amplitude={0.2} />
+              </div>
+            );
+            return { ...project, framework: "react", visual: GradientVisual };
+          }
+
+          const ImageVisual = ({ containerRef, containerSize }) => {
+            // Calculate object-fit style based on container size
+            const imgStyle = {
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+            };
+            
+            return (
+              <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                {project.image ? (
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    style={imgStyle}
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-blue-600 to-blue-900">
+                    <FaReact className="text-white" size={containerSize.width ? Math.min(60, containerSize.width / 4) : 40} />
+                  </div>
+                )}
+              </div>
+            );
           };
+
+          return { ...project, framework: "react", visual: ImageVisual };
         });
-        
-        // Combine vanilla and React projects
+
         setAllProjects([...vanillaProjects, ...reactProjects]);
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error("Error fetching projects:", error);
         setAllProjects(vanillaProjects);
+      } finally {
+        setIsLoading(false);
       }
     };
-    
+
     fetchReactProjects();
   }, []);
 
-  // Save layouts to localStorage when they change
+  // Set mounted after initial render to avoid SSR issues with measurements
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Save layouts to localStorage
   useEffect(() => {
     if (layouts && Object.keys(layouts).length > 0) {
-      localStorage.setItem('portfolioLayouts', JSON.stringify(layouts));
+      localStorage.setItem("portfolioLayouts", JSON.stringify(layouts));
     }
   }, [layouts]);
 
-  // Get unique categories from all projects
-  const allCategories = ["all", ...new Set(
-    allProjects.map(project => project.category || "other")
-  )];
-
-  // Define available frameworks
+  const allCategories = ["all", ...new Set(allProjects.map((p) => p.category || "other"))];
   const frameworks = ["all", "vanilla", "react"];
 
-  // Filter projects based on activeFilter and activeFrameworkFilter
-  const filteredProjects = allProjects.filter(project => {
+  const filteredProjects = allProjects.filter((project) => {
     const categoryMatch = activeFilter === "all" || project.category === activeFilter;
-    const frameworkMatch = activeFrameworkFilter === "all" || project.framework === activeFrameworkFilter;
+    const frameworkMatch =
+      activeFrameworkFilter === "all" || project.framework === activeFrameworkFilter;
     return categoryMatch && frameworkMatch;
   });
-  
-  // Handle layout changes
-  const onLayoutChange = (_, allLayouts) => {
-    setLayouts(allLayouts);
-  };
 
-  // Generate initial layouts with 4-column grid
-  const generateLayouts = useMemo(() => {
-    if (!allProjects.length) return {};
+  const onLayoutChange = useCallback((currentLayout, allLayouts) => {
+    setLayouts(allLayouts);
+  }, []);
+
+  // Generate fixed layout for the grid
+  const generateLayout = useCallback(() => {
+    if (!filteredProjects.length) return { lg: [], md: [], sm: [], xs: [], xxs: [] };
     
     const cols = { lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 };
-    const initialLayouts = {};
+    const layouts = {};
     
     Object.keys(cols).forEach(breakpoint => {
-      initialLayouts[breakpoint] = allProjects.map((project, i) => {
-        const colNum = cols[breakpoint];
-        const row = Math.floor(i / colNum);
-        const col = i % colNum;
-        
+      const colNum = cols[breakpoint];
+      layouts[breakpoint] = filteredProjects.map((project, i) => {
         return {
           i: `${project.framework}-${project.id}`,
-          x: col,
-          y: row,
+          x: i % colNum,
+          y: Math.floor(i / colNum),
           w: 1,
-          h: 2
+          h: 2,
+          static: false
         };
       });
     });
     
-    return initialLayouts;
-  }, [allProjects]);
+    return layouts;
+  }, [filteredProjects]);
 
-  // Simple category filter handler
-  const handleFilterChange = (category) => {
-    if (category === activeFilter) return;
-    setActiveFilter(category);
-  };
-  
-  // Simple framework filter handler
-  const handleFrameworkFilterChange = (framework) => {
-    if (framework === activeFrameworkFilter) return;
-    setActiveFrameworkFilter(framework);
-  };
+  // Get current layout
+  const currentLayouts = useMemo(() => {
+    return generateLayout();
+  }, [generateLayout]);
 
-  // Filter Pills Component - FIXED: Now properly defined
+  // Components for the filter pills
   const FilterPills = () => (
-    <div className="flex flex-wrap gap-2 mb-6 justify-center">
-      {allCategories.map(category => (
-        <button
+    <div className="flex flex-wrap gap-3 mb-6 justify-center">
+      {allCategories.map((category) => (
+        <motion.button
           key={category}
-          onClick={() => handleFilterChange(category)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            activeFilter === category 
-              ? "bg-blue2 text-white opacity-80" 
-              : "bg-blue1 text-white hover:bg-gray-700 opacity-80"
+          onClick={() => setActiveFilter(category)}
+          className={`px-5 py-2 rounded-full text-sm font-medium transition-all backdrop-blur-sm border-2 ${
+            activeFilter === category
+              ? "bg-blue2 text-white border-blue2 shadow-lg shadow-blue2/30"
+              : "bg-white text-blue2 border-blue2 hover:bg-blue2/10"
           }`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.98 }}
         >
           {category.charAt(0).toUpperCase() + category.slice(1)}
-        </button>
+        </motion.button>
       ))}
     </div>
   );
 
-  // Framework Filter Pills Component - FIXED: Now properly defined
   const FrameworkFilterPills = () => (
-    <div className="flex flex-wrap gap-2 mb-6 justify-center">
-      {frameworks.map(framework => (
-        <button
+    <div className="flex flex-wrap gap-3 mb-6 justify-center">
+      {frameworks.map((framework) => (
+        <motion.button
           key={framework}
-          onClick={() => handleFrameworkFilterChange(framework)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            activeFrameworkFilter === framework 
-              ? "bg-blue2 text-white opacity-80" 
-              : "bg-blue1 text-white hover:bg-gray-700 opacity-80"
+          onClick={() => setActiveFrameworkFilter(framework)}
+          className={`px-5 py-2 rounded-full text-sm font-medium transition-all backdrop-blur-sm border-2 ${
+            activeFrameworkFilter === framework
+              ? "bg-blue2 text-white border-blue2 shadow-lg shadow-blue2/30"
+              : "bg-white text-blue2 border-blue2 hover:bg-blue2/10"
           }`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.98 }}
         >
           {framework.charAt(0).toUpperCase() + framework.slice(1)}
-        </button>
+        </motion.button>
       ))}
     </div>
   );
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-blue-600">Loading projects...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
       <TsParticles />
-      <h2 className="text-center text-6xl text-blue2 font-bold mb-6 flex items-center justify-center gap-2">
-        My Work
-      </h2>
-      
-      <div className="mb-4">
-        <FilterPills />
-      </div>
-      
-      <div className="mb-8">
-        <FrameworkFilterPills />
-      </div>
 
+      <motion.h2
+        className="text-center text-6xl text-blue2 font-bold mb-10 mt-12 flex items-center justify-center gap-2"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          My
+        </motion.span>
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-700"
+        >
+          Portfolio
+        </motion.span>
+      </motion.h2>
+
+      <motion.div
+        className="mb-6"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <FilterPills />
+      </motion.div>
+      <motion.div
+        className="mb-10"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+      >
+        <FrameworkFilterPills />
+      </motion.div>
+
+      {/* Portfolio grid layout */}
       <div className="px-4 py-10">
-        {filteredProjects.length > 0 && (
-          <ResponsiveGridLayout
-            className="layout"
-            layouts={layouts || generateLayouts}
-            onLayoutChange={onLayoutChange}
-            isDraggable={true}
-            isResizable={false}
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 }}
-            rowHeight={250}
-            margin={[16, 16]}
-            containerPadding={[20, 20]}
-            draggableHandle=".drag-handle"
-            compactType="vertical"
-            useCSSTransforms={true}
-            autoSize={true}
-            draggableCancel=".project-link-content"
-            isBounded={false}
-            allowOverlap={false}
-            measureBeforeMount={false}
-            // Adjust rearrangement speed with this time value (milliseconds)
-            // Higher values make smoother transitions for non-dragged items
-            resizeHandles={[]}
-          >
-            {filteredProjects.map((project, index) => (
-              <div 
-                key={`${project.framework}-${project.id}`}
-                className="project-item"
-                style={{ overflow: 'visible' }}
-              >
-                <ProjectWidget
-                  {...project}
-                  routePrefix={project.framework === "react" ? "/react-projects" : "/projects"}
-                  showCategory={true}
-                  titleExtra={project.framework === "react" ? <FaReact className="text-blue-500 flex-shrink-0" size={24} /> : null}
-                />
-              </div>
-            ))}
-          </ResponsiveGridLayout>
+        {filteredProjects.length > 0 ? (
+          mounted && (
+            <ResponsiveGridLayout
+              className="layout"
+              layouts={currentLayouts}
+              onLayoutChange={onLayoutChange}
+              isDraggable={true}
+              isResizable={false}
+              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+              cols={{ lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 }}
+              rowHeight={240}
+              margin={[20, 20]}
+              containerPadding={[20, 20]}
+              useCSSTransforms={true}
+              draggableHandle=".drag-handle"
+            >
+              {filteredProjects.map((project) => (
+                <div 
+                  key={`${project.framework}-${project.id}`} 
+                  className="project-grid-item"
+                >
+                  <ProjectWidget
+                    {...project}
+                    buttonText={project.buttonText || "View Project"}
+                    routePrefix={project.framework === "react" ? "/react-projects" : "/projects"}
+                    showCategory={true}
+                    titleExtra={
+                      project.framework === "react" ? (
+                        <FaReact className="text-blue-500 flex-shrink-0" size={24} />
+                      ) : null
+                    }
+                  />
+                </div>
+              ))}
+            </ResponsiveGridLayout>
+          )
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-lg text-gray-600">No projects match the selected filters.</p>
+          </div>
         )}
       </div>
-      
-      {/* Better CSS for smooth rearrangement */}
-      <style jsx global>{`
-        /* Key change: Only disable transitions for the item being dragged */
-        .react-grid-item.react-draggable-dragging {
-          z-index: 100 !important;
-          cursor: grabbing !important;
-          transition: none !important;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+
+      <style>{`
+        html, body, #root {
+          height: auto !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
         }
-        
-        /* For items being rearranged (not the one being dragged), keep smooth transitions */
-        .react-grid-item:not(.react-draggable-dragging) {
-          transition: transform 0.3s ease, left 0.3s ease, top 0.3s ease, right 0.3s ease !important;
+
+        .layout {
+          position: relative;
+          width: 100%;
         }
-        
-        /* Make placeholder responsive */
-        .react-grid-placeholder {
-          background-color: rgba(27, 105, 250, 0.2) !important;
-          border: 1px dashed #1b69fa !important;
-          border-radius: 0.75rem !important;
-          transition: all 0.15s ease !important;
+
+        .react-grid-layout {
+          position: relative;
+          transition: height 200ms ease;
         }
-        
-        /* Basic styling */
-        .drag-handle {
-          cursor: grab;
-        }
-        
-        .drag-handle:active,
-        .react-draggable-dragging .drag-handle {
-          cursor: grabbing !important;
-        }
-        
-        /* Optimize for performance */
+
         .react-grid-item {
-          will-change: transform;
+          transition: all 200ms ease;
+          transition-property: left, top, width, height;
+        }
+
+        .react-grid-item.react-grid-placeholder {
+          background: rgba(27, 105, 250, 0.2);
+          border-radius: 0.75rem;
+          opacity: 0.8;
+          transition-duration: 100ms;
+          z-index: 2;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          -o-user-select: none;
+          user-select: none;
+        }
+
+        .react-grid-item.react-draggable-dragging {
+          transition: none;
+          z-index: 3;
+          opacity: 0.8;
+        }
+
+        .react-grid-item.cssTransforms {
+          transition-property: transform;
+        }
+
+        .react-grid-item.resizing {
+          z-index: 1;
+          will-change: width, height;
+        }
+
+        .project-grid-item {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          min-height: 480px;
+        }
+
+        .project-grid-item > div {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .text-gradient {
+          background-image: linear-gradient(to right, #1B69FA, #1B44FA);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
         }
       `}</style>
     </div>
