@@ -14,9 +14,7 @@
   
 }
 
-ul li {
-  color: #1B44FA;
-}
+
 
 html, body {
   margin: 0;
@@ -148,16 +146,212 @@ html, body {
   display: block;
 }
 
-/* Add this to your existing CSS */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+/* Adjust project cards for 4-column layout */
+.project-card {
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
+
+.project-card h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 1.1rem;
+}
+
+@media (min-width: 1280px) { /* xl breakpoint */
+  .project-card h3 {
+    font-size: 1.2rem;
   }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
+/* Add hover effect to indicate clickability */
+a:hover .project-card {
+  transform: translateY(-4px);
+}
+
+/* Keep link styling clean */
+a.block.h-full.no-underline {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Adjust container widths for better responsive behavior */
+.max-w-7xl {
+  max-width: 1920px !important; /* Override Tailwind's default */
+}
+
+/* Project grid container */
+section[aria-labelledby="projects"] > div {
+  max-width: 100% !important;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1536px) {
+  section[aria-labelledby="projects"] > div {
+    max-width: 1920px !important;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Make entire project card clickable */
+.project-card-container {
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+/* Properly style clickable project card */
+.project-card-container > div {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transform: translateY(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.project-card-container > div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(27, 105, 250, 0.3);
+}
+
+.project-card-container > div:focus {
+  outline: 2px solid #284af7;
+  transform: translateY(-4px);
+}
+
+/* Ensure the card is clickable via cursor */
+.project-card-container > div {
+  cursor: pointer;
+}
+
+/* Ensure the card is prominent as clickable */
+.project-card-container > div, 
+.project-card {
+  cursor: pointer !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Add a more noticeable hover effect */
+.project-card-container > div:hover,
+.project-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 12px 20px -5px rgba(27, 105, 250, 0.4) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Add a click animation */
+.project-card-container > div:active,
+.project-card:active {
+  transform: translateY(-2px) !important;
+  transition: transform 0.1s ease-in-out !important;
+}
+
+/* Updated card styling for proper link behavior */
+.project-card-container {
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+/* Style the link properly */
+.project-card-container a {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Hover effects apply to the card */
+.project-card {
+  height: 100%;
+  transform: translateY(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 20px -5px rgba(27, 105, 250, 0.4);
+}
+
+/* Remove the problematic overlay */
+.project-card::after {
+  content: none;
+}
+
+/* Workaround for navigation issues - add a fullwidth transparent overlay */
+.project-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+
+/* Make sure the button remains clickable above the overlay */
+.project-card a {
+  position: relative;
+  z-index: 3;
+}
+
+/* Clean up and simplify project card styles */
+.project-card-container {
+  position: relative;
+  height: 100%;
+  transition: transform 0.2s ease;
+}
+
+/* Make the link cover the entire card */
+.project-card-container a {
+  display: block;
+  height: 100%;
+  width: 100%;
+  color: inherit;
+  text-decoration: none !important;
+  outline: none;
+}
+
+/* Style the actual card */
+.project-card {
+  height: 100%;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect */
+.project-card-container:hover .project-card {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 20px -5px rgba(27, 105, 250, 0.4);
+}
+
+/* Remove all overlay elements that could interfere with clickability */
+.project-card::after,
+.project-card::before {
+  content: none !important;
+}
+
+/* Remove any conflicting styles */
+.project-card-container > div:hover,
+.project-card:hover {
+  /* Let the parent handle the hover effect */
+}
+
+/* Remove any other card modifiers that might interfere */
+section[aria-labelledby="projects"] .project-card-container {
+  pointer-events: auto;
 }

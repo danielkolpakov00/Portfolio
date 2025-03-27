@@ -1,14 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faMobileAlt } from '@fortawesome/free-solid-svg-icons';
-import TsParticles from './components/TsParticles'; // Updated import for default export
+import { faInfoCircle, faMobileAlt, faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import TsParticles from './components/TsParticles';
 
 const ReactProjectPage = () => {
   const { id } = useParams();
   const [selectedProject, setSelectedProject] = useState(null);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const demoSectionRef = useRef(null);
+  const [showScrollButton, setShowScrollButton] = useState(true);
+  const topSectionRef = useRef(null);
+  
+  // Scroll to demo function
+  const scrollToDemo = () => {
+    demoSectionRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+    // Hide button after click
+    setShowScrollButton(false);
+  };
+
+  // Observer to detect when user scrolls back to top
+  useEffect(() => {
+    const topSection = topSectionRef.current;
+    if (!topSection) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        // Show button when top section is visible
+        if (entry.isIntersecting) {
+          setShowScrollButton(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(topSection);
+    
+    return () => {
+      if (topSection) {
+        observer.unobserve(topSection);
+      }
+    };
+  }, []);
 
   // Shared tooltip state
   const [tooltip, setTooltip] = useState({
@@ -107,24 +145,24 @@ const ReactProjectPage = () => {
   const projectDescriptions = {
     'gradient-generator': (
       <section className="space-y-8">
-        <h3 className="text-xl text-blue2 md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">
+        <h3 className="text-xl text-white md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">
           A dynamic gradient generator built with React and Tailwind CSS. This tool lets users create and customize gradient backgrounds with live previews.
         </h3>
         
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-2">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-2 text-white">
           This project was super interesting to make for me, as I love making interactive projects that gives users the flexibility to create and export their own designs. I learned a lot about shaders and how they can be used to create stunning visual effects. I also learned a few things about the different types of shaders, such as vertex shaders and fragment shaders, and how they work together to render a scene.
         </p>
-        <h3 className="text-xl text-blue2 md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">What is OpenGLSL?</h3>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-2">
+        <h3 className="text-xl text-white md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">What is OpenGLSL?</h3>
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-2 text-white">
           Open GLSL is a C-like language that allows for high-performance graphics rendering. The shader program is responsible for rendering the scene by calculating the color of each pixel on the screen. It's a cool language that I want to learn more in-depth in the future.
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
           OpenGLSL's flexibility allows for some really cool effects that would be difficult to achieve with other languages. I'm excited to see what other projects I can create with shaders in the future.
         </p>
-        <p className="text-md md:text-sm lg:text-md leading-relaxed max-w-full py-2">
+        <p className="text-md md:text-sm lg:text-md leading-relaxed max-w-full py-2 text-white">
           Here's a sample of gradient generation in GLSL:
         </p>
-        <pre className="bg-gray-900 w-full text-white p-4 rounded-lg overflow-x-auto opacity-90 relative">
+        <pre className="bg-blue2/40 w-full text-white p-4 rounded-lg overflow-x-auto relative">
           <code className="hljs language-glsl block"> 
             {formatCodeWithTooltips(`
 #version 300 es
@@ -150,25 +188,25 @@ void main() {
 }`)}
           </code>
         </pre>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
           This code snippet shows the fragment shader used to generate the gradient effect. The shader takes in the screen resolution, two colors, and an angle as inputs. It then calculates the gradient direction and projects the pixel position onto this direction to determine the color at that point. The final color is then output to the screen.
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
         I also had to learn a bit of Blender to combine animations to the model (which I named Grad Dude). I used Mixamo to get animations and Blender to combine them. I also had to learn how to export the model and animations to GLTF format, which is a common format for 3D models on the web. Overall, it was a great learning experience, and I'm excited to see what other projects I can create with 3D models in the future.
         </p>
-        <p className="text-md md:text-sm lg:text-md leading-relaxed max-w-full py-2">
+        <p className="text-md md:text-sm lg:text-md leading-relaxed max-w-full py-2 text-white">
           Here's a sneak peek of what the Blender process looked like:
         </p>
         <div className="flex flex-col md:flex-row gap-4 justify-center">
           <div className="flex flex-col items-center w-full md:w-1/2">
-            <h4 className="text-lg text-blue2 font-semibold mb-2">Talking Animation</h4>
+            <h4 className="text-lg text-white font-semibold mb-2">Talking Animation</h4>
             <video autoPlay loop muted className="w-full rounded-lg shadow-lg">
               <source src="assets/blenderdemo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
           <div className="flex flex-col items-center w-full md:w-1/2">
-            <h4 className="text-lg text-blue2 font-semibold mb-2">Idle Animation</h4>
+            <h4 className="text-lg text-white font-semibold mb-2">Idle Animation</h4>
             <video autoPlay loop muted className="w-full rounded-lg shadow-lg">
               <source src="assets/blenderdemo2.mp4" type="video/mp4" />
               Your browser does not support the video tag.
@@ -179,32 +217,27 @@ void main() {
     ),
     'lastfm-app': (
       <section className="space-y-8">
-        <h3 className="text-xl text-blue2 md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">
+        <h3 className="text-xl text-white md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">
           An interactive Windows App with Last.fm API integration.
         </h3>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-2">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-2 text-white">
           This project is a dynamic application that integrates with the Last.fm API to provide real-time music and artist information. It empowers users to explore trending tracks, discover detailed artist bios, and stay updated on the latest releases.
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
           This one's kind of funny. If you can't tell, I basically attempted to recreate the windows xp desktop. I used a lot of CSS to get the windows and buttons to look just right. I also used a lot of JavaScript to make the windows draggable and resizable. Try finding the easter egg that gives you a bluescreen! (in the app, of course)
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
           There's a few apps you can open other than the Last.fm app that you see. Try hitting the windows start button on the bottom left. Under all programs, you'll see paint and minesweeper.
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
-          A lot of considerations went into making this app. I had to make sure the windows were draggable and resizable, and that they would stack properly when opened (which currently doesn't really work the way I expected). 
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
+          A lot of considerations went into making this app. I had to make sure the windows were draggable and resizable. React-draggable played a huge role in this. 
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
          I think that what really brought this to the next level is the blue bar at the top, which sort of makes it look like it is running in a virtual machine. 
         </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
-         Side note, it's sort of hard to make a project like this responsive, since it's supposed to look like an old windows desktop. I did my best to make it look good on all screen sizes, but it's not perfect and I plan on changing that in the future.
-        </p>
-        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1">
-         Share me the best drawings you can make in the paint app!
-        </p>
-   
-        
+        <p className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-full py-1 text-white">
+         I sort of just love making these types of projects because it's a break from what you would normally see on the web. 
+        </p>      
       </section>
     )
   };
@@ -301,42 +334,52 @@ void main() {
   return (
     <> 
       <TsParticles/>
-      <div className="relative">
+      <div className="relative overflow-x-hidden min-h-screen">
         <style>{codeAnimations}</style>
-        <div className="min-h-screen relative overflow-y-auto overflow-x-hidden">
-          
-          
-          <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-            
-            {/* Header */}
-            <header className="text-center space-y-4">
-              
-              <h1 className="text-4xl font-bold text-blue-600">
-                {selectedProject?.title}
-              </h1>
-              <div className="flex flex-wrap justify-center gap-2">
-                {selectedProject?.technologies?.map((tech, index) => (
-                  <span 
-                    key={index} 
-                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </header>
+        
+        {/* Header section with ref for intersection observer */}
+        <div ref={topSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+          <header className="text-center space-y-4 mb-8">
+            <h1 className="text-4xl font-bold text-blue-600">
+              {selectedProject?.title}
+            </h1>
+            <div className="flex flex-wrap justify-center gap-2">
+              {selectedProject?.technologies?.map((tech, index) => (
+                <span 
+                  key={index} 
+                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </header>
+        </div>
 
-            {/* Project Demo iFrame */}
-            {renderProjectDemo()}
-
-            {/* Description */}
-            <div className="bg-white/80 bg-blur-lg rounded-xl shadow-lg p-8">
-              <div className="prose prose-lg max-w-none">
-                {selectedProject && projectDescriptions[selectedProject.id]}
-              </div>
+        {/* Description - Full width section with centered content - improved padding */}
+        <div className="w-full bg-blue2/40 py-10 mb-12 shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="prose prose-lg max-w-none">
+              {selectedProject && projectDescriptions[selectedProject.id]}
             </div>
           </div>
         </div>
+
+        {/* Project Demo section - consistent padding with other sections */}
+        <div ref={demoSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+          {renderProjectDemo()}
+        </div>
+        
+        {/* Fixed scroll-to-demo button - now with conditional display */}
+        {showScrollButton && (
+          <button 
+            onClick={scrollToDemo}
+            className="fixed bottom-8 right-8 bg-blue2 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg z-50 transition-all duration-300 transform hover:scale-110"
+            aria-label="Scroll to demo"
+          >
+            <FontAwesomeIcon icon={faArrowDown} className="text-xl" />
+          </button>
+        )}
       </div>
     </>
   );

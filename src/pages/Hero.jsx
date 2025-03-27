@@ -169,75 +169,76 @@ const Hero = ({ isOpen }) => {
         </div>
 
         {/* Dialogue Box */}
-        <div 
-          className="dialogue-container p-4 sm:p-8 rounded-lg max-w-[300px] sm:max-w-[400px] min-h-[120px] md:min-h-[200px]"
-          onClick={() => { if(isMobile) updateDialogue((dialogueIndex + 1) % messages.length); }}
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.8)',
-            border: '2px dashed #1B44FA',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            margin: '1rem auto 1.5rem',
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: isMobile ? '120px' : '150px'
-          }}>
-          <div ref={dialogueTextRef} className="text-center text-sm sm:text-md md:text-lg text-blue2 font-medium">
-            {displayedText}
+          <div 
+            className="dialogue-container p-4 sm:p-8 rounded-lg max-w-[300px] sm:max-w-[400px] min-h-[120px] md:min-h-[200px]"
+            onClick={() => { if(isMobile) updateDialogue((dialogueIndex + 1) % messages.length); }}
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.8)',
+              border: '2px solid #1B44FA',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              margin: '1rem auto 1.1rem',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: isMobile ? '120px' : '150px'
+            }}>
+            <div ref={dialogueTextRef} className="text-center text-sm sm:text-md md:text-lg text-blue2 font-medium">
+              {displayedText}
+            </div>
+
+            {!isMobile && (
+              <>
+                <button 
+            onClick={() => updateDialogue((dialogueIndex - 1 + messages.length) % messages.length)}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '10px',
+              border: 'none',
+              background: 'none',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              color: '#fff',
+              backgroundColor: '#1B44FA',
+              padding: '0.5rem',
+              borderRadius: '50%',
+              height: '30px',
+              width: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+            <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <button 
+            onClick={() => updateDialogue((dialogueIndex + 1) % messages.length)}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '10px',
+              border: 'none',
+              background: 'none',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              color: '#fff',
+              backgroundColor: '#1B44FA',
+              padding: '0.5rem',
+              borderRadius: '50%',
+              height: '30px',
+              width: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+            <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </>
+            )}
           </div>
-
-        
-
-
-
           
-          {!isMobile && (
-            <>
-              <button 
-                onClick={() => updateDialogue((dialogueIndex - 1 + messages.length) % messages.length)}
-                style={{
-                  position: 'absolute',
-                  bottom: '10px',
-                  left: '10px',
-                  border: 'none',
-                  background: 'none',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  backgroundColor: '#1B44FA',
-                  padding: '0.5rem',
-                  borderRadius: '50%',
-                  height: '30px',
-                  width: '30px'
-                }}>
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
-              <button 
-                onClick={() => updateDialogue((dialogueIndex + 1) % messages.length)}
-                style={{
-                  position: 'absolute',
-                  bottom: '10px',
-                  right: '10px',
-                  border: 'none',
-                  background: 'none',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  backgroundColor: '#1B44FA',
-                  padding: '0.5rem',
-                  borderRadius: '50%',
-                  height: '30px',
-                  width: '30px'
-                }}>
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
-            </>
-          )}
-        </div>
-        
-        {/* Navigation links */}
-        <div className="mt-4 flex flex-col items-center space-y-6">
+          {/* Navigation links */}
+        <div className="mt-2 flex flex-col items-center space-y-6">
           <h2 className="font-georama text-3xl text-blue2 p-6"></h2>
           <Link to="/portfolio" className="bg-blue2 mt-10 text-white py-2 px-8 rounded-lg font-semibold uppercase tracking-wide hover:bg-blue3 transition duration-300 ease-in-out shadow-lg">My Portfolio</Link>
         </div>

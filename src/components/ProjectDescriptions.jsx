@@ -21,7 +21,7 @@ const CodeSkeleton = () => (
   </div>
 );
 
-const ProblemStatementCard = ({ icon, text, index }) => {
+const ProblemStatementCard = ({ icon, text, index, isInteractive = true }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const cardRef = useRef(null);
   const flipTimeout = useRef(null);
@@ -44,6 +44,8 @@ const ProblemStatementCard = ({ icon, text, index }) => {
   }, []);
 
   const handleFlip = () => {
+    if (!isInteractive) return;
+    
     if (flipTimeout.current) {
       clearTimeout(flipTimeout.current);
     }
@@ -60,10 +62,10 @@ const ProblemStatementCard = ({ icon, text, index }) => {
   return (
     <div
       ref={cardRef}
-      className="relative h-[300px] transform-gpu cursor-pointer"
+      className={`relative h-[300px] transform-gpu ${isInteractive ? 'cursor-pointer' : ''}`}
       style={{ perspective: "1000px" }}
-      onMouseEnter={handleFlip}
-      onMouseLeave={handleFlip}
+      onMouseEnter={isInteractive ? handleFlip : undefined}
+      onMouseLeave={isInteractive ? handleFlip : undefined}
     >
       <div className={`absolute w-full h-full transition-all duration-600 transform-gpu backface-hidden
                       ${isFlipped ? 'opacity-0' : 'opacity-100'}

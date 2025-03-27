@@ -4,7 +4,7 @@ import hljs from 'highlight.js';
 import './dk-blue.css'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHtml5, faCss3Alt, faJs } from '@fortawesome/free-brands-svg-icons';
-import { faCaretDown, faExpand, faMobileAlt as faMobileAltSolid } from '@fortawesome/free-solid-svg-icons';
+import { faCaretDown, faExpand, faMobileAlt as faMobileAltSolid, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { getProjectDescription } from './components/ProjectDescriptions';
 import LoadingScreen from './components/LoadingScreen';
 import TsParticles from './components/TsParticles';
@@ -20,6 +20,9 @@ const ProjectPage = () => {
   const [isContentLoading, setIsContentLoading] = useState(true);
   const iframeRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const demoSectionRef = useRef(null);
+  const [showScrollButton, setShowScrollButton] = useState(true);
+  const topSectionRef = useRef(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -172,6 +175,40 @@ const ProjectPage = () => {
     }
   };
 
+  const scrollToDemo = () => {
+    demoSectionRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+    // Hide button after click
+    setShowScrollButton(false);
+  };
+
+  // Observer to detect when user scrolls back to top
+  useEffect(() => {
+    const topSection = topSectionRef.current;
+    if (!topSection) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        // Show button when top section is visible
+        if (entry.isIntersecting) {
+          setShowScrollButton(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(topSection);
+    
+    return () => {
+      if (topSection) {
+        observer.unobserve(topSection);
+      }
+    };
+  }, []);
+
   const tabs =
     selectedProject && selectedProject.stack === 'backend'
       ? selectedProject.jsFiles || []
@@ -241,9 +278,9 @@ const ProjectPage = () => {
             </button>
           </div>
         ) : (
-          <p className="text-gray-500">
-            Live demo not available for this project.
-          </p>
+          <div className="h-[1200px] flex items-center justify-center bg-blue2/40">
+            <p className="text-white">Demo not available</p>
+          </div>
         )}
       </div>
     );
@@ -252,21 +289,32 @@ const ProjectPage = () => {
   return (
     <>
       <TsParticles />
-      <div className="project-page max-w-7xl mx-auto p-4 lg:p-8">
+      <div className="project-page mx-auto min-h-screen">
         <style>{tailwindAnimations}</style>
-        <h1 className="text-4xl font-bold text-blue-600 text-center my-8">
-          {selectedProject.title}
-        </h1>
-
-        <div className="project-description w-full max-w-4xl mx-auto px-4 md:px-8 py-6 mb-10 bg-offwhite rounded-lg shadow-sm">
-          {DescriptionComponent && <div className="prose prose-lg max-w-none text-gray-700"><DescriptionComponent /></div>}
-          
+        
+        {/* Header with ref for intersection observer */}
+        <div ref={topSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+          <h1 className="text-4xl font-bold text-blue-600 text-center mb-8">
+            {selectedProject.title}
+          </h1>
         </div>
 
-        {renderProjectDemo()}
+        {/* Full-width container with background - improved padding */}
+        <div className="project-description-container w-full bg-blue2/40 py-10 mb-12 shadow-md">
+          {/* Content container that's centered and width-constrained */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {DescriptionComponent && <div className="prose prose-lg max-w-none text-white"><DescriptionComponent /></div>}
+          </div>
+        </div>
+
+        {/* Demo section with consistent padding */}
+        <div ref={demoSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 mb-10">
+          {renderProjectDemo()}
+        </div>
         
+        {/* Code section with improved spacing */}
         {selectedProject.stack !== 'backend' && (
-        <div className="flex justify-center -mt-[1px]">
+        <div className="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 pb-16">
           <div className="code-block w-full max-w-6xl bg-gray-900 shadow-lg overflow-hidden">
             <div className="flex">
               {tabs.map((tab) => {
@@ -329,7 +377,16 @@ const ProjectPage = () => {
         </div>
         )}
 
-     
+        {/* Fixed scroll-to-demo button - now with conditional display */}
+        {showScrollButton && (
+          <button 
+            onClick={scrollToDemo}
+            className="fixed bottom-8 right-8 bg-blue2 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg z-50 transition-all duration-300 transform hover:scale-110"
+            aria-label="Scroll to demo"
+          >
+            <FontAwesomeIcon icon={faArrowDown} className="text-xl" />
+          </button>
+        )}
       </div>
     </>
   );
