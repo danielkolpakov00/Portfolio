@@ -1,20 +1,22 @@
 // src/PortfolioPreview.jsx
-import React, { useState, useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useState, useEffect, useMemo } from "react";
+import { Responsive, WidthProvider } from "react-grid-layout";
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+
+// Project previews
 import WeatherPreview from "./WeatherPreview";
 import PlinkoPreview from "./PlinkoPreview";
 import BedroomPreview from "./BedroomScenePreview";
 import MusicPreview from "./MusicPreview";
 import MailPreview from "./MailPreview";
 import TsParticles from "./components/TsParticles";
-import { Link } from "react-router-dom";
-import "./index.css";
 import ProjectWidget from "./components/ProjectWidget";
-import { FaReact, FaJs } from "react-icons/fa"; // Added FaJs import
+import { FaReact } from "react-icons/fa";
 import projectsData from './data/projects.json';
 
-gsap.registerPlugin(ScrollTrigger);
+// Set up responsive grid layout with width provider
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 // Map visual components to their imported references
 const visualComponents = {
@@ -25,237 +27,166 @@ const visualComponents = {
   "MailPreview": MailPreview
 };
 
-// Replace hardcoded projects with data from JSON
-const projects = projectsData.vanillaProjects.map(project => ({
-  ...project,
-  visual: visualComponents[project.visualComponent]
-}));
-
 const PortfolioPreview = () => {
-  const [reactProjects, setReactProjects] = useState(() => {
-    // Try to get cached data from localStorage first
-    const cached = localStorage.getItem('reactProjects');
-    return cached ? JSON.parse(cached) : [];
+  // Create layout state to store and persist grid positions
+  const [layouts, setLayouts] = useState(() => {
+    const savedLayouts = localStorage.getItem('portfolioLayouts');
+    return savedLayouts ? JSON.parse(savedLayouts) : null;
   });
-  const [showIndicator, setShowIndicator] = useState(true);
+  
+  const [allProjects, setAllProjects] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeFrameworkFilter, setActiveFrameworkFilter] = useState("all");
-  const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Refs for the project containers
-  const vanillaContainerRef = useRef(null);
-  const reactContainerRef = useRef(null);
-  
-  // Get unique categories from all projects
-  const allCategories = ["all", ...new Set([
-    ...projects.map(project => project.category || "other"),
-    ...reactProjects.map(project => project.category || "other")
-  ])];
-
-  // Define available frameworks
-  const frameworks = ["all", "vanilla", "react"];
-
-  // Function to determine if the filtered projects are odd in count
-  const isOddCount = (projectsList) => {
-    return filterProjects(projectsList, projectsList === projects ? "vanilla" : "react").length % 2 !== 0;
-  };
-
+  // Generate combined projects array
   useEffect(() => {
-    const fetchProjects = async () => {
+    // Process vanilla projects from projectsData
+    const vanillaProjects = projectsData.vanillaProjects.map(project => ({
+      ...project,
+      visual: visualComponents[project.visualComponent],
+      framework: "vanilla"
+    }));
+    
+    // Fetch React projects from public folder
+    const fetchReactProjects = async () => {
       try {
-        // You can still fetch dynamic react projects if needed
-        // or modify to use the JSON file directly
         const response = await fetch('/react-projects.json');
         if (!response.ok) throw new Error('Failed to load projects');
         const data = await response.json();
         
-        // Add framework property to react projects if not present
-        const processedProjects = data.projects.map(project => ({
-          ...project,
-          framework: project.framework || "react" // Ensure framework is set to "react"
-        }));
+        // Create image-based visual components for React projects
+        const reactProjects = data.projects.map(project => {
+          // Create a custom visual component for each React project
+          const ImageVisual = () => (
+            <div className="w-full h-full flex items-center justify-center bg-gray-800">
+              {project.image ? (
+                <img 
+                  src={project.image} 
+                  alt={project.title}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-blue-600 to-blue-900">
+                  <FaReact className="text-white" size={60} />
+                </div>
+              )}
+            </div>
+          );
+
+          return {
+            ...project,
+            framework: "react",
+            visual: ImageVisual
+          };
+        });
         
-        setReactProjects(processedProjects);
-        // Cache the fetched data
-        localStorage.setItem('reactProjects', JSON.stringify(processedProjects));
+        // Combine vanilla and React projects
+        setAllProjects([...vanillaProjects, ...reactProjects]);
       } catch (error) {
         console.error('Error fetching projects:', error);
+        setAllProjects(vanillaProjects);
       }
     };
     
-    fetchProjects();
+    fetchReactProjects();
   }, []);
 
-  // Debug logging to see if frameworks are set correctly
+  // Save layouts to localStorage when they change
   useEffect(() => {
-    console.log('Vanilla projects:', projects);
-    console.log('React projects:', reactProjects);
-  }, [reactProjects]);
+    if (layouts && Object.keys(layouts).length > 0) {
+      localStorage.setItem('portfolioLayouts', JSON.stringify(layouts));
+    }
+  }, [layouts]);
 
-  // Function to filter projects based on activeFilter and activeFrameworkFilter
-  const filterProjects = (projectsList, framework) => {
-    return projectsList.filter(project => {
-      // Check if project has category that matches the filter or if filter is "all"
-      const categoryMatch = activeFilter === "all" || project.category === activeFilter;
-      
-      // For framework filter, check both explicit framework property and the provided framework
-      const frameworkMatch = activeFrameworkFilter === "all" || 
-                             project.framework === activeFrameworkFilter ||
-                             framework === activeFrameworkFilter;
-      
-      return categoryMatch && frameworkMatch;
-    });
+  // Get unique categories from all projects
+  const allCategories = ["all", ...new Set(
+    allProjects.map(project => project.category || "other")
+  )];
+
+  // Define available frameworks
+  const frameworks = ["all", "vanilla", "react"];
+
+  // Filter projects based on activeFilter and activeFrameworkFilter
+  const filteredProjects = allProjects.filter(project => {
+    const categoryMatch = activeFilter === "all" || project.category === activeFilter;
+    const frameworkMatch = activeFrameworkFilter === "all" || project.framework === activeFrameworkFilter;
+    return categoryMatch && frameworkMatch;
+  });
+  
+  // Handle layout changes
+  const onLayoutChange = (_, allLayouts) => {
+    setLayouts(allLayouts);
   };
 
-  // Handle filter changes with smooth transitions
+  // Generate initial layouts with 4-column grid
+  const generateLayouts = useMemo(() => {
+    if (!allProjects.length) return {};
+    
+    const cols = { lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 };
+    const initialLayouts = {};
+    
+    Object.keys(cols).forEach(breakpoint => {
+      initialLayouts[breakpoint] = allProjects.map((project, i) => {
+        const colNum = cols[breakpoint];
+        const row = Math.floor(i / colNum);
+        const col = i % colNum;
+        
+        return {
+          i: `${project.framework}-${project.id}`,
+          x: col,
+          y: row,
+          w: 1,
+          h: 2
+        };
+      });
+    });
+    
+    return initialLayouts;
+  }, [allProjects]);
+
+  // Simple category filter handler
   const handleFilterChange = (category) => {
     if (category === activeFilter) return;
-    
-    setIsTransitioning(true);
-    
-    // Animate out current projects
-    const vanillaProjects = vanillaContainerRef.current?.querySelectorAll('.project-card') || [];
-    const reactProjects = reactContainerRef.current?.querySelectorAll('.project-card') || [];
-    
-    const allProjects = [...vanillaProjects, ...reactProjects];
-    
-    gsap.to(allProjects, {
-      opacity: 0,
-      y: 20,
-      stagger: 0.05,
-      duration: 0.3,
-      onComplete: () => {
-        // Change the filter after fade out
-        setActiveFilter(category);
-        
-        // Short delay to allow state to update
-        setTimeout(() => {
-          // Animate new projects in
-          const newVanillaProjects = vanillaContainerRef.current?.querySelectorAll('.project-card') || [];
-          const newReactProjects = reactContainerRef.current?.querySelectorAll('.project-card') || [];
-          
-          const newAllProjects = [...newVanillaProjects, ...newReactProjects];
-          
-          gsap.fromTo(newAllProjects, 
-            { opacity: 0, y: 20 },
-            { 
-              opacity: 1, 
-              y: 0, 
-              stagger: 0.05, 
-              duration: 0.3,
-              onComplete: () => setIsTransitioning(false)
-            }
-          );
-        }, 100);
-      }
-    });
+    setActiveFilter(category);
   };
   
-  // Handle framework filter changes with smooth transitions
+  // Simple framework filter handler
   const handleFrameworkFilterChange = (framework) => {
     if (framework === activeFrameworkFilter) return;
-    
-    setIsTransitioning(true);
-    
-    // Animate out current projects
-    const vanillaProjects = vanillaContainerRef.current?.querySelectorAll('.project-card') || [];
-    const reactProjects = reactContainerRef.current?.querySelectorAll('.project-card') || [];
-    
-    const allProjects = [...vanillaProjects, ...reactProjects];
-    
-    gsap.to(allProjects, {
-      opacity: 0,
-      y: 20,
-      stagger: 0.05,
-      duration: 0.3,
-      onComplete: () => {
-        // Change the filter after fade out
-        setActiveFrameworkFilter(framework);
-        
-        // Short delay to allow state to update
-        setTimeout(() => {
-          // Animate new projects in
-          const newVanillaProjects = vanillaContainerRef.current?.querySelectorAll('.project-card') || [];
-          const newReactProjects = reactContainerRef.current?.querySelectorAll('.project-card') || [];
-          
-          const newAllProjects = [...newVanillaProjects, ...newReactProjects];
-          
-          gsap.fromTo(newAllProjects, 
-            { opacity: 0, y: 20 },
-            { 
-              opacity: 1, 
-              y: 0, 
-              stagger: 0.05, 
-              duration: 0.3,
-              onComplete: () => setIsTransitioning(false)
-            }
-          );
-        }, 100);
-      }
-    });
+    setActiveFrameworkFilter(framework);
   };
-  
-  // Set up initial animations when component mounts
-  useEffect(() => {
-    const vanillaProjects = vanillaContainerRef.current?.querySelectorAll('.project-card') || [];
-    const reactProjects = reactContainerRef.current?.querySelectorAll('.project-card') || [];
-    
-    gsap.fromTo(
-      [...vanillaProjects, ...reactProjects],
-      { opacity: 0, y: 20 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        stagger: 0.05, 
-        duration: 0.5,
-        delay: 0.2
-      }
-    );
-  }, [reactProjects]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.pageYOffset > 100) { // adjust threshold as needed
-        setShowIndicator(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Filter Pills Component with updated onClick handlers
+  // Filter Pills Component - FIXED: Now properly defined
   const FilterPills = () => (
     <div className="flex flex-wrap gap-2 mb-6 justify-center">
       {allCategories.map(category => (
         <button
           key={category}
           onClick={() => handleFilterChange(category)}
-          disabled={isTransitioning}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             activeFilter === category 
               ? "bg-blue2 text-white opacity-80" 
               : "bg-blue1 text-white hover:bg-gray-700 opacity-80"
-          } ${isTransitioning ? "cursor-not-allowed opacity-50" : ""}`}
+          }`}
         >
-          {category}
+          {category.charAt(0).toUpperCase() + category.slice(1)}
         </button>
       ))}
     </div>
   );
 
-  // Framework Filter Pills Component with updated onClick handlers
+  // Framework Filter Pills Component - FIXED: Now properly defined
   const FrameworkFilterPills = () => (
     <div className="flex flex-wrap gap-2 mb-6 justify-center">
       {frameworks.map(framework => (
         <button
           key={framework}
           onClick={() => handleFrameworkFilterChange(framework)}
-          disabled={isTransitioning}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             activeFrameworkFilter === framework 
               ? "bg-blue2 text-white opacity-80" 
               : "bg-blue1 text-white hover:bg-gray-700 opacity-80"
-          } ${isTransitioning ? "cursor-not-allowed opacity-50" : ""}`}
+          }`}
         >
           {framework.charAt(0).toUpperCase() + framework.slice(1)}
         </button>
@@ -266,112 +197,99 @@ const PortfolioPreview = () => {
   return (
     <div className="relative">
       <TsParticles />
-      <h2
-        className="text-center text-6xl text-blue2 font-bold mb-6 flex items-center justify-center gap-2"
-      >
+      <h2 className="text-center text-6xl text-blue2 font-bold mb-6 flex items-center justify-center gap-2">
         My Work
       </h2>
       
       <div className="mb-4">
-       
         <FilterPills />
       </div>
       
       <div className="mb-8">
-    
         <FrameworkFilterPills />
       </div>
 
-      <section 
-        aria-labelledby="vanilla-projects" 
-        className="mb-16 px-4 py-10"
-        style={{ 
-          display: (activeFrameworkFilter === "all" || activeFrameworkFilter === "vanilla") ? "block" : "none" 
-        }}
-      >
-        <h3 id="vanilla-projects" className="text-3xl text-white mb-6 flex items-center justify-center gap-3">
-        <div className="h-0.5 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent w-1/2"></div>
-          <div className="mx-4 p-2  flex items-center justify-center">
-            <FaJs className="text-blue-500" size={32} />
-          </div>
-          <div className="h-0.5 bg-gradient-to-r from-blue-500/50 via-blue-500/50 to-transparent w-1/2"></div>
-        </h3>
-        <div 
-          ref={vanillaContainerRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl transition-all duration-500 ease-in-out"
-        >
-          {filterProjects(projects, "vanilla").map((project, index, array) => (
-            <div 
-              key={project.id} 
-              className={`relative h-[500px] project-card transition-all duration-300 ${
-                index === array.length - 1 && array.length % 2 !== 0 ? 'md:col-span-2 md:w-[calc(50%-1.5rem)] md:mx-auto' : ''
-              }`}
-            >
-              <ProjectWidget 
-                {...project} 
-                showCategory={true}
-                category={project.category} 
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Visual divider when both sections are visible */}
-      {(activeFrameworkFilter === "all" && 
-        filterProjects(projects, "vanilla").length > 0 && 
-        filterProjects(reactProjects, "react").length > 0) && (
-        <div className="flex items-center justify-center my-14">
-          <div className="h-0.5 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent w-1/2"></div>
-          <div className="mx-4 p-2 rounded-full bg-blue-500/10 flex items-center justify-center">
-            <FaReact className="text-blue-500 animate-spin-slow" size={32} />
-          </div>
-          <div className="h-0.5 bg-gradient-to-r from-blue-500/50 via-blue-500/50 to-transparent w-1/2"></div>
-        </div>
-      )}
-
-      <section 
-        aria-labelledby="react-projects" 
-        id="react-projects" 
-        className="mb-16 px-4 py-10"
-        style={{ 
-          display: (activeFrameworkFilter === "all" || activeFrameworkFilter === "react") ? "block" : "none" 
-        }}
-      >
-        <h3 id="react-projects-heading" className="text-3xl text-white mb-6 flex items-center justify-center gap-3">
-          
-         
-        </h3>
-        <div 
-          ref={reactContainerRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mx-auto w-full max-w-6xl transition-all duration-500 ease-in-out"
-        >
-          {filterProjects(reactProjects, "react").map((project, index, array) => (
-            <div 
-              key={project.id} 
-              className={`relative h-[500px] project-card transition-all duration-300 ${
-                index === array.length - 1 && array.length % 2 !== 0 ? 'md:col-span-2 md:w-[calc(50%-1.5rem)] md:mx-auto' : ''
-              }`}
-            >
-              <ProjectWidget
-                {...project}
-                buttonText="View Project"
-                color="#284af7"
-                routePrefix="/react-projects"
-                showCategory={true}
-                titleExtra={<FaReact className="text-blue-500 flex-shrink-0" size={24} />}
-                visual={project.visual || (() => (
-                  <img
-                    src={project.image || "/path/to/default/react-image.png"}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
-                ))}
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="px-4 py-10">
+        {filteredProjects.length > 0 && (
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={layouts || generateLayouts}
+            onLayoutChange={onLayoutChange}
+            isDraggable={true}
+            isResizable={false}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 }}
+            rowHeight={250}
+            margin={[16, 16]}
+            containerPadding={[20, 20]}
+            draggableHandle=".drag-handle"
+            compactType="vertical"
+            useCSSTransforms={true}
+            autoSize={true}
+            draggableCancel=".project-link-content"
+            isBounded={false}
+            allowOverlap={false}
+            measureBeforeMount={false}
+            // Adjust rearrangement speed with this time value (milliseconds)
+            // Higher values make smoother transitions for non-dragged items
+            resizeHandles={[]}
+          >
+            {filteredProjects.map((project, index) => (
+              <div 
+                key={`${project.framework}-${project.id}`}
+                className="project-item"
+                style={{ overflow: 'visible' }}
+              >
+                <ProjectWidget
+                  {...project}
+                  routePrefix={project.framework === "react" ? "/react-projects" : "/projects"}
+                  showCategory={true}
+                  titleExtra={project.framework === "react" ? <FaReact className="text-blue-500 flex-shrink-0" size={24} /> : null}
+                />
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        )}
+      </div>
+      
+      {/* Better CSS for smooth rearrangement */}
+      <style jsx global>{`
+        /* Key change: Only disable transitions for the item being dragged */
+        .react-grid-item.react-draggable-dragging {
+          z-index: 100 !important;
+          cursor: grabbing !important;
+          transition: none !important;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* For items being rearranged (not the one being dragged), keep smooth transitions */
+        .react-grid-item:not(.react-draggable-dragging) {
+          transition: transform 0.3s ease, left 0.3s ease, top 0.3s ease, right 0.3s ease !important;
+        }
+        
+        /* Make placeholder responsive */
+        .react-grid-placeholder {
+          background-color: rgba(27, 105, 250, 0.2) !important;
+          border: 1px dashed #1b69fa !important;
+          border-radius: 0.75rem !important;
+          transition: all 0.15s ease !important;
+        }
+        
+        /* Basic styling */
+        .drag-handle {
+          cursor: grab;
+        }
+        
+        .drag-handle:active,
+        .react-draggable-dragging .drag-handle {
+          cursor: grabbing !important;
+        }
+        
+        /* Optimize for performance */
+        .react-grid-item {
+          will-change: transform;
+        }
+      `}</style>
     </div>
   );
 };
