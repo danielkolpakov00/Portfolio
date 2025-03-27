@@ -1,7 +1,7 @@
 // src/ProjectWidget.jsx
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const ProjectWidget = ({
   title,
@@ -24,11 +24,11 @@ const ProjectWidget = ({
     if (visualContainerRef.current) {
       resizeObserverRef.current = new ResizeObserver((entries) => {
         for (let entry of entries) {
-          const resizeEvent = new CustomEvent("container-resize", {
+          const resizeEvent = new CustomEvent('container-resize', {
             detail: {
               width: entry.contentRect.width,
-              height: entry.contentRect.height,
-            },
+              height: entry.contentRect.height
+            }
           });
           visualContainerRef.current.dispatchEvent(resizeEvent);
         }
@@ -40,12 +40,12 @@ const ProjectWidget = ({
         clearTimeout(resizeTimeoutRef.current);
       }
       resizeTimeoutRef.current = setTimeout(() => {
-        setKey((prevKey) => prevKey + 1);
+        setKey(prevKey => prevKey + 1);
       }, 500);
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
       if (resizeObserverRef.current && visualContainerRef.current) {
         resizeObserverRef.current.unobserve(visualContainerRef.current);
       }
@@ -60,7 +60,7 @@ const ProjectWidget = ({
       <div
         ref={visualContainerRef}
         className="relative overflow-hidden bg-transparent backdrop-blur-sm flex-shrink-0"
-        style={{ height: "180px", minHeight: "180px", maxHeight: "250px" }}
+        style={{ height: '180px', minHeight: '180px', maxHeight: '250px' }}
       >
         {Visual && <Visual key={key} containerRef={visualContainerRef} />}
       </div>

@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Three.js Sun, Moon, and Day/Night Cycle (Vancouver Time)</title>
+  <meta name="description" content="Interactive 3D weather visualization with day/night cycle based on Vancouver time">
+  <title>Interactive Weather Visualization</title>
   
   <!-- Resource hints for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preload" href="https://unpkg.com/three@0.159.0/build/three.module.js" as="script">
+  
+  <!-- Import map for modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+      }
+    }
+  </script>
   
   <!-- Load Inter font optimized for text rendering -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,32 +33,43 @@
   <link href="weatherapi.css" rel="stylesheet">
 </head>
 <body>
-  <div id="weatherDisplay"></div>
-  <div id="gradientOverlay"></div>
-  <div id="sunriseOverlay"></div>
-  <div id="timeDisplay"></div>
-  <div id="controlGroup">
-    <input type="range" id="timeSlider" min="0" max="1440" step="1" value="720">
-    <div class="buttonRow">
-      <button id="precipButton" class="control-button" aria-label="Precipitation controls">
-        <i class="fa-solid fa-cloud-rain icon"></i>
-      </button>
-      <button id="playButton" class="control-button" aria-label="Play/pause time">
-        <i class="fa-solid fa-play icon"></i>
-      </button>
-      <button id="debugButton" class="control-button" aria-label="Debug mode">
-        <i class="fa-solid fa-bug icon"></i>
-      </button>
+  <main>
+    <div id="weatherDisplay" aria-live="polite" role="status"></div>
+    <div id="gradientOverlay" aria-hidden="true"></div>
+    <div id="sunriseOverlay" aria-hidden="true"></div>
+    <div id="timeDisplay" aria-label="Current time"></div>
+    
+    <div id="controlGroup">
+      <input type="range" id="timeSlider" min="0" max="1440" step="1" value="720" 
+             aria-label="Time control slider">
+      
+      <div class="buttonRow">
+        <button id="precipButton" class="control-button" aria-label="Precipitation controls" 
+                title="Weather Controls">
+          <i class="fa-solid fa-cloud-rain icon"></i>
+        </button>
+        <button id="playButton" class="control-button" aria-label="Play/pause time" 
+                title="Play/Pause Time">
+          <i class="fa-solid fa-play icon"></i>
+        </button>
+        <button id="debugButton" class="control-button" aria-label="Debug mode" 
+                title="Time Controls">
+          <i class="fa-solid fa-clock icon"></i>
+        </button>
+      </div>
+      
+      <div id="precipControls">
+        <select id="precipType" aria-label="Precipitation type">
+          <option value="none">Clear</option>
+          <option value="rain">Rain</option>
+          <option value="snow">Snow</option>
+        </select>
+        <input type="range" id="precipIntensity" min="0" max="100" value="50" 
+               aria-label="Precipitation intensity">
+      </div>
     </div>
-    <div id="precipControls">
-      <select id="precipType" aria-label="Precipitation type">
-        <option value="none">Clear</option>
-        <option value="rain">Rain</option>
-        <option value="snow">Snow</option>
-      </select>
-      <input type="range" id="precipIntensity" min="0" max="100" value="50" aria-label="Precipitation intensity">
-    </div>
-  </div>
+  </main>
+  
   <script async src="https://unpkg.com/es-module-shims/dist/es-module-shims.js"></script>
   <script type="importmap">
     {

@@ -9,8 +9,11 @@ import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 const timeSlider = document.getElementById('timeSlider');
 const debugButton = document.getElementById('debugButton');
 const playButton = document.getElementById('playButton');
-const dayColor = new THREE.Color(0xb1d8ff);    // Soft sky blue
-const nightColor = new THREE.Color(0x0a1428);   // Darker night blue
+// Enhanced sky colors for more pleasing visuals
+const dayColor = new THREE.Color(0xb8e0ff);    // Softer sky blue
+const nightColor = new THREE.Color(0x0c1a2e);   // Richer night blue
+const sunsetColor = new THREE.Color(0xffb88c);  // Warm sunset color
+const sunriseColor = new THREE.Color(0xffd4b8);  // Soft sunrise color
 
 // Add state tracking at the top with other constants
 let isPlaying = false;
@@ -41,6 +44,10 @@ const precipButton = document.getElementById('precipButton');
 const precipControls = document.getElementById('precipControls');
 const precipType = document.getElementById('precipType');
 const precipIntensity = document.getElementById('precipIntensity');
+const weatherDisplay = document.getElementById('weatherDisplay');
+const timeDisplay = document.getElementById('timeDisplay');
+const gradientOverlay = document.getElementById('gradientOverlay');
+const sunriseOverlay = document.getElementById('sunriseOverlay');
 
 // 3. Three.js Setup
 const scene = new THREE.Scene();
@@ -50,12 +57,13 @@ camera.position.z = 5;
 const renderer = new THREE.WebGLRenderer({ 
     antialias: window.devicePixelRatio < 2, // Only use antialias for higher-end devices
     powerPreference: "high-performance",
-    precision: "highp"
+    precision: "highp",
+    alpha: true // Enable transparency for smoother blending
 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.3;
+renderer.toneMappingExposure = 0.4; // Reduced from 0.5 for less overall brightness
 document.body.appendChild(renderer.domElement);
 
 // Setup postprocessing with responsive quality
@@ -74,17 +82,20 @@ const bloomPass = new UnrealBloomPass(
 composer.addPass(bloomPass);
 
 // 4. Object Creation
-// Create Sun with Gradient
+// Create Sun with much more vibrant and saturated golden yellow color
 function createSunGradient() {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 256;
   const context = canvas.getContext('2d');
 
-  // Create radial gradient
-  const gradient = context.createRadialGradient(128, 128, 50, 128, 128, 128);
-  gradient.addColorStop(0, '#FFFF00'); // Bright yellow in the center
-  gradient.addColorStop(1, '#FFA500'); // Orange around the edges
+  // Create radial gradient with pure golden-yellow tones (no orange/white)
+  const gradient = context.createRadialGradient(128, 128, 25, 128, 128, 128);
+  gradient.addColorStop(0, 'rgba(255, 200, 0, 1.0)');     // Pure gold center - fully opaque
+  gradient.addColorStop(0.4, 'rgba(255, 200, 0, 1.0)');   // Vibrant yellow - fully opaque
+  gradient.addColorStop(0.7, 'rgba(255, 200, 0, 1.0)');   // Golden yellow transition - mostly opaque
+  gradient.addColorStop(1, 'rgb(255, 200, 0)');     // Gold edge - slightly transparent
+
   // Fill with gradient
   context.fillStyle = gradient;
   context.fillRect(0, 0, 256, 256);
@@ -92,8 +103,14 @@ function createSunGradient() {
   return new THREE.CanvasTexture(canvas);
 }
 
-// Create the sun
-const sunMaterial = new THREE.MeshBasicMaterial({ map: createSunGradient() });
+// Update sun material with solid yellow color and no transparency in the center
+const sunMaterial = new THREE.MeshBasicMaterial({ 
+  map: createSunGradient(),
+  transparent: true,
+  opacity: 1.0,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
 const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 scene.add(sun);
@@ -102,18 +119,18 @@ scene.add(sun);
 const moonTextureLoader = new THREE.TextureLoader();
 const moonTexture = moonTextureLoader.load('./moontexture.jpeg'); // Replace with your moon texture path
 
-// Create moon light with adjusted properties
-const moonLight = new THREE.PointLight(0x8888FF, 2, 150);
+// Create moon light with more natural properties
+const moonLight = new THREE.PointLight(0x8fc0ff, 1.2, 150); // Slightly bluer for night ambiance
 moonLight.position.set(-5, 0, 0);
 scene.add(moonLight);
 
-// Create the moon material
+// Create the moon material with enhanced visual features
 const moonMaterial = new THREE.MeshStandardMaterial({
     map: moonTexture,
-    roughness: 0.7,
+    roughness: 0.8,
     metalness: 0.1,
-    emissive: 0xCCCCFF,
-    emissiveIntensity: 0.4
+    emissive: 0xCCDDFF, // Slightly bluer glow
+    emissiveIntensity: 0.35
 });
 
 // Create the moon
@@ -122,8 +139,8 @@ const moon = new THREE.Mesh(moonGeometry, moonMaterial);
 moon.position.x = -5;
 scene.add(moon);
 
-// Create sun light
-const sunLight = new THREE.PointLight(0xFFFF00, 2, 10);
+// Create sun light with pure gold/yellow color
+const sunLight = new THREE.PointLight(0xFFD700, 0.8, 15); // Pure gold color (RGB 255,215,0)
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 
@@ -131,7 +148,7 @@ scene.add(sunLight);
 const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
 scene.add(ambientLight);
 
-// Update cloud creation function with more responsive scaling
+// Update cloud creation function with more attractive clouds
 function createCloud(size, x, y, direction) {
   const loader = new SVGLoader();
   const cloud = new THREE.Group();
@@ -152,39 +169,45 @@ function createCloud(size, x, y, direction) {
         const material = new THREE.MeshBasicMaterial({
           color: 0xffffff,
           transparent: true,
-          opacity: 0.8,
+          opacity: 0.85,
           side: THREE.DoubleSide,
           depthTest: false
         });
         
         const mesh = new THREE.Mesh(geometry, material);
-        // Apply slight random rotation to avoid squared appearance
-        mesh.rotation.z = (Math.random() - 0.5) * 0.2;
+        // Apply slight random rotation for natural appearance
+        mesh.rotation.z = (Math.random() - 0.5) * 0.3;
         cloud.add(mesh);
         cloud.meshes.push(mesh); // Store reference to mesh
       });
     });
     
-    // Use non-uniform scaling to avoid squared appearance
-    const randomWidthScale = 0.9 + Math.random() * 0.2;
-    cloud.scale.set(adjustedSize * 0.001 * randomWidthScale, adjustedSize * 0.001, 1);
+    // Use non-uniform scaling for natural cloud shapes
+    const randomWidthScale = 0.85 + Math.random() * 0.3;
+    const randomHeightScale = 0.9 + Math.random() * 0.2;
+    cloud.scale.set(
+      adjustedSize * 0.001 * randomWidthScale, 
+      adjustedSize * 0.001 * randomHeightScale, 
+      1
+    );
     cloud.position.set(x, -3, 1);
   });
   
   cloud.direction = direction;
   
-  // Add rounded glow effect
-  const glowGeometry = new THREE.CircleGeometry(adjustedSize/2, 32);
+  // Add enhanced glow effect
+  const glowGeometry = new THREE.CircleGeometry(adjustedSize/1.8, 32);
   const glowMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.3,
+    opacity: 0.4,
     side: THREE.DoubleSide,
     blending: THREE.AdditiveBlending,
     depthTest: false
   });
   
   const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+  glow.scale.y = 0.6; // Flatten for more natural cloud shape
   cloud.add(glow);
   
   scene.add(cloud);
@@ -201,10 +224,14 @@ function getRandomCloudPosition() {
   };
 }
 
-// Update getRandomDirection function for horizontal movement only
+// Override getRandomDirection to ensure clouds move at a visible speed
 function getRandomDirection() {
-  const speed = Math.random() * 0.001 + 0.003; // Random speed between 0.02 and 0.12
-  return Math.random() > 0.5 ? speed : -speed; // Only horizontal movement
+  // Increase base speed for more noticeable movement
+  const baseSpeed = 0.01; // 3x faster than previous value
+  const variability = 0.005;
+  const speed = baseSpeed + Math.random() * variability;
+  
+  return Math.random() > 0.5 ? speed : -speed;
 }
 
 // Update cloud creation array
@@ -213,27 +240,39 @@ const clouds = Array(6).fill(null).map(() => {
   const size = Math.random() * 1.5 + 2; // Random size between 2 and 3.5
   const direction = getRandomDirection();
   const cloud = createCloud(size, pos.x, pos.y, direction);
+  
+  // Store initial position for reference
+  cloud.initialY = pos.y;
   cloud.verticalRange = { min: -2, max: 2 }; // Add vertical bounds
+  cloud.originalSize = size; // Store original size for responsive scaling
+  cloud.loaded = false; // Mark as not loaded initially
+  cloud.lastTime = null; // For delta time calculation
+  
   return cloud;
 });
 
-// Create Rain Particle System
+// Create enhanced Rain Particle System
 function createRain() {
   const rainGeometry = new THREE.BufferGeometry();
   const maxRainCount = 15000;
   const rainPositions = new Float32Array(maxRainCount * 3);
-
+  
+  // More varied distribution
   for (let i = 0; i < maxRainCount; i++) {
-    rainPositions[i * 3] = Math.random() * 40 - 20;
-    rainPositions[i * 3 + 1] = Math.random() * 20 - 10;
-    rainPositions[i * 3 + 2] = Math.random() * 40 - 20;
+    rainPositions[i * 3] = (Math.random() - 0.5) * 40;
+    rainPositions[i * 3 + 1] = Math.random() * 20 - 5; // Start higher
+    rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
   }
 
   rainGeometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+  
+  // More realistic raindrops
   const rainMaterial = new THREE.PointsMaterial({
-    color: 0xaaaaaa,
-    size: 0.1,
+    color: 0xccddff,
+    size: 0.12,
     transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending
   });
 
   const rain = new THREE.Points(rainGeometry, rainMaterial);
@@ -244,23 +283,33 @@ function createRain() {
   return rain;
 }
 
-// Create Snow Particle System
+// Create enhanced Snow Particle System
 function createSnow() {
   const snowGeometry = new THREE.BufferGeometry();
   const maxSnowCount = 5000;
   const snowPositions = new Float32Array(maxSnowCount * 3);
+  const snowSizes = new Float32Array(maxSnowCount);
 
+  // More varied distribution and sizes
   for (let i = 0; i < maxSnowCount; i++) {
-    snowPositions[i * 3] = Math.random() * 40 - 20;
-    snowPositions[i * 3 + 1] = Math.random() * 20 - 10;
-    snowPositions[i * 3 + 2] = Math.random() * 40 - 20;
+    snowPositions[i * 3] = (Math.random() - 0.5) * 40;
+    snowPositions[i * 3 + 1] = Math.random() * 20 - 5; // Start higher
+    snowPositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+    snowSizes[i] = Math.random() * 0.2 + 0.1; // Varied snowflake sizes
   }
 
   snowGeometry.setAttribute('position', new THREE.BufferAttribute(snowPositions, 3));
+  snowGeometry.setAttribute('size', new THREE.BufferAttribute(snowSizes, 1));
+  
+  // More realistic snowflakes
   const snowMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
     size: 0.2,
     transparent: true,
+    opacity: 0.9,
+    vertexColors: false,
+    sizeAttenuation: true,
+    map: createSnowflakeTexture()
   });
 
   const snow = new THREE.Points(snowGeometry, snowMaterial);
@@ -269,6 +318,28 @@ function createSnow() {
   scene.add(snow);
 
   return snow;
+}
+
+// Create a snowflake texture
+function createSnowflakeTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  
+  // Clear canvas
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, 32, 32);
+  
+  // Draw snowflake
+  ctx.beginPath();
+  ctx.arc(16, 16, 12, 0, Math.PI * 2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  
+  // Create texture
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
 }
 
 // Initialize Rain and Snow Particle Systems
@@ -304,9 +375,12 @@ function animate() {
     }
   }
 
-  // Rotate sun and moon
+  // Rotate sun and moon with gentle wobble
   sun.rotation.y += 0.005;
-  moon.rotation.y += 0.005;
+  sun.rotation.x = Math.sin(Date.now() * 0.0005) * 0.05;
+  
+  moon.rotation.y += 0.002;
+  moon.rotation.x = Math.sin(Date.now() * 0.0003) * 0.03;
 
   // Move clouds
   animateClouds();
@@ -321,64 +395,124 @@ function animate() {
   composer.render(); // Replace renderer.render() with composer.render()
 }
 
-// Update animateClouds function for horizontal-only movement
+// Completely rewrite the cloud animation function to ensure proper movement
 function animateClouds() {
   const dims = getResponsiveRadius();
   const margin = 2;
+  const now = Date.now();
   
-  clouds.forEach((cloud) => {
-    // Update horizontal position only
-    cloud.position.x += cloud.direction;
-
-    // Reset position when out of bounds
-    if (cloud.position.x > dims.maxX + margin) {
-      cloud.position.x = -dims.maxX - margin;
-      cloud.direction = getRandomDirection();
-    }
-    if (cloud.position.x < -dims.maxX - margin) {
-      cloud.position.x = dims.maxX + margin;
-      cloud.direction = getRandomDirection();
+  // Use a constant movement speed independent of frame rate
+  const frameTime = now - (window.lastFrameTime || now);
+  window.lastFrameTime = now;
+  
+  // Cap the frame time delta to prevent huge jumps after tab switches
+  const normalizedFrameTime = Math.min(frameTime, 100);
+  const speedFactor = normalizedFrameTime / 16.67; // Target 60fps
+  
+  clouds.forEach((cloud, index) => {
+    // Skip clouds that don't have meshes yet
+    if (!cloud.meshes || cloud.meshes.length === 0) {
+      return;
     }
     
-    // Animate cloud glow opacity only
+    // Add slight vertical bobbing for more natural movement
+    const verticalBob = Math.sin(now * 0.0003 + index * 200) * 0.02;
+    
+    // If initialY isn't set yet, store current position
+    if (cloud.initialY === undefined) {
+      cloud.initialY = cloud.position.y;
+    }
+    
+    // Apply vertical bobbing
+    cloud.position.y = cloud.initialY + verticalBob;
+    
+    // Move cloud horizontally at constant speed
+    const moveDistance = cloud.direction * speedFactor;
+    cloud.position.x += moveDistance;
+    
+    // Reset position when cloud goes out of bounds
+    if (cloud.direction > 0 && cloud.position.x > dims.maxX + margin) {
+      cloud.position.x = -dims.maxX - margin;
+      
+      // Randomize vertical position slightly
+      cloud.initialY = -3 + (Math.random() - 0.5) * 1; 
+    } 
+    else if (cloud.direction < 0 && cloud.position.x < -dims.maxX - margin) {
+      cloud.position.x = dims.maxX + margin;
+      
+      // Randomize vertical position slightly
+      cloud.initialY = -3 + (Math.random() - 0.5) * 1;
+    }
+    
+    // Animate cloud glow
     const glow = cloud.children[cloud.children.length - 1];
     if (glow && glow.material) {
-      glow.material.opacity = 0.2 + Math.sin(Date.now() * 0.001) * 0.1;
+      glow.material.opacity = 0.3 + Math.sin(now * 0.0007) * 0.1;
     }
+    
+    // Apply slight rotation for natural movement
+    cloud.rotation.z = Math.sin(now * 0.0002 + index) * 0.01;
   });
 }
 
+// Enhance weather particle animation
 function animateWeatherParticles() {
-  // Rain Animation
+  // Rain Animation with improved realism
   if (rain.visible) {
     const rainPositions = rain.geometry.attributes.position.array;
     const drawCount = rain.geometry.drawRange.count;
 
     for (let i = 0; i < drawCount; i++) {
       const index = i * 3;
-      rainPositions[index + 1] -= 0.2; // Move down
+      
+      // Add slight wind effect
+      const windFactor = Math.sin(Date.now() * 0.001) * 0.03;
+      rainPositions[index] += windFactor;
+      
+      // Variable falling speed for more natural look
+      const speed = 0.15 + Math.random() * 0.1;
+      rainPositions[index + 1] -= speed;
 
+      // Reset particles that go below the view
       if (rainPositions[index + 1] < -10) {
+        rainPositions[index] = (Math.random() - 0.5) * 40; // Random x
         rainPositions[index + 1] = 10; // Reset to the top
+        rainPositions[index + 2] = (Math.random() - 0.5) * 40; // Random z
       }
     }
     rain.geometry.attributes.position.needsUpdate = true;
   }
 
-  // Snow Animation
+  // Snow Animation with improved realism
   if (snow.visible) {
     const snowPositions = snow.geometry.attributes.position.array;
     const drawCount = snow.geometry.drawRange.count;
+    const time = Date.now() * 0.001;
 
     for (let i = 0; i < drawCount; i++) {
       const index = i * 3;
-      snowPositions[index + 1] -= 0.05; // Snow falls slower
+      
+      // Add swirling wind effect
+      const uniqueOffset = i * 0.01;
+      const swirl = Math.sin(time + uniqueOffset) * 0.03;
+      snowPositions[index] += swirl;
+      snowPositions[index + 2] += Math.cos(time + uniqueOffset) * 0.02;
+      
+      // Variable falling speed based on implied size
+      const fallSpeed = 0.03 + Math.random() * 0.03;
+      snowPositions[index + 1] -= fallSpeed;
 
+      // Reset particles that go below the view
       if (snowPositions[index + 1] < -10) {
+        snowPositions[index] = (Math.random() - 0.5) * 40; // Random x
         snowPositions[index + 1] = 10; // Reset to the top
+        snowPositions[index + 2] = (Math.random() - 0.5) * 40; // Random z
       }
     }
     snow.geometry.attributes.position.needsUpdate = true;
+    
+    // Add subtle rotation to the entire snow system
+    snow.rotation.y = Math.sin(time * 0.1) * 0.05;
   }
 }
 
@@ -418,16 +552,15 @@ window.addEventListener('resize', () => {
     updateTime(currentTime);
 });
 
-// Update the window.onload handler to initialize play button state
+// Update the window.onload handler to better initialize clouds
 window.onload = () => {
   // Simulate default data (no API call)
   displayWeatherData(); // This will show N/A for temperature and precipitation
 
-  // Ensure slider is hidden and debug button styles are set
+  // Initialize UI components
   timeSlider.style.display = 'none';
   debugButton.style.backgroundColor = 'white';
   
-  // Initialize debug button icon
   const bugIcon = debugButton.querySelector('i');
   bugIcon.style.color = 'black';
 
@@ -440,8 +573,34 @@ window.onload = () => {
   const precipIcon = precipButton.querySelector('i');
   precipIcon.style.color = 'black';
   
+  // Add subtle entrance animation for UI elements
+  gsap.from(weatherDisplay, {
+    y: 20,
+    opacity: 0,
+    duration: 1,
+    delay: 0.5,
+    ease: "power2.out"
+  });
+  
+  gsap.from(timeDisplay, {
+    y: -20,
+    opacity: 0,
+    duration: 1,
+    delay: 0.7,
+    ease: "power2.out"
+  });
+  
+  gsap.from("#controlGroup", {
+    y: 20,
+    opacity: 0,
+    duration: 1,
+    delay: 0.9,
+    ease: "power2.out"
+  });
+  
   // Setup responsive event handlers
   setupTouchEvents();
+  setupInteractiveEffects();
   
   isPlaying = false;
   currentTime = getVancouverTime() * 60;
@@ -451,39 +610,121 @@ window.onload = () => {
     const originalSize = Math.random() * 1.5 + 2;
     cloud.originalSize = originalSize;
   });
+  
+  // Initialize clouds with better distribution to avoid bunching
+  const dims = getResponsiveRadius();
+  const margin = 2;
+  const spacing = (dims.maxX * 2 + margin * 2) / clouds.length;
+  
+  clouds.forEach((cloud, index) => {
+    // Evenly distribute clouds along x-axis
+    const baseX = -dims.maxX - margin + (spacing * index);
+    cloud.position.x = baseX + (Math.random() - 0.5) * spacing * 0.5; // Add small random offset
+    
+    // Store initial position
+    cloud.initialX = cloud.position.x;
+    
+    // Avoid immediate animation until meshes are loaded
+    cloud.loaded = false;
+  });
+
+  // Reset cloud positions with faster speed
+  clouds.forEach((cloud, index) => {
+    // Give clouds faster movement speed
+    cloud.direction = getRandomDirection();
+    
+    // Spread clouds around the scene
+    const dims = getResponsiveRadius();
+    const maxX = dims.maxX + 2;
+    
+    // Distribute clouds evenly across screen
+    cloud.position.x = -maxX + (index / (clouds.length - 1)) * (maxX * 2);
+    cloud.initialY = -3 + (Math.random() - 0.5) * 1.5;
+    
+    // Force position update
+    if (cloud.meshes && cloud.meshes.length > 0) {
+      cloud.position.y = cloud.initialY;
+    }
+  });
+  
+  // Initialize last frame time for animation
+  window.lastFrameTime = Date.now();
 };
 
 debugButton.addEventListener('click', () => {
   if (timeSlider.style.display === 'none') {
+    // Show time slider with animation
     timeSlider.style.display = 'block';
-    debugButton.style.backgroundColor = 'black';
+    timeSlider.style.opacity = 0;
+    gsap.to(timeSlider, {
+      opacity: 1,
+      duration: 0.3
+    });
     
-    // Update the bug icon color
+    gsap.to(debugButton, {
+      backgroundColor: 'black',
+      duration: 0.3
+    });
+    
+    // Update the icon color with animation
     const bugIcon = debugButton.querySelector('i');
-    bugIcon.style.color = 'white';
+    gsap.to(bugIcon, {
+      color: 'white',
+      duration: 0.3
+    });
   } else {
-    timeSlider.style.display = 'none';
-    debugButton.style.backgroundColor = 'white';
+    // Hide time slider with animation
+    gsap.to(timeSlider, {
+      opacity: 0,
+      duration: 0.2,
+      onComplete: () => {
+        timeSlider.style.display = 'none';
+      }
+    });
     
-    // Update the bug icon color
+    gsap.to(debugButton, {
+      backgroundColor: 'white',
+      duration: 0.3
+    });
+    
+    // Update the icon color with animation
     const bugIcon = debugButton.querySelector('i');
-    bugIcon.style.color = 'black';
+    gsap.to(bugIcon, {
+      color: 'black',
+      duration: 0.3
+    });
   }
 });
 
-// Add play button click handler
+// Enhance play button interaction
 playButton.addEventListener('click', () => {
   isPlaying = !isPlaying;
-  playButton.style.backgroundColor = isPlaying ? 'black' : 'white';
   
-  // Update the icon color and content
+  // Use GSAP for smoother color transition
+  gsap.to(playButton, {
+    backgroundColor: isPlaying ? 'black' : 'white',
+    duration: 0.3
+  });
+  
+  // Update the icon color and content with animation
   const playIcon = playButton.querySelector('i');
-  playIcon.style.color = isPlaying ? 'white' : 'black';
+  gsap.to(playIcon, {
+    color: isPlaying ? 'white' : 'black',
+    duration: 0.3
+  });
   
-  // Change icon from play to pause and vice versa
+  // Change icon from play to pause and vice versa with animation
   if (isPlaying) {
     playIcon.classList.remove('fa-play');
     playIcon.classList.add('fa-pause');
+    
+    // Add subtle pulse animation while playing
+    gsap.to(playButton, {
+      scale: 1.05,
+      duration: 0.2,
+      repeat: 1,
+      yoyo: true
+    });
   } else {
     playIcon.classList.remove('fa-pause');
     playIcon.classList.add('fa-play');
@@ -497,12 +738,54 @@ timeSlider.addEventListener('input', () => {
 // Add precipitation button click handler
 precipButton.addEventListener('click', () => {
     const isVisible = precipControls.style.display === 'flex';
-    precipControls.style.display = isVisible ? 'none' : 'flex';
-    precipButton.style.backgroundColor = isVisible ? 'white' : 'black';
     
-    // Update the icon color
-    const precipIcon = precipButton.querySelector('i');
-    precipIcon.style.color = isVisible ? 'black' : 'white';
+    if (isVisible) {
+      // Animate hiding
+      gsap.to(precipControls, {
+        opacity: 0,
+        y: -10,
+        duration: 0.2,
+        onComplete: () => {
+          precipControls.style.display = 'none';
+        }
+      });
+      
+      gsap.to(precipButton, {
+        backgroundColor: 'white',
+        duration: 0.3
+      });
+      
+      // Update the icon color
+      const precipIcon = precipButton.querySelector('i');
+      gsap.to(precipIcon, {
+        color: 'black',
+        duration: 0.3
+      });
+    } else {
+      // Set initial state
+      precipControls.style.opacity = 0;
+      precipControls.style.display = 'flex';
+      precipControls.style.transform = 'translateY(-10px)';
+      
+      // Animate showing
+      gsap.to(precipControls, {
+        opacity: 1,
+        y: 0,
+        duration: 0.3
+      });
+      
+      gsap.to(precipButton, {
+        backgroundColor: 'black',
+        duration: 0.3
+      });
+      
+      // Update the icon color
+      const precipIcon = precipButton.querySelector('i');
+      gsap.to(precipIcon, {
+        color: 'white',
+        duration: 0.3
+      });
+    }
 });
 
 // Add precipitation control handlers
@@ -528,6 +811,7 @@ function updatePrecipitation() {
 }
 
 // 7. Utility Functions
+// Better color interpolation for sky transitions
 function interpolateColor(color1, color2, factor) {
   const r = color1.r + (color2.r - color1.r) * factor;
   const g = color1.g + (color2.g - color1.g) * factor;
@@ -535,40 +819,76 @@ function interpolateColor(color1, color2, factor) {
   return new THREE.Color(r, g, b);
 }
 
+// Enhanced background color updates with smoother transitions
 function updateBackgroundColor(simulatedTime) {
     const hours = simulatedTime / 60;
-    let factor;
+    let color1, color2, factor;
 
-    // Deep night (0-5h): stays dark
-    if (hours >= 0 && hours < 5) {
-        factor = 0;
+    // Deep night (0-4h): pure night color
+    if (hours >= 0 && hours < 4) {
+        scene.background = nightColor;
+        gradientOverlay.style.opacity = "0";
+        sunriseOverlay.style.opacity = "0";
+        return;
     }
-    // Sunrise transition (5-7h)
-    else if (hours >= 5 && hours < 7) {
-        factor = (hours - 5) / 2;
+    // Pre-dawn transition (4-5h)
+    else if (hours >= 4 && hours < 5) {
+        color1 = nightColor;
+        color2 = new THREE.Color(0x1a2a44); // Dark blue
+        factor = (hours - 4);
+        sunriseOverlay.style.opacity = "0";
     }
-    // Full daylight (7-17h)
-    else if (hours >= 7 && hours < 17) {
-        factor = 1;
+    // Dawn transition (5-6:30h)
+    else if (hours >= 5 && hours < 6.5) {
+        color1 = new THREE.Color(0x1a2a44);
+        color2 = sunriseColor;
+        factor = (hours - 5) / 1.5;
+        sunriseOverlay.style.opacity = (factor * 0.3).toString();
+        gradientOverlay.style.opacity = "0";
     }
-    // Sunset transition (17-19h)
-    else if (hours >= 17 && hours < 19) {
-        factor = 1 - ((hours - 17) / 2);
+    // Sunrise to morning (6:30-8h)
+    else if (hours >= 6.5 && hours < 8) {
+        color1 = sunriseColor;
+        color2 = dayColor;
+        factor = (hours - 6.5) / 1.5;
+        sunriseOverlay.style.opacity = (0.3 * (1 - factor)).toString();
     }
-    // Night (19-24h): stays dark
+    // Full daylight (8-17h)
+    else if (hours >= 8 && hours < 17) {
+        scene.background = dayColor;
+        gradientOverlay.style.opacity = "0";
+        sunriseOverlay.style.opacity = "0";
+        return;
+    }
+    // Late afternoon (17-18:30h)
+    else if (hours >= 17 && hours < 18.5) {
+        color1 = dayColor;
+        color2 = sunsetColor;
+        factor = (hours - 17) / 1.5;
+        gradientOverlay.style.opacity = (factor * 0.3).toString();
+    }
+    // Sunset (18:30-19:30h)
+    else if (hours >= 18.5 && hours < 19.5) {
+        color1 = sunsetColor;
+        color2 = new THREE.Color(0x1a2a44); // Dark blue
+        factor = (hours - 18.5);
+        gradientOverlay.style.opacity = (0.3 * (1 - factor)).toString();
+    }
+    // Evening to night (19:30-21h)
+    else if (hours >= 19.5 && hours < 21) {
+        color1 = new THREE.Color(0x1a2a44);
+        color2 = nightColor;
+        factor = (hours - 19.5) / 1.5;
+    }
+    // Night (21-24h)
     else {
-        factor = 0;
+        scene.background = nightColor;
+        gradientOverlay.style.opacity = "0";
+        return;
     }
-
-    // Add slight ambient light during night hours
-    const minLight = 0.1; // Minimum light factor
-    factor = Math.max(minLight, factor);
 
     // Smoothly interpolate the background color
-    scene.background = interpolateColor(nightColor, dayColor, factor);
-    
-    // Adjust ambient light for better visibility
-    ambientLight.intensity = 0.2 + (factor * 0.4);
+    scene.background = interpolateColor(color1, color2, factor);
 }
 
 function getVancouverTime() {
@@ -651,9 +971,14 @@ function updateTime(simulatedTime) {
         moon.visible = false;
         
         interpolatePosition(sun, xPosition, yPosition, transitionSpeed);
-        sunLight.intensity = 1.5 * lightFactor;
-        moonLight.intensity = 0;
-        bloomPass.strength = 0.4;
+        // Adjust sun intensity based on height in sky - higher at noon
+        const noonFactor = Math.sin(Math.PI * sunHeight); // Peaks at 1.0 when sun is directly overhead
+        sunLight.intensity = 0.9 * noonFactor; // Slightly higher intensity
+        
+        // Minimal bloom to preserve the yellow color
+        bloomPass.strength = 0.1;
+        bloomPass.radius = 0.25;
+        bloomPass.threshold = 0.4; // Higher threshold preserves color better
         timeDisplay.style.color = 'black';
         updateCloudBloom(true);
         
@@ -720,18 +1045,17 @@ function updateCloudBloom(isDaytime) {
   });
   
   // Adjust bloom settings
-  bloomPass.strength = isDaytime ? 0.4 : 0.6;
-  bloomPass.radius = isDaytime ? 0.5 : 0.7;
-  bloomPass.threshold = isDaytime ? 0.1 : 0.05;
+  bloomPass.strength = isDaytime ? 0.2 : 0.6; // Further reduced daytime bloom
+  bloomPass.radius = isDaytime ? 0.35 : 0.7;
+  bloomPass.threshold = isDaytime ? 0.2 : 0.05; // Higher threshold = less bloom on bright objects
 }
 
-// Update the displayWeatherData function for better responsiveness
+// Enhance weather messages with better formatting
 function displayWeatherData(data = null) {
-  const weatherDisplay = document.getElementById('weatherDisplay');
-
   // Use default values or fetch from API response
   let temperature = data && data.main ? data.main.temp : null;
   let precipitationValue = 0;
+  let weatherDescription = data && data.weather && data.weather[0] ? data.weather[0].description : "clear skies";
 
   // Check for precipitation data (rain or snow)
   if (data) {
@@ -753,29 +1077,32 @@ function displayWeatherData(data = null) {
   // Determine time of day for greeting
   const currentHour = new Date().getHours();
   let greeting = "Good evening";
+  let emoji = "✨";
   if (currentHour >= 5 && currentHour < 12) {
     greeting = "Good morning";
+    emoji = "🌄";
   } else if (currentHour >= 12 && currentHour < 17) {
     greeting = "Good afternoon";
+    emoji = "☀️";
   }
 
-  // Format the individual messages
+  // Format the individual messages with emojis
   const messages = [
-    greeting,
-    `The current temperature is ${temperature}°C`,
-    `and the current precipitation is ${precipitationValue} mm.`
+    `${greeting} ${emoji}`,
+    `Temperature: ${temperature}°C 🌡️`,
+    `Precipitation: ${precipitationValue} mm 💧`
   ];
 
   // Clear any previous content
   weatherDisplay.innerHTML = '';
 
-  // Create message elements
+  // Create message elements with enhanced styling
   const messageElements = messages.map((text) => {
     const div = document.createElement('div');
     div.className = 'weatherMessage';
     div.textContent = text;
     // Add text-shadow for better visibility in all conditions
-    div.style.textShadow = '0px 0px 4px rgba(0, 0, 0, 0.5)';
+    div.style.textShadow = '0px 1px 4px rgba(0, 0, 0, 0.3)';
     return div;
   });
 
@@ -787,26 +1114,58 @@ function displayWeatherData(data = null) {
   // Make global reference to access messages in updateTime
   window.weatherMessages = messageElements;
 
-  // Use GSAP to create the vertical carousel effect
-  gsap.set(messageElements, { yPercent: 100, opacity: 0 });
-  gsap.set(messageElements[0], { yPercent: 0, opacity: 1 });
+  // Use GSAP to create a smoother carousel effect
+  gsap.set(messageElements, { 
+    yPercent: 100, 
+    opacity: 0,
+    filter: "blur(3px)"
+  });
+  
+  gsap.to(messageElements[0], { 
+    yPercent: 0, 
+    opacity: 1, 
+    filter: "blur(0px)",
+    duration: 0.8,
+    ease: "power2.out"
+  });
 
   let currentIndex = 0;
   function rotateMessages() {
     const nextIndex = (currentIndex + 1) % messageElements.length;
 
-    gsap.to(messageElements[currentIndex], { yPercent: -100, opacity: 0, duration: 1 });
+    // Smoother animation with slight scaling
+    gsap.to(messageElements[currentIndex], { 
+      yPercent: -100, 
+      opacity: 0, 
+      scale: 0.95,
+      filter: "blur(3px)",
+      duration: 0.8, 
+      ease: "power2.inOut" 
+    });
+    
     gsap.fromTo(
       messageElements[nextIndex],
-      { yPercent: 100, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 1 }
+      { 
+        yPercent: 100, 
+        opacity: 0, 
+        scale: 0.95,
+        filter: "blur(3px)"
+      },
+      { 
+        yPercent: 0, 
+        opacity: 1, 
+        scale: 1,
+        filter: "blur(0px)",
+        duration: 0.8, 
+        ease: "power2.inOut" 
+      }
     );
 
     currentIndex = nextIndex;
   }
 
   // Adjust rotation interval based on screen size
-  const rotationInterval = window.innerWidth < 768 ? 4000 : 3000;
+  const rotationInterval = window.innerWidth < 768 ? 4500 : 3500;
   setInterval(rotateMessages, rotationInterval);
 }
 
@@ -850,6 +1209,44 @@ function setupTouchEvents() {
       precipIcon.style.color = isVisible ? 'black' : 'white';
     }
   }, { passive: true });
+}
+
+// Add hover effects to interactive elements
+function setupInteractiveEffects() {
+  // Add pulse effect to buttons on hover
+  const buttons = document.querySelectorAll('.control-button');
+  buttons.forEach(button => {
+    button.addEventListener('mouseenter', () => {
+      gsap.to(button, {
+        scale: 1.05,
+        duration: 0.2,
+        ease: "power1.out"
+      });
+    });
+    
+    button.addEventListener('mouseleave', () => {
+      gsap.to(button, {
+        scale: 1,
+        duration: 0.2,
+        ease: "power1.in"
+      });
+    });
+  });
+  
+  // Add shine effect to weather display on hover
+  weatherDisplay.addEventListener('mouseenter', () => {
+    gsap.to(weatherDisplay, {
+      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+      duration: 0.3
+    });
+  });
+  
+  weatherDisplay.addEventListener('mouseleave', () => {
+    gsap.to(weatherDisplay, {
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+      duration: 0.3
+    });
+  });
 }
 
 // Start the animation
