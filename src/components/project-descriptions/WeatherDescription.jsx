@@ -65,11 +65,11 @@ const WeatherDescription = () => {
 
   return (
     <section className="space-y-8 w-full">
-      <h3 ref={descriptionRef} className="text-xl text-white md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">
+      <h4 ref={descriptionRef} className="text-xl text-white md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">
         A 3D weather app that brings forecasts to life with dynamic visuals
-      </h3>
+      </h4>
       
-      <div ref={el => sectionsRef.current[0] = el} className="bg-blue2/40 backdrop-blur-lg rounded-xl shadow-lg p-8">
+      <div ref={el => sectionsRef.current[0] = el} className="bg-blue2/40 backdrop-blur-lg rounded-xl p-8">
         <h4 className="text-xl font-medium mb-4 text-white">Why I Built This</h4>
         <p className="text-lg md:text-xl leading-relaxed mb-6 text-white">
           I was tired of boring weather apps that show you the same static icons day after day. So I thought, "What if I could actually see the rain falling or clouds moving when I check the weather?" That's when I decided to build this 3D weather visualization that makes checking the forecast actually fun.
@@ -84,28 +84,7 @@ const WeatherDescription = () => {
         </p>
       </div>
       
-      <div ref={el => sectionsRef.current[1] = el} className="bg-blue2/40 backdrop-blur-lg rounded-xl shadow-lg p-8">
-        <h4 className="text-xl font-medium mb-4 text-white">How It Works</h4>
-        <p className="text-lg leading-relaxed mb-6 text-white">
-          I built a 3D environment that connects to real weather APIs and transforms that data into visual elements. When it's raining in your city, you'll see actual raindrops falling in the scene. If it's sunny, you'll see a brilliant sun with realistic lighting effects. It's weather forecasting that you can actually experience, not just read.
-        </p>
-      </div>
-      
-      <h3 className="text-xl text-white md:text-2xl lg:text-3xl font-semibold pb-3 border-b border-gray-200 w-full">The Cool Features</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div ref={el => featuresRef.current[0] = el} className="feature-card p-6 bg-blue2/40 backdrop-blur-lg rounded-xl shadow-lg border border-white/20">
-          <FontAwesomeIcon icon={faSun} className="text-3xl text-white mb-4" />
-          <h4 className="text-lg font-medium mb-2 text-white">Day/Night Cycle</h4>
-          <p className="text-lg text-white">The scene's lighting changes based on the actual time in Vancouver. Morning has a soft golden glow, noon is bright and clear, and night brings a serene moonlit atmosphere.</p>
-        </div>
-        
-        <div ref={el => featuresRef.current[1] = el} className="feature-card p-6 bg-blue2/40 backdrop-blur-lg rounded-xl shadow-lg border border-white/20">
-          <FontAwesomeIcon icon={faCloud} className="text-3xl text-white mb-4" />
-          <h4 className="text-lg font-medium mb-2 text-white">Dynamic Weather Effects</h4>
-          <p className="text-lg text-white">When it rains, thousands of realistic raindrops fall. Snow creates a bunch of white particles representing snowflakes. (as a quick disclaimer, since there isn't really a way for me to get unlimited access to a weather API, I added debug options so you can explore what the weather effects look like.</p>
-        </div>
-      </div>
+     
     </section>
   );
 };

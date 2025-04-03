@@ -8,6 +8,19 @@ import { faCaretDown, faExpand, faMobileAlt as faMobileAltSolid, faArrowDown } f
 import { getProjectDescription } from './components/ProjectDescriptions';
 import LoadingScreen from './components/LoadingScreen';
 import TsParticles from './components/TsParticles';
+import PlinkoDemoDescription from './components/project-descriptions/PlinkoDemoDescription';
+import WeatherDemoDescription from './components/project-descriptions/WeatherDemoDescription';
+import BedroomDemoDescription from './components/project-descriptions/BedroomDemoDescription';
+import MusicDemoDescription from './components/project-descriptions/MusicDemoDescription';
+import MailDemoDescription from './components/project-descriptions/MailDemoDescription';
+import WeatherDescription from './components/project-descriptions/WeatherDescription';
+import PlinkoDescription from './components/project-descriptions/PlinkoDescription';
+import BedroomDescription from './components/project-descriptions/BedroomDescription';
+import MusicDescription from './components/project-descriptions/MusicDescription';
+import MailDescription from './components/project-descriptions/MailDescription';
+import GradientDemoDescription from './components/project-descriptions/GradientDemoDescription';
+import LastFmDemoDescription from './components/project-descriptions/LastFmDemoDescription';
+
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -254,12 +267,20 @@ const ProjectPage = () => {
       );
     }
     
+    const descriptionComponents = {
+        PlinkoDemoDescription: PlinkoDemoDescription,
+        WeatherDemoDescription: WeatherDemoDescription,
+        BedroomDemoDescription: BedroomDemoDescription,
+        MusicDemoDescription: MusicDemoDescription,
+        MailDemoDescription: MailDemoDescription
+    };
+
     // Otherwise show the iframe
     return (
-      
-      <div className="project-demo flex justify-center">
+      <div className="project-demo flex flex-col">
         {selectedProject.demoUrl ? (
-          <div className="w-full max-w-6xl aspect-[4/3] md:aspect-[16/9] lg:h-[800px] overflow-hidden shadow-lg mb-0 relative">
+          <>
+          <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg mb-4 md:mb-4 relative`}>
             <iframe
               ref={iframeRef}
               src={selectedProject.demoUrl}
@@ -267,6 +288,7 @@ const ProjectPage = () => {
               className="w-full h-full border-0"
               allow="fullscreen"
               allowFullScreen
+              style={{ transform: 'scale(1)', transformOrigin: 'center' }}
             ></iframe>
             <button
               onClick={handleFullscreen}
@@ -277,6 +299,42 @@ const ProjectPage = () => {
               <span>Fullscreen</span>
             </button>
           </div>
+          <div className="w-full max-w-6xl p-4 bg-blue2">
+            <p className="text-white">
+              {/* Display the custom demo description or the last paragraph */}
+              {selectedProject.demoDescriptionComponent ? (
+                  (() => {
+                      const DescriptionComponent = descriptionComponents[selectedProject.demoDescriptionComponent];
+                      if (DescriptionComponent) {
+                          return <DescriptionComponent />;
+                      }
+                      return null;
+                  })()
+              ) : DescriptionComponent && (
+                (() => {
+                  const Description = DescriptionComponent();
+                  if (Description && Description.props && Description.props.children) {
+                    const childrenArray = React.Children.toArray(Description.props.children);
+                    
+                    // Find the last paragraph
+                    let lastParagraph = null;
+                    for (let i = childrenArray.length - 1; i >= 0; i--) {
+                      const child = childrenArray[i];
+                      if (child && child.type === 'p') {
+                        lastParagraph = child;
+                        break;
+                      }
+                    }
+                    
+                    // Render the last paragraph
+                    return lastParagraph;
+                  }
+                  return null;
+                })()
+              )}
+            </p>
+          </div>
+        </>
         ) : (
           <div className="h-[1200px] flex items-center justify-center bg-blue2/40">
             <p className="text-white">Demo not available</p>
@@ -289,26 +347,26 @@ const ProjectPage = () => {
   return (
     <>
       <TsParticles />
-      <div className="project-page mx-auto min-h-screen">
+      <div className="project-page mx-auto min-h-screen overflow-x-hidden">
         <style>{tailwindAnimations}</style>
         
         {/* Header with ref for intersection observer */}
-        <div ref={topSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+        <div ref={topSectionRef} className="max-w-9xl mx-auto px-4 sm:px-6 pt-8 pb-4">
           <h1 className="text-4xl font-bold text-blue-600 text-center mb-8">
             {selectedProject.title}
           </h1>
         </div>
 
         {/* Full-width container with background - improved padding */}
-        <div className="project-description-container w-full bg-blue2/40 py-10 mb-12 shadow-md">
+        <div className="project-description-container w-full bg-blue2/100 py-10 px-12 mb-12 shadow-md">
           {/* Content container that's centered and width-constrained */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             {DescriptionComponent && <div className="prose prose-lg max-w-none text-white"><DescriptionComponent /></div>}
           </div>
         </div>
 
         {/* Demo section with consistent padding */}
-        <div ref={demoSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 mb-10">
+        <div ref={demoSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 flex justify-center items-center">
           {renderProjectDemo()}
         </div>
         

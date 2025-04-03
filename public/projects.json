@@ -1,29 +1,31 @@
 [
   {
     "id": 1,
-    "title": "Weather API Project",
+    "title": "3D Weather App",
     "description": "A Three.js scene that fetches and displays weather data from the OpenWeather API for Vancouver.",
-    "htmlFile": "/projects/weatherapi.html",
-    "cssFile": "/projects/weatherapi.css",
-    "jsFile": "/projects/weatherapi.js",
+    "htmlFile": "projects/weather/index.html",
+    "cssFile": "projects/weather/style.css",
+    "jsFile": "projects/weather/script.js",
     "demoUrl": "/projects/weatherapi.html",
     "library": "projects/assets/three-js-icon.svg",
     "libraryname": "Three.js",
     "threejs": "A JavaScript 3D library that allows for creating and displaying animated 3D graphics in a web browser.",
-    "isMobileFriendly": true
+    "isMobileFriendly": true,
+    "demoDescriptionComponent": "WeatherDemoDescription"
   },
   {
     "id": 2,
-    "title": "Matter.js Plinko",
+    "title": "Plinko Game",
     "description": "A physics-based Plinko game built with Matter.js physics engine.",
-    "htmlFile": "/projects/mplinko.html",
-    "cssFile": "/projects/mplinko.css",
-    "jsFile": "/projects/mplinko.js",
+    "htmlFile": "projects/matterplinkopreview.html",
+    "cssFile": "projects/mplinko.css",
+    "jsFile": "projects/mplinko.js",
     "demoUrl": "/projects/matterplinkopreview.html",
     "library": "projects/assets/matterjs.svg",
     "libraryname": "Matter.js",
     "threejs": "A 2D physics engine for the web that can simulate rigid bodies and their interactions.",
-    "isMobileFriendly": true
+    "isMobileFriendly": true,
+    "demoDescriptionComponent": "PlinkoDemoDescription"
   },
   {
     "id": 3,
@@ -36,7 +38,8 @@
     "library": "/assets/threejs.svg",
     "libraryname": "Three.js",
     "threejs": "A JavaScript 3D library that makes WebGL simpler, allowing for the creation of GPU-accelerated 3D animations.",
-    "isMobileFriendly": false
+    "isMobileFriendly": false,
+    "demoDescriptionComponent": "BedroomDemoDescription"
   },
   {
     "id": 4,
@@ -49,7 +52,8 @@
     "library": "/assets/threejs.svg",
     "libraryname": "Three.js",
     "threejs": "A JavaScript 3D library used here to create visual effects that respond to audio analysis.",
-    "isMobileFriendly": false
+    "isMobileFriendly": false,
+    "demoDescriptionComponent": "MusicDemoDescription"
   },
   {
     "id": 5,
@@ -61,6 +65,7 @@
     "demoUrl": "https://glitch.com/edit/#!/detailed-different-coyote",
     "stack": "backend",
     "framework": "vanilla",
-    "isMobileFriendly": true
+    "isMobileFriendly": true,
+    "demoDescriptionComponent": "MailDemoDescription"
   }
 ]

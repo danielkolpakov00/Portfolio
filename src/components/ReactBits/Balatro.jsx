@@ -31,7 +31,7 @@ void main() {
 `;
 
 const fragmentShader = `
-precision highp float;
+precision mediump float;
 
 #define PI 3.14159265359
 
@@ -79,7 +79,7 @@ vec4 effect(vec2 screenSize, vec2 screen_coords) {
     
     vec2 uv2 = vec2(uv.x + uv.y);
     
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < 2; i++) {
         uv2 += sin(max(uv.x, uv.y)) + uv;
         uv += 0.5 * vec2(
             cos(5.1123314 + 0.353 * uv2.y + speed * 0.131121),

@@ -37,7 +37,7 @@ const Navbar = ({ isOpen, setIsOpen }) => {
   ];
 
   return (
-    <div className="fixed bottom-4 left-0 w-full md:left-8 lg:left-12 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:w-auto z-20">
+    <div className="fixed bottom-4 left-4 w-full md:left-12 lg:left-12 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:w-auto z-20">
       <div className="md:rotate-[270deg] md:origin-center transform-gpu">
         <Dock 
           items={items} 

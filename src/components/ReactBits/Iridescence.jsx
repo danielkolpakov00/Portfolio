@@ -65,8 +65,11 @@ export default function Iridescence({
     let program;
 
     function resize() {
-      const scale = 1;
-      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
+      const dpr = Math.min(window.devicePixelRatio, 0.5); // or 0.5 for ultra low GPU strain
+renderer.setSize(ctn.offsetWidth * dpr, ctn.offsetHeight * dpr);
+gl.canvas.style.width = ctn.offsetWidth + "px";
+gl.canvas.style.height = ctn.offsetHeight + "px";
+
       if (program) {
         program.uniforms.uResolution.value = new Color(
           gl.canvas.width,

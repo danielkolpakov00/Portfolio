@@ -160,47 +160,6 @@ const PortfolioPreview = () => {
     return generateLayout();
   }, [generateLayout]);
 
-  // Components for the filter pills
-  const FilterPills = () => (
-    <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 justify-center px-2 sm:px-4">
-      {allCategories.map((category) => (
-        <motion.button
-          key={category}
-          onClick={() => setActiveFilter(category)}
-          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all backdrop-blur-md border-2 ${
-            activeFilter === category
-              ? "bg-blue2 text-white border-blue2 shadow-md shadow-blue2/20"
-              : "bg-white/90 text-blue2 border-blue2/70 hover:bg-blue2/5 hover:border-blue2/90"
-          }`}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          {category.charAt(0).toUpperCase() + category.slice(1)}
-        </motion.button>
-      ))}
-    </div>
-  );
-
-  const FrameworkFilterPills = () => (
-    <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-10 justify-center px-2 sm:px-4">
-      {frameworks.map((framework) => (
-        <motion.button
-          key={framework}
-          onClick={() => setActiveFrameworkFilter(framework)}
-          className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all backdrop-blur-md border-2 ${
-            activeFrameworkFilter === framework
-              ? "bg-blue2 text-white border-blue2 shadow-md shadow-blue2/20"
-              : "bg-white/90 text-blue2 border-blue2/70 hover:bg-blue2/5 hover:border-blue2/90"
-          }`}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          {framework.charAt(0).toUpperCase() + framework.slice(1)}
-        </motion.button>
-      ))}
-    </div>
-  );
-
   // Loading state
   if (isLoading) {
     return (
@@ -239,23 +198,6 @@ const PortfolioPreview = () => {
           Portfolio
         </motion.span>
       </motion.h2>
-
-      <motion.div
-        className="mb-6"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-      >
-        <FilterPills />
-      </motion.div>
-      <motion.div
-        className="mb-10"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-      >
-        <FrameworkFilterPills />
-      </motion.div>
 
       {/* Portfolio grid layout */}
       <div className="px-4 py-10">

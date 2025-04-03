@@ -2,9 +2,8 @@ import { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
 const springValues = {
-  damping: 30,
-  stiffness: 100,
-  mass: 2,
+  damping: 20, stiffness: 200, mass: 1
+
 };
 
 export default function TiltedCard({

@@ -3,6 +3,8 @@ import PlinkoDescription from './PlinkoDescription';
 import BedroomDescription from './BedroomDescription';
 import MusicDescription from './MusicDescription';
 import MailDescription from './MailDescription';
+import GradientDemoDescription from './GradientDemoDescription';
+import LastFmDemoDescription from './LastFmDemoDescription';
 
 export const getProjectDescription = (id) => {
   const descriptions = {
@@ -10,7 +12,9 @@ export const getProjectDescription = (id) => {
     2: PlinkoDescription,
     3: BedroomDescription,
     4: MusicDescription,
-    5: MailDescription
+    5: MailDescription,
+    "gradient-generator": GradientDemoDescription,
+    "lastfm-app": LastFmDemoDescription
   };
   return descriptions[id] || (() => <p>Description not available</p>);
 };
@@ -20,5 +24,7 @@ export {
   PlinkoDescription,
   BedroomDescription,
   MusicDescription,
-  MailDescription
+  MailDescription,
+  GradientDemoDescription,
+  LastFmDemoDescription
 };

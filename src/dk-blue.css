@@ -1,7 +1,7 @@
 .hljs,
 .code-editor {
-    background: #1a1a1a;
-    color: #ffffff;
+    background: #e0f2f1; /* Lighter cyan background */
+    color: #0d47a1; /* Dark blue text */
     border-radius: 8px;
     font-family: 'Fira Code', monospace;
     line-height: 1.5;
@@ -14,10 +14,10 @@
 
 
 .hljs {
-    background: transparent; /* White background */
-    color: #ffffff;      /* Black text */
+    background: transparent;
+    color: #0d47a1;
     border-radius: 8px;
-    font-family: 'Fira Code', monospace; /* Preferred monospaced font */
+    font-family: 'Fira Code', monospace;
     line-height: 1.5;
 }
 
@@ -52,28 +52,28 @@
 .hljs-keyword,
 .hljs-built_in,
 .hljs-literal {
-    color: #1e90ff; /* Dodger blue for keywords */
+    color: #29b6f6; /* Cyan for keywords */
     font-weight: bold;
 }
 
 .hljs-string {
-    color: #4682b4; /* Steel blue for strings */
+    color: #64b5f6; /* Light blue for strings */
 }
 
 .hljs-number {
-    color: #4169e1; /* Royal blue for numbers */
+    color: #7986cb; /* Indigo for numbers */
 }
 
 .hljs-comment {
-    color: #708090; /* Slate gray for comments */
+    color: #b0bec5; /* Blue gray for comments */
     font-style: italic;
 }
 
 .hljs-title,
 .hljs-function {
-    color: #5f9ea0; /* Cadet blue for function names */
+    color: #26c6da; /* Teal for function names */
 }
 
 .hljs-attribute {
-    color: #6495ed; /* Cornflower blue for attributes */
+    color: #4fc3f7; /* Light sky blue for attributes */
 }
