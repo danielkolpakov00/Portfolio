@@ -2,11 +2,19 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js';
+
+// Add a console log to confirm the script is running
+console.log('Music visualizer script loaded!');
 
 window.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM fully loaded, initializing visualizer...');
+  
   // here's all the dom elements we need
   const settingsModal = document.getElementById('settings-modal');
   const settingsBtn = document.getElementById('settings-btn');
+  const settingsCloseBtn = document.getElementById('settings-close-btn');
   const colorPicker = document.getElementById('color-picker');
   const bgColorPicker = document.getElementById('bg-color-picker');
   const songTitle = document.getElementById('song-title');
@@ -31,8 +39,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // variables for three.js stuff and audio
   let scene, camera, renderer, sphere, particlesMaterial, audioContext, analyser, dataArray, audioSource, audio;
-  const ORIGINAL_COLOR = new THREE.Color(0x0000FF); // blue
-  let ORIGINAL_BG_COLOR = new THREE.Color(0xFFFFFF); // white
+  const ORIGINAL_COLOR = new THREE.Color(0xFFFFFF); // white
+  let ORIGINAL_BG_COLOR = new THREE.Color(0xFFFFFF); // darker background that will show up better
   let composer;
   let bloomPass;
 
@@ -56,11 +64,26 @@ window.addEventListener('DOMContentLoaded', () => {
   let transitionProgress = 0;
   const TRANSITION_SPEED = 0.02;
 
+  // Fix: Move these global variables inside the DOMContentLoaded scope
+  const uiElementsText = [];
+  const uiElementsIcons = [];
+
   // initialize the scene and audio
-  initScene();
-  initAudio();
-  animateVisualizer(); // start the rendering loop immediately
-  setupAudio(null); // set default audio
+  try {
+    initScene();
+    console.log('Scene initialized successfully');
+    
+    initAudio();
+    console.log('Audio initialized successfully');
+    
+    animateVisualizer(); // start the rendering loop immediately
+    console.log('Animation loop started');
+  } catch (error) {
+    console.error('Error during initialization:', error);
+  }
+
+  // Call this function to set up autoplay on first interaction
+  attemptAutoPlay();
 
   settingsBtn.addEventListener('click', () => {
     if (settingsModal.classList.contains('opacity-0')) {
@@ -73,6 +96,13 @@ window.addEventListener('DOMContentLoaded', () => {
       settingsModal.classList.add('opacity-0', 'pointer-events-none');
     }
   });
+
+  // Add event listener for the close button
+  settingsCloseBtn.addEventListener('click', () => {
+    settingsModal.classList.remove('opacity-100');
+    settingsModal.classList.add('opacity-0', 'pointer-events-none');
+  });
+  
   cycleBtn.addEventListener('click', () => {
     isColorCycling = !isColorCycling;
     cycleBtn.classList.toggle('text-green-400');
@@ -157,101 +187,121 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // the fun stuff 
   function initScene() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 400;
-  
-    // Add camera constraints
-    camera.minDistance = 400;
-    camera.maxDistance = 400;
-  
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('visualizer').appendChild(renderer.domElement);
-  
-    // creating a sphere. Not too bad so far.
-    const sphereGeometry = new THREE.SphereGeometry(100, 128, 128);
+    try {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 400;
     
+      // Add camera constraints
+      camera.minDistance = 400;
+      camera.maxDistance = 400;
+    
+      // Initialize renderer with proper options
+      renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000, 1); // Changed alpha to 1 for solid background
+      document.getElementById('visualizer').appendChild(renderer.domElement);
+      console.log('Renderer created and attached to DOM');
+    
+      // creating a sphere. Not too bad so far.
+      const sphereGeometry = new THREE.SphereGeometry(100, 128, 128);
+      
 
 
 
-    // ok so we have to map out the positions of the vertices of the sphere
-    const originalPositions = new Float32Array(sphereGeometry.attributes.position.array);
-    sphereGeometry.setAttribute(
-      'originalPosition',
-      new THREE.BufferAttribute(originalPositions, 3)
-    );
-  
-    // custom shader material, very cool
-    const sphereMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        baseColor: { value: new THREE.Color(0x0000FF) }, // blue
-        intensity: { value: 4.0 },
-        glowColor: { value: new THREE.Color(1.0, 1.0, 1.0) }, // making it glow
-        fresnelPower: { value: 1.2 }, // Adjustable fresnel power
-        glowIntensity: { value: 0.15 } // Adjustable glow intensity
-      },
+      // ok so we have to map out the positions of the vertices of the sphere
+      const originalPositions = new Float32Array(sphereGeometry.attributes.position.array);
+      sphereGeometry.setAttribute(
+        'originalPosition',
+        new THREE.BufferAttribute(originalPositions, 3)
+      );
+    
+      // custom shader material, very cool
+      const sphereMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          baseColor: { value: new THREE.Color(0x0000FF) }, // Changed to white to match ORIGINAL_COLOR
+          intensity: { value: 4.0 },
+          glowColor: { value: new THREE.Color(1.0, 1.0, 1.0) }, // making it glow
+          fresnelPower: { value: 1.2 }, // Adjustable fresnel power
+          glowIntensity: { value: 0.15 } // Adjustable glow intensity
+        },
 
 
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vPosition; 
-        
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vPosition = position;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 baseColor;
-        uniform vec3 glowColor;
-        uniform float time;
-        uniform float intensity;
-        uniform float fresnelPower;
-        uniform float glowIntensity;
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-        
-        void main() {
-          // Smoother fresnel calculation
-          float fresnel = pow(1.0 - dot(vNormal, normalize(cameraPosition)), fresnelPower);
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition; 
           
-          // Smooth color mixing
-          vec3 finalColor = mix(
-            baseColor * (1.0 + intensity * 0.5),
-            glowColor,
-            fresnel * glowIntensity * (1.0 + intensity * 0.3)
-          );
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 baseColor;
+          uniform vec3 glowColor;
+          uniform float time;
+          uniform float intensity;
+          uniform float fresnelPower;
+          uniform float glowIntensity;
+          varying vec3 vNormal;
+          varying vec3 vPosition;
           
-          gl_FragColor = vec4(finalColor, 1.0);
-        }
-      `
-    });
-  // the fresnel effect is basically how shiny/reflective the sphere is depending on the angle of the camera, which gives the sphere its shadows and highlights
-    sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(sphere); // adding the sphere to the scene
+          void main() {
+            // Smoother fresnel calculation
+            float fresnel = pow(1.0 - dot(vNormal, normalize(cameraPosition)), fresnelPower);
+            
+            // Smooth color mixing
+            vec3 finalColor = mix(
+              baseColor * (1.0 + intensity * 0.5),
+              glowColor,
+              fresnel * glowIntensity * (1.0 + intensity * 0.3)
+            );
+            
+            gl_FragColor = vec4(finalColor, 1.0);
+          }
+        `
+      });
+    // the fresnel effect is basically how shiny/reflective the sphere is depending on the angle of the camera, which gives the sphere its shadows and highlights
+      sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      scene.add(sphere); // adding the sphere to the scene
+    
+      // Setup post-processing with proper error handling
+      try {
+        composer = new EffectComposer(renderer);
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
+
+        bloomPass = new UnrealBloomPass(
+          new THREE.Vector2(window.innerWidth, window.innerHeight),
+          0.35,
+          0.8,
+          0
+        );
+        composer.addPass(bloomPass);
+        
+        // Add a copy shader as the final pass to ensure output
+        const copyPass = new ShaderPass(CopyShader);
+        copyPass.renderToScreen = true;
+        composer.addPass(copyPass);
+        
+        console.log('Post-processing initialized successfully');
+      } catch (e) {
+        console.error('Failed to initialize post-processing:', e);
+        // If post-processing fails, we'll fallback to standard rendering
+      }
+    
+      window.addEventListener('resize', onWindowResize); 
   
-    // Setup post-processing
-    composer = new EffectComposer(renderer); // my favourite part, the post-processing
-    const renderPass = new RenderPass(scene, camera); 
-    composer.addPass(renderPass); 
-
-
-const bloomPass = new UnrealBloomPass( // bloom just makes it look infinitely times better
-  new THREE.Vector2(window.innerWidth, window.innerHeight), 
-  0.35,  // strength, this is the intensity of the bloom
-  0.8,  // radius, this is the size of the bloom
-  0  // threshold, this is the minimum brightness needed for bloom to happen
-);
-composer.addPass(bloomPass); // adding the bloom pass to the composer
- 
-
-    window.addEventListener('resize', onWindowResize); 
-
-    // Add this to initScene after creating sphere
-    scene.background = new THREE.Color(0xFFFFFF); // white background
+      // Add this to initScene after creating sphere
+      scene.background = ORIGINAL_BG_COLOR; // Fix: Use our darker background color
+    } catch (e) {
+      console.error('Error in initScene:', e);
+    }
   }
 
   window.addEventListener('wheel', (event) => {
@@ -265,50 +315,87 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
   }
-  function initAudio() { // the audio stuff, snore 
+  function initAudio() {
     audio = new Audio();
-    audio.src = 'assets/1 Hop This Time V2.mp3';
+    audio.src = 'assets/Demo_Track.wav';
     audio.crossOrigin = 'anonymous';
   
-    audio.addEventListener('canplaythrough', async () => {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      }
+    // Update song title to match initial song
+    songTitle.textContent = 'Demo Track (AI)';
   
-      const response = await fetch(audio.src); // fetching the audio file
-      const arrayBuffer = await response.arrayBuffer(); // converting the audio file to an array buffer, which is a binary data type
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer); // decoding the audio data into a format that the audio context can understand
-  
-      // used to have BPM analysis here, but it was too complicated and it ended up doing more harm than good
-    });
-  
+    // Fix: Ensure audio context is created properly
     if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)(); // compatibility between browsers. I'm pretty sure it's still bugged on safari. :(
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        console.log("AudioContext created successfully");
+      } catch(e) {
+        console.error("Failed to create AudioContext:", e);
+      }
     }
-  
-    analyser = audioContext.createAnalyser(); //the next 5 lines or so are basically how responsive the visualizer is to the audio. 
-    analyser.fftSize = 2048; // fftSize is the number of samples used to determine the frequency of the audio
-    analyser.smoothingTimeConstant = 0.9; // smoothingTimeConstant is how smooth the audio is, 0.9 is a good balance between smoothness and responsiveness
-    analyser.minDecibels = -60;  
-    analyser.maxDecibels = -30; 
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-  
-    // the settings above i can probably change to make the visualizer a little smoother, but i like the way it is now.
+    
+    audio.addEventListener('canplaythrough', function() {
+      const loadAudioData = async function() {
+        try {
+          if (!audioContext) return;
+          
+          // Fix: Create analyzer here to ensure it exists
+          if (!analyser) {
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.9;
+            analyser.minDecibels = -60;
+            analyser.maxDecibels = -30;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            console.log("Analyzer created successfully");
+          }
+          
+          if (!isAudioSourceConnected) {
+            try {
+              audioSource = audioContext.createMediaElementSource(audio);
+              audioSource.connect(analyser);
+              analyser.connect(audioContext.destination);
+              isAudioSourceConnected = true;
+              isAudioConnected = true;
+              console.log("Audio connected successfully");
+            } catch (e) {
+              console.error("Failed to connect audio:", e);
+            }
+          }
 
-
-  
-    if (audioSource) {
-      audioSource.disconnect(); // if audio source exist, disconnect it. this is to prevent multiple audio sources from being connected at the same time
+          const response = await fetch(audio.src);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          console.log("Audio data loaded successfully");
+        } catch (error) {
+          console.error('Error loading audio data:', error);
+        }
+      };
+      
+      loadAudioData();
+    });
+    
+    // Update the duration display
+    if (!isNaN(audio.duration)) {
+      totalTime.textContent = formatTime(audio.duration);
     }
-  
-    audioSource = audioContext.createMediaElementSource(audio); // create a new audio source
-    audioSource.connect(analyser); // connect the audio source to the analyser
-    analyser.connect(audioContext.destination); // connect the analyser to the audio context destination
+    
+    // Set up a listener for when duration becomes available
+    audio.addEventListener('loadedmetadata', function() {
+      totalTime.textContent = formatTime(audio.duration);
+    });
+    
+    // Load the audio file to prepare it
+    audio.load();
   }
 
   function animateVisualizer() { // alrightttttt here we go
     requestAnimationFrame(animateVisualizer); // this is the main loop that runs the visualizer, without this, all hell would break loose.
   
+    // Fix: Add a check that sphere exists before manipulating it
+    if (!sphere) {
+      console.log("Sphere not initialized yet");
+      return;
+    }
  
     sphere.rotation.y += 0.001; // rotating the sphere on the y-axis
     sphere.rotation.x += 0.001; // rotating the sphere on the x-axis
@@ -316,6 +403,12 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
     // Get positions
     const positions = sphere.geometry.attributes.position.array;
     const originalPositions = sphere.geometry.attributes.originalPosition.array;
+    
+    // Fix: Ensure we're not accessing undefined data
+    if (!positions || !originalPositions) {
+      console.log("Position data not available");
+      return;
+    }
 
     // Initialize previousPositions if needed
     if (!previousPositions) {
@@ -323,82 +416,83 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
       previousPositions.set(positions);
     }
 
-    if (audio && !audio.paused) {
-      transitionProgress = Math.min(1, transitionProgress + TRANSITION_SPEED);
-      // Analyze audio frequency data
-      analyser.getByteFrequencyData(dataArray); // getting the frequency data from the audio
-      const positions = sphere.geometry.attributes.position.array; // getting the positions of the vertices of the sphere
-      const originalPositions = sphere.geometry.attributes.originalPosition.array; // getting the original positions of the vertices of the sphere
-      // We're comparing the original positions to the positions of the vertices of the sphere to get the distortion effect
-  
-      // Process audio frequencies for sphere deformation
-      const subBass = getAverageFrequency(dataArray, 0, 3) * 1.8;     // 20-50Hz
-      const bass = getAverageFrequency(dataArray, 3, 8) * 1.6;        // 50-120Hz
-      const lowMid = getAverageFrequency(dataArray, 8, 20) * 1.4;     // 120-400Hz
-      const mid = getAverageFrequency(dataArray, 20, 50);             // 400-2kHz
-      const highMid = getAverageFrequency(dataArray, 50, 100) * 0.8;  // 2k-8kHz
-      const high = getAverageFrequency(dataArray, 100, 200) * 0.6;    // 8k-20kHz
-  
-      for (let i = 0; i < positions.length; i += 3) { // iterating through the positions of the vertices of the sphere to get the distortion effect
-        const originalX = originalPositions[i]; // getting the original x position of the vertex
-        const originalY = originalPositions[i + 1]; // getting the original y position of the vertex
-        const originalZ = originalPositions[i + 2]; // getting the original z position of the vertex
-  
-        // Normalize vertex direction
-        const normal = new THREE.Vector3(originalX, originalY, originalZ).normalize(); // normalizing the vertex direction
-  
-        // Calculate distortion
-        const time = Date.now() * 0.001; // getting the current time. At the time this comment was written, it was 10:22PM.
-        const bpmSync = time * (125 / 60) * Math.PI; // syncing the distortion to the BPM of the song. 125 BPM is a good balance between speed and distortion. Especially for house songs.
-  
-        const subBassScale = (subBass / 255.0) * 45; // scaling the sub bass
-        const bassScale = (bass / 255.0) * 35; // scaling the bass
-        const lowMidScale = (lowMid / 255.0) * 20; // scaling the low mid
-        const midScale = (mid / 255.0) * 15; // scaling the mid
-        const highMidScale = (highMid / 255.0) * 10; // scaling the high mid
-        const highScale = (high / 255.0) * 5;    // scaling the high
-
-        // The reason we scale the frequencies is to make the distortion effect more pronounced.
-  
-        const wave1 = Math.sin(normal.x * 4 + bpmSync) * Math.cos(normal.y * 4 + bpmSync * 0.5); // creating a wave effect
-        const wave2 = Math.sin(normal.z * 3 + bpmSync * 0.75) * Math.cos(normal.x * 3 + bpmSync * 0.25); // creating another wave effect
-        const wave3 = Math.sin(normal.y * 2 + bpmSync * 0.125); // creating yet another wave effect
-  
-        const distortion =
-          subBassScale * wave1 + // combining the waves to create the distortion effect
-          bassScale * wave2 + 
-          lowMidScale * wave3 +  
-          midScale * Math.sin(bpmSync) +
-          highMidScale * Math.cos(bpmSync * 2) +
-          highScale * Math.sin(bpmSync * 4);
-  
+    // Fix: Make sure audio and analyser exist before trying to use them
+    if (audio && analyser && !audio.paused) {
+      try {
+        transitionProgress = Math.min(1, transitionProgress + TRANSITION_SPEED);
+        analyser.getByteFrequencyData(dataArray);
         
-        positions[i] = originalX + normal.x * distortion; // applying the distortion to the x position of the vertex
-        positions[i + 1] = originalY + normal.y * distortion; // applying the distortion to the y position of the vertex
-        positions[i + 2] = originalZ + normal.z * distortion; // applying the distortion to the z position of the vertex
+        // Process audio frequencies for sphere deformation
+        const subBass = getAverageFrequency(dataArray, 0, 3) * 1.8;     // 20-50Hz
+        const bass = getAverageFrequency(dataArray, 3, 8) * 1.6;        // 50-120Hz
+        const lowMid = getAverageFrequency(dataArray, 8, 20) * 1.4;     // 120-400Hz
+        const mid = getAverageFrequency(dataArray, 20, 50);             // 400-2kHz
+        const highMid = getAverageFrequency(dataArray, 50, 100) * 0.8;  // 2k-8kHz
+        const high = getAverageFrequency(dataArray, 100, 200) * 0.6;    // 8k-20kHz
+  
+        for (let i = 0; i < positions.length; i += 3) { // iterating through the positions of the vertices of the sphere to get the distortion effect
+          const originalX = originalPositions[i]; // getting the original x position of the vertex
+          const originalY = originalPositions[i + 1]; // getting the original y position of the vertex
+          const originalZ = originalPositions[i + 2]; // getting the original z position of the vertex
+    
+          // Normalize vertex direction
+          const normal = new THREE.Vector3(originalX, originalY, originalZ).normalize(); // normalizing the vertex direction
+    
+          // Calculate distortion
+          const time = Date.now() * 0.001; // getting the current time. At the time this comment was written, it was 10:22PM.
+          const bpmSync = time * (125 / 60) * Math.PI; // syncing the distortion to the BPM of the song. 125 BPM is a good balance between speed and distortion. Especially for house songs.
+    
+          const subBassScale = (subBass / 255.0) * 45; // scaling the sub bass
+          const bassScale = (bass / 255.0) * 35; // scaling the bass
+          const lowMidScale = (lowMid / 255.0) * 20; // scaling the low mid
+          const midScale = (mid / 255.0) * 15; // scaling the mid
+          const highMidScale = (highMid / 255.0) * 10; // scaling the high mid
+          const highScale = (high / 255.0) * 5;    // scaling the high
+  
+          // The reason we scale the frequencies is to make the distortion effect more pronounced.
+    
+          const wave1 = Math.sin(normal.x * 4 + bpmSync) * Math.cos(normal.y * 4 + bpmSync * 0.5); // creating a wave effect
+          const wave2 = Math.sin(normal.z * 3 + bpmSync * 0.75) * Math.cos(normal.x * 3 + bpmSync * 0.25); // creating another wave effect
+          const wave3 = Math.sin(normal.y * 2 + bpmSync * 0.125); // creating yet another wave effect
+    
+          const distortion =
+            subBassScale * wave1 + // combining the waves to create the distortion effect
+            bassScale * wave2 + 
+            lowMidScale * wave3 +  
+            midScale * Math.sin(bpmSync) +
+            highMidScale * Math.cos(bpmSync * 2) +
+            highScale * Math.sin(bpmSync * 4);
+    
+          
+          positions[i] = originalX + normal.x * distortion; // applying the distortion to the x position of the vertex
+          positions[i + 1] = originalY + normal.y * distortion; // applying the distortion to the y position of the vertex
+          positions[i + 2] = originalZ + normal.z * distortion; // applying the distortion to the z position of the vertex
+        }
+    
+        sphere.geometry.attributes.position.needsUpdate = true; // updating the positions of the vertices of the sphere
+    
+     
+        const totalIntensity = (subBass + bass + lowMid + mid + highMid + high) / (255 * 6); // calculating the total intensity of the audio
+        sphere.material.uniforms.time.value = Date.now() * 0.001; // updating the time uniform of the shader
+        sphere.material.uniforms.intensity.value = totalIntensity; // updating the intensity uniform of the shader
+    
+        updateProgress(); 
+  
+        // Get bass average
+        const bassAverage = getAverageFrequency(dataArray, 0, 8);
+        
+        // Adjust color transition speed based on bass intensity
+        colorLerpFactor = THREE.MathUtils.lerp(
+          0.1, // minimum smoothing
+          0.01, // maximum smoothing (slower transitions)
+          Math.min(bassAverage / bassThreshold, 1.0)
+        );
+  
+        // Store current positions for transition
+        previousPositions.set(positions);
+      } catch (e) {
+        console.error("Error analyzing audio:", e);
       }
-  
-      sphere.geometry.attributes.position.needsUpdate = true; // updating the positions of the vertices of the sphere
-  
-   
-      const totalIntensity = (subBass + bass + lowMid + mid + highMid + high) / (255 * 6); // calculating the total intensity of the audio
-      sphere.material.uniforms.time.value = Date.now() * 0.001; // updating the time uniform of the shader
-      sphere.material.uniforms.intensity.value = totalIntensity; // updating the intensity uniform of the shader
-  
-      updateProgress(); 
-
-      // Get bass average
-      const bassAverage = getAverageFrequency(dataArray, 0, 8);
-      
-      // Adjust color transition speed based on bass intensity
-      colorLerpFactor = THREE.MathUtils.lerp(
-        0.1, // minimum smoothing
-        0.01, // maximum smoothing (slower transitions)
-        Math.min(bassAverage / bassThreshold, 1.0)
-      );
-
-      // Store current positions for transition
-      previousPositions.set(positions);
     } else {
       // Transition to idle state
       transitionProgress = Math.max(0, transitionProgress - TRANSITION_SPEED);
@@ -409,7 +503,7 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
         const originalX = originalPositions[i];
         const originalY = originalPositions[i + 1];
         const originalZ = originalPositions[i + 2];
-
+  
         // Create gentle wave motion
         const normal = new THREE.Vector3(originalX, originalY, originalZ).normalize();
         const amplitude = 2; // Adjust this for more/less movement
@@ -418,7 +512,7 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
           Math.sin(normal.x * 2 + time) * 
           Math.cos(normal.y * 2 + time * 0.5) * 
           amplitude;
-
+  
         // Interpolate between previous active state and new idle state
         positions[i] = THREE.MathUtils.lerp(
           previousPositions[i],
@@ -436,7 +530,7 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
           1 - transitionProgress
         );
       }
-
+  
       sphere.geometry.attributes.position.needsUpdate = true;
       sphere.material.uniforms.intensity.value = THREE.MathUtils.lerp(
         sphere.material.uniforms.intensity.value,
@@ -445,8 +539,12 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
       );
     }
   
-    // Render the scene
-    composer.render(); 
+    // Render the scene - ensure composer exists
+    if (composer) {
+      composer.render();
+    } else if (renderer && scene && camera) {
+      renderer.render(scene, camera);
+    }
   }
   
 
@@ -638,15 +736,64 @@ composer.addPass(bloomPass); // adding the bloom pass to the composer
 
 // Add function to update UI colors
 function updateUIColors(color) {
-  const hexColor = '#' + color.getHexString();
+  // Create a new color to avoid reference issues
+  const uiColor = new THREE.Color().copy(color);
+  const uiHSL = {};
+  uiColor.getHSL(uiHSL);
   
-  // Update text elements
-  uiElements.text.forEach(element => {
-    element.style.color = color.getHSL(hsl);
-  });
+  // Make it brighter for visibility
+  uiColor.setHSL(uiHSL.h, uiHSL.s, Math.min(0.9, uiHSL.l * 1.5));
+  const hexColor = '#' + uiColor.getHexString();
   
-  // Update icons
-  uiElements.icons.forEach(icon => {
-    icon.style.color = color.getHSL(hsl);
-  });
+  // Since uiElements is defined in DOMContentLoaded scope, we need to handle this differently
+  // Just return the calculated color for now
+  return hexColor;
+}
+
+// Fix: attemptAutoPlay needs access to audio, audioContext, etc.
+// Move this inside the DOMContentLoaded event or reference global variables properly
+function attemptAutoPlay() {
+  // This function will be called when user interacts with the page
+  const startAudio = function() {
+    if (audio && audio.paused) {
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().then(function() {
+          audio.play().then(function() {
+            playIcon.classList.remove('fa-play');
+            playIcon.classList.add('fa-pause');
+          }).catch(function(error) {
+            console.log('Playback prevented by browser policy:', error);
+          });
+        }).catch(function(error) {
+          console.log('AudioContext resume prevented:', error);
+        });
+      } else {
+        audio.play().then(function() {
+          playIcon.classList.remove('fa-play');
+          playIcon.classList.add('fa-pause');
+        }).catch(function(error) {
+          console.log('Playback prevented by browser policy:', error);
+        });
+      }
+    }
+    // Remove the event listeners after first interaction
+    document.removeEventListener('click', startAudio);
+    document.removeEventListener('touchstart', startAudio);
+  };
+
+  // Add event listeners for user interaction
+  document.addEventListener('click', startAudio);
+  document.addEventListener('touchstart', startAudio);
+}
+
+function updateBackgroundFromSphere() {
+  if (!scene || !sphere) return;
+  
+  // Create a darker version of the sphere color for the background
+  const bgColor = new THREE.Color().copy(sphere.material.uniforms.baseColor.value);
+  const bgHSL = {};
+  bgColor.getHSL(bgHSL);
+  bgColor.setHSL(bgHSL.h, bgHSL.s * 0.4, bgHSL.l * 0.15); // Darker version of sphere color
+  
+  scene.background = bgColor;
 }
