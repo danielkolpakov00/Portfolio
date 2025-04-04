@@ -57,7 +57,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let currentColor = new THREE.Color(0x0000FF);
   let targetColor = new THREE.Color(0x0000FF);
   let colorLerpFactor = 0.1; // Adjust for smoother/faster transitions
-  let bassThreshold = 200; // Adjust based on your audio analysis
+  let bassThreshold = 200; // Adjust based on audio analysis
 
   // Add these near other state variables at the top of the file
   let previousPositions = null;

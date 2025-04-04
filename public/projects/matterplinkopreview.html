@@ -207,25 +207,97 @@
             opacity: 0;
             transition: opacity 0.5s ease;
         }
+
+        /* Center the game container */
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 1200px;
+            padding: 1rem;
+        }
+        
+        /* Layout styles for game and stats */
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .game-layout {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+        
+        /* Game container styles */
+        #game-container {
+            position: relative;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+        }
+        
+        /* Stats panel styles */
+        .stats-panel {
+            width: 100%;
+            max-width: 350px;
+            flex-shrink: 0;
+        }
+        
+        /* Mobile drop button styles */
+        #mobile-drop-button {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Ensure visibility on mobile */
+        .mobile-button-container {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            text-align: center;
+            padding: 0 1rem;
+        }
     </style>
 </head>
 
 <body class="bg-dark text-light font-sans relative min-h-screen px-3 md:px-6">
-   
-
-    <!-- Main container -->
-    <div class="">
-        <div class="flex flex-col lg:flex-row gap-6">
+    <!-- Game wrapper for center alignment -->
+    <div class="game-wrapper py-4">
+        <!-- Game layout for responsive positioning -->
+        <div class="game-layout">
             <!-- Game Area -->
-            <div class="flex-1 order-2 lg:order-1">
-                <!-- Game Container with improved aspect ratio -->
-                <div id="game-container" class="w-full aspect-[3/4] md:aspect-[1/1] max-h-[500px] relative rounded-lg overflow-hidden shadow-xl bg-black border border-accent2/30">
-                    <!-- The game canvas will be inserted here by Matter.js -->
+            <div class="flex-1 w-full md:w-auto">
+                <!-- Game Container -->
+                <div id="game-container" class="w-full aspect-[1/1] max-w-[500px] mx-auto relative rounded-lg overflow-hidden shadow-xl bg-black border border-accent2/30">
                     <div id="scroll" class="absolute top-0"></div>
                 </div>
 
-                <!-- Statistics Panel -->
-                <div class="bg-black/50 p-4 mt-6 rounded-lg shadow-lg border border-accent2/30">
+                <!-- Drop ball button - visible on all screen sizes -->
+                <div class="mt-4 w-full max-w-[500px] mx-auto">
+                    <button id="drop-button" class="bg-accent hover:bg-light text-black py-3 px-6 rounded-lg font-bold text-lg shadow-lg transition-colors w-full">
+                        <div class="flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Drop Ball</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Panel - Smaller and inline -->
+            <div class="stats-panel">
+                <div class="bg-black/50 p-4 rounded-lg shadow-lg border border-accent2/30">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold">Statistics</h3>
                         <p id="bet-counter" class="text-sm font-mono">Total Balls: 0</p>
@@ -246,8 +318,6 @@
                     </div>
                 </div>
             </div>
-
-       
         </div>
     </div>
 
@@ -258,7 +328,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a4 4 0 00-4-4H8.8a4 4 0 00-3.6 2.3L2 8" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z" />
             </svg>
-           
         </div>
     </div>
     
@@ -606,18 +675,18 @@
                     // Calculate wall positions based on peg layout rather than fixed ratios
                     // This ensures proper alignment on both desktop and mobile screens
                     const pegStructureWidth = pegSpacingX * (pegRows + 1); // Width of the entire peg structure
-                    const horizontalPadding = 0.7 * pegSpacingX; // Padding from outer pegs to walls
+                    const horizontalPadding = 1 * pegSpacingX; // Padding from outer pegs to walls
                     
                     // Position walls based on the peg structure width
                     const leftWallX = (canvasWidth - pegStructureWidth) / 2 + horizontalPadding;
                     const rightWallX = (canvasWidth + pegStructureWidth) / 2 - horizontalPadding;
                     const wallY = canvasHeight * 0.5; // Center height
-                    const wallLength = canvasHeight * 0.58;
+                    const wallLength = canvasHeight * 0.8;
                     
                     // Left wall - angled
                     const wallLeft = Bodies.rectangle(leftWallX, wallY, 75, wallLength, {
                         isStatic: true,
-                        angle: Math.PI / 6.5,
+                        angle: Math.PI / 6.8,
                         render: { visible: false },
                         collisionFilter: {
                             category: 0x0002,
@@ -922,6 +991,26 @@
                         updateBalance(-betAmount);
                         dropBall(betAmount);
                     });
+
+                    // Main Drop Ball Button (Desktop)
+                    const dropButton = document.getElementById('drop-button');
+                    if (dropButton) {
+                        dropButton.addEventListener('click', function() {
+                            console.log('Drop button clicked');
+                            const betAmount = 10; // Fixed bet amount for simplicity
+                            dropBall(betAmount);
+                        });
+                    }
+
+                    // Mobile drop button
+                    const mobileDropButton = document.getElementById('mobile-drop-button');
+                    if (mobileDropButton) {
+                        mobileDropButton.addEventListener('click', function() {
+                            console.log('Mobile drop button clicked');
+                            const betAmount = 10; // Fixed bet amount for simplicity
+                            dropBall(betAmount);
+                        });
+                    }
                 }
 
                 // Set up Matter.js engine
@@ -1204,6 +1293,25 @@
                     
                     const betCounter = document.getElementById('bet-counter');
                     if (betCounter) betCounter.textContent = 'Total Balls: 0';
+
+                    // Add direct event listeners to buttons (outside of setupEventListeners)
+                    const dropButton = document.getElementById('drop-button');
+                    if (dropButton) {
+                        dropButton.onclick = function() {
+                            console.log('Direct drop button clicked');
+                            dropBall(10);
+                            return false;
+                        };
+                    }
+
+                    const mobileDropButton = document.getElementById('mobile-drop-button');
+                    if (mobileDropButton) {
+                        mobileDropButton.onclick = function() {
+                            console.log('Direct mobile drop button clicked');
+                            dropBall(10);
+                            return false;
+                        };
+                    }
                 }
 
                 // Export functions to window for debugging
@@ -1257,8 +1365,8 @@
     </script>
 
     <!-- Fixed drop ball button for mobile -->
-    <div class="fixed bottom-6 right-4 left-4 z-50 lg:hidden">
-        <button id="mobile-drop-button" class="bg-accent hover:bg-light text-black py-4 px-6 rounded-lg font-bold text-lg shadow-lg transition-colors w-full backdrop-blur-sm backdrop-brightness-110 border border-white/20 animate-pulse">
+    <div class="mobile-button-container lg:hidden">
+        <button id="mobile-drop-button" class="bg-accent hover:bg-light text-black py-4 px-6 rounded-lg font-bold text-lg shadow-lg transition-colors w-full max-w-xs mx-auto backdrop-blur-sm border border-white/20 animate-pulse">
             <div class="flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
@@ -1284,6 +1392,27 @@
                 mobileButton.classList.remove('shadow-xl');
                 mobileButton.classList.add('animate-pulse');
             }
+        });
+    </script>
+
+    <!-- Emergency Drop Ball Fallback -->
+    <script>
+        // This ensures the button will work even if other event bindings fail
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a fallback drop ball handler that runs after everything else
+            setTimeout(function() {
+                const allDropButtons = document.querySelectorAll('#drop-button, #mobile-drop-button');
+                allDropButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        console.log('Fallback drop ball handler');
+                        if (window.debugPlinko && typeof window.debugPlinko.dropBall === 'function') {
+                            window.debugPlinko.dropBall(10);
+                        }
+                        e.preventDefault();
+                        return false;
+                    });
+                });
+            }, 2000); // Give main script time to initialize
         });
     </script>
 </body>
