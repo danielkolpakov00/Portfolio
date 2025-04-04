@@ -34,7 +34,7 @@
     },
     {
       "id": 5,
-      "title": "Simple Backend for Emails (NodeMailer, MongoDB)",
+      "title": "NodeMailer + Mongo Mail Backend",
       "description": "I made a simple backend for an email form with Express.js and Nodemailer",
       "buttonText": "Check it out!",
       "color": "#284af7",
