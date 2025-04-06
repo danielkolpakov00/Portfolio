@@ -37,17 +37,19 @@ const Navbar = ({ isOpen, setIsOpen }) => {
   ];
 
   return (
-    <div className="fixed bottom-4 left-4 w-full md:left-12 lg:left-12 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:w-auto z-20">
-      <div className="md:rotate-[270deg] md:origin-center transform-gpu">
-        <Dock 
-          items={items} 
-          panelHeight={{ base: 68}}
-          baseItemSize={{ base: 50}}
-          magnification={{ base: 65}}
-          className="bg-white/70 backdrop-blur-sm md:bg-white/80 md:backdrop-blur-md md:shadow-lg"
-          distance={100}
-          spring={{ mass: 0.5, stiffness: 120, damping: 20 }}
-        />
+    <div className="fixed bottom-4 left-0 right-0 z-20">
+      <div className="relative w-fit mx-auto md:mx-0 md:fixed md:left-12 md:top-1/2 md:-translate-y-1/2">
+        <div className="md:rotate-[270deg] md:origin-center transform-gpu">
+          <Dock 
+            items={items} 
+            panelHeight={{ base: 68}}
+            baseItemSize={{ base: 50}}
+            magnification={{ base: 65}}
+            className="bg-white/70 backdrop-blur-sm md:bg-white/80 md:backdrop-blur-md md:shadow-lg"
+            distance={100}
+            spring={{ mass: 0.5, stiffness: 120, damping: 20 }}
+          />
+        </div>
       </div>
     </div>
   );
