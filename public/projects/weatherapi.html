@@ -3,36 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Interactive 3D weather visualization with day/night cycle based on Vancouver time">
   <title>Interactive Weather Visualization</title>
   
-  <!-- Resource hints for faster loading -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://unpkg.com/three@0.159.0/build/three.module.js" as="script">
-  
-  <!-- Import map for modules -->
+  <!-- Import map to handle bare specifiers -->
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+        "three": "../../node_modules/three/build/three.module.js",
+        "three/": "../../node_modules/three/",
+        "gsap": "../../node_modules/gsap/index.js"
       }
     }
   </script>
   
+  <!-- Add base target to prevent iframe navigation issues -->
+  <base target="_parent">
+  
+  <!-- Resource hints for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
   <!-- Load Inter font optimized for text rendering -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   
-  <!-- FontAwesome with reduced subset for faster loading -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-        crossorigin="anonymous" referrerpolicy="no-referrer">
+  <!-- Use FontAwesome from CDN instead of local module -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.0/gsap.min.js" defer></script>
+  <!-- CSS only -->
   <link href="weatherapi.css" rel="stylesheet">
+  
+  <style>
+    /* Inline critical CSS for proper iframe positioning */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    /* Ensure all contents are positioned relative to the viewport */
+    main {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
+  <!-- Loading screen with enhanced progress indication -->
+  <div id="loadingScreen">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Weather Visualization</div>
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+      <div class="loading-progress">0%</div>
+      <div class="loading-status">Initializing...</div>
+    </div>
+  </div>
+  
   <main>
     <div id="weatherDisplay" aria-live="polite" role="status"></div>
     <div id="gradientOverlay" aria-hidden="true"></div>
@@ -70,18 +107,6 @@
     </div>
   </main>
   
-  <script async src="https://unpkg.com/es-module-shims/dist/es-module-shims.js"></script>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
-        "three/examples/jsm/postprocessing/EffectComposer.js": "https://unpkg.com/three@0.159.0/examples/jsm/postprocessing/EffectComposer.js",
-        "three/examples/jsm/postprocessing/RenderPass.js": "https://unpkg.com/three@0.159.0/examples/jsm/postprocessing/RenderPass.js",
-        "three/examples/jsm/postprocessing/UnrealBloomPass.js": "https://unpkg.com/three@0.159.0/examples/jsm/postprocessing/UnrealBloomPass.js",
-        "three/examples/jsm/loaders/SVGLoader.js": "https://unpkg.com/three@0.159.0/examples/jsm/loaders/SVGLoader.js"
-      }
-    }
-  </script>
-  <script src="weatherapi.js" type="module"></script>
+  <script type="module" src="weatherapi.js"></script>
 </body>
 </html>

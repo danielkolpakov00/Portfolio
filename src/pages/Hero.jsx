@@ -14,6 +14,7 @@ import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons
 import '../components/DialogueBox.css'; // Dialogue styles
 import { Coolshape } from "coolshapes-react";
 import DKModelComponent from '../components/DKModelComponent'; // Import the new component
+import BouncingLogo from '@/components/BouncingLogo';
 
 const Hero = ({ isOpen }) => {
   const location = useLocation();
@@ -143,6 +144,7 @@ const Hero = ({ isOpen }) => {
   return (
     <div className={`relative flex flex-col items-center justify-center min-h-screen bg-offwhite p-0 ${isOpen ? 'border-4 border-blue2' : ''}`}>
       <TsParticles />
+      <BouncingLogo />
       <VerticalMarquee />
       <header className="text-center relative z-10">
         

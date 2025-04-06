@@ -7,23 +7,129 @@ body {
   background-color: #f5f7fa; /* Light background color */
 }
 
-/* Weather display with improved aesthetics */
+
+/* Loading screen styles */
+#loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0c1a2e, #1e3c72);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: min(90%, 400px);
+}
+
+.loading-text {
+  color: white;
+  font-size: clamp(16px, 4vw, 24px);
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4e84ff, #82a9ff);
+  border-radius: 4px;
+  transition: width 0.3s ease-out; /* Faster transition */
+  background-size: 200% 100%;
+  animation: gradientMove 2s linear infinite;
+  will-change: width; /* Optimize animation */
+}
+
+.loading-progress {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: clamp(14px, 3vw, 18px);
+  margin-top: -10px;
+}
+
+.loading-status {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(12px, 2.5vw, 14px);
+  text-align: center;
+  font-style: italic;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: opacity 0.2s ease; /* Faster transition */
+  margin-top: 5px;
+  min-height: 1.2em; /* Prevent layout shift */
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #4e84ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Add Compagnon-Medium font */
+@font-face {
+  font-family: 'Compagnon-Medium';
+  src: url('./assets/Compagnon-Medium.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Weather display with improved aesthetics - fixed centering for iframe */
 #weatherDisplay { 
   position: absolute;
-  top: min(50%, calc(50% - 40px));
+  bottom: min(100px, 20vh); /* Reposition to bottom instead of top */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%); /* Only translate X, not Y */
   font-weight: 500;
   letter-spacing: max(0.2px, min(0.5px, 0.3vw));
-  font-size: clamp(16px, 3.5vw, 28px);
+  font-size: clamp(14px, 3.2vw, 28px); /* Reduced minimum size for better mobile fit */
   color: rgb(255, 255, 255);
   transition: color 1s ease, transform 0.3s ease;
   text-align: center;
-  width: min(90%, 600px);
-  max-width: 800px;
+  width: min(92%, 600px); /* Increased width percentage for small screens */
+  max-width: 90vw; /* Use viewport width to ensure proper iframe fitting */
   overflow: hidden;
   height: auto;
-  min-height: 60px;
+  min-height: min(60px, 15vh); /* Make min-height responsive */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,56 +137,137 @@ body {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: min(16px, 3vw);
-  padding: min(15px, 4vw);
+  padding: min(12px, 3vw) min(15px, 4vw); /* Adjusted padding for better mobile fit */
   z-index: 10;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px; /* Add space between the display and buttons */
+  box-sizing: border-box; /* Ensure padding is included in width calculations */
 }
 
 #weatherDisplay:hover {
-  transform: translate(-50%, -51%);
+  transform: translateX(-50%) translateY(-5px); /* Keep X centered, just move up on hover */
+}
+
+/* Enhanced weather message styles for cycling messages */
+.weather-message-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 /* Use hardware acceleration for animations */
 .weatherMessage {
   position: absolute;
   width: 100%;
-  padding: 0 10px;
+  padding: 0 min(10px, 3vw); /* Responsive padding */
   box-sizing: border-box;
   line-height: 1.5; /* Improved line height */
   transition: color 1s ease, opacity 0.8s ease, transform 0.5s ease;
   will-change: transform, opacity; /* Optimize animations */
+  font-size: clamp(14px, 3.2vw, 28px); /* Specify font size to ensure consistency */
 }
 
+/* Add fancy transition for the weather messages */
+.weatherMessage.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.weatherMessage.inactive {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Vancouver time sync indicator */
+.sync-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 20;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sync-indicator.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sync-indicator .sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #4caf50;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+/* Make sure the canvas fits properly within iframe */
 canvas { 
   display: block;
-  width: 100vw;
+  width: 100%;  /* Use 100% instead of 100vw for iframe compatibility */
   height: 100vh;
   touch-action: none;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-/* Enhanced time display */
+/* Enhanced time display - fixed centering for iframe */
 #timeDisplay {
   position: absolute;
-  top: min(100px, 12vh);
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  font-weight: 600;
+  transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+  font-family: 'Compagnon-Medium', monospace;
+  font-weight: normal;
   letter-spacing: clamp(3px, 1.5vw, 6px);
   font-size: clamp(40px, 10vw, 90px);
   color: black;
   transition: color 1s ease, text-shadow 1s ease;
   z-index: 10;
   text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+  width: 100%; /* Ensure full width for proper centering */
+  text-align: center; /* Center the text */
+  box-sizing: border-box; /* Include padding in width calculation */
+  padding: 0 10px; /* Add some padding for very small screens */
 }
 
 /* Simplified overlay with reduced properties */
 #gradientOverlay, #sunriseOverlay {
   position: absolute;
+  top: 0;
+  right: 0;
   bottom: 0;
   left: 0;
-  width: 100%;
-  height: 100vh;
+  width: 100%; /* Use 100% instead of specific width */
+  height: 100%; /* Use 100% instead of 100vh */
   opacity: 0;
   pointer-events: none;
 }
@@ -169,7 +356,7 @@ canvas {
   transition: color 0.5s ease, transform 0.3s ease;
 }
 
-/* Controls positioning and layout */
+/* Controls positioning and layout - fixed for iframe */
 #controlGroup {
   position: absolute;
   bottom: min(20px, 5vh);
@@ -180,6 +367,9 @@ canvas {
   align-items: center;
   gap: min(15px, 2vh);
   z-index: 20;
+  width: min(100%, 600px); /* Match width constraint with weather display */
+  max-width: 90vw; /* Use viewport width to ensure proper iframe fitting */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .buttonRow {
@@ -281,19 +471,29 @@ canvas {
 /* Combine media queries for better performance */
 @media (max-height: 600px) and (orientation: landscape) {
   #weatherDisplay {
-    font-size: clamp(14px, 2.5vw, 18px);
+    font-size: clamp(12px, 2.5vw, 18px);
     min-height: 50px;
-    padding: 10px;
-    top: 40%;
+    padding: 8px;
+    bottom: min(70px, 18vh); /* Adjust for landscape */
+    width: min(70%, 500px);
+  }
+  
+  .weatherMessage {
+    font-size: clamp(12px, 2.5vw, 18px);
+    line-height: 1.3;
   }
   
   #timeDisplay {
-    top: 8vh;
+    /* Keep centered */
     font-size: clamp(30px, 8vw, 60px);
   }
   
   #controlGroup {
     bottom: 10px;
+  }
+  
+  .buttonRow {
+    gap: 15px;
   }
   
   .buttonRow button {
@@ -329,5 +529,149 @@ canvas {
   #timeSlider::-moz-range-thumb {
     width: 22px;
     height: 22px;
+  }
+  
+  /* Improve tap target sizes */
+  .weatherMessage {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  
+  #precipType {
+    font-size: 16px;
+    padding: 6px 10px;
+  }
+}
+
+/* Improve mobile responsiveness with more specific media queries */
+/* Small mobile phones (portrait) */
+@media (max-width: 380px) {
+  #weatherDisplay {
+    letter-spacing: 0.2px;
+    min-height: max(60px, 10vh);
+    bottom: min(80px, 20vh); /* Adjust for smaller screens */
+    font-size: 14px;
+    width: 95%;
+    padding: 12px 15px;
+  }
+  
+  .weatherMessage {
+    font-size: 14px;
+    padding: 0 5px;
+  }
+  
+  #timeDisplay {
+    /* Keep centered vertically and horizontally */
+    font-size: clamp(32px, 12vw, 40px);
+    letter-spacing: clamp(2px, 1.2vw, 4px);
+    /* No top position needed - using transform */
+  }
+  
+  .buttonRow {
+    gap: 10px;
+  }
+  
+  .buttonRow button {
+    padding: 10px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  .icon {
+    font-size: 1em;
+  }
+}
+
+/* Medium mobile phones (portrait) */
+@media (min-width: 381px) and (max-width: 480px) {
+  #weatherDisplay {
+    letter-spacing: 0.3px;
+    min-height: max(65px, 10vh);
+    bottom: min(90px, 20vh);
+    width: 92%;
+  }
+  
+  #timeDisplay {
+    /* Keep centered */
+    font-size: clamp(36px, 10vw, 50px);
+  }
+  
+  .buttonRow button {
+    padding: 10px 15px;
+  }
+}
+
+/* Larger phones */
+@media (min-width: 481px) and (max-width: 767px) {
+  #weatherDisplay {
+    bottom: min(100px, 20vh);
+    width: 85%;
+  }
+  
+  #timeDisplay {
+    top: 15vh;
+  }
+}
+
+/* Tablets and small screens */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #weatherDisplay {
+    bottom: min(110px, 20vh);
+    width: 80%;
+  }
+}
+
+/* Add special handling for very small height screens */
+@media (max-height: 400px) {
+  #weatherDisplay {
+    bottom: 65px; /* Fixed position closer to buttons */
+    min-height: 40px;
+    padding: 5px 10px;
+  }
+  
+  #timeDisplay {
+    font-size: clamp(24px, 8vw, 36px); /* Smaller time display */
+  }
+  
+  .weatherMessage {
+    line-height: 1.2;
+    font-size: clamp(11px, 2.2vw, 16px);
+  }
+}
+
+/* Improve notch handling for modern phones */
+@supports(padding: max(0px)) {
+  #weatherDisplay {
+    padding-left: max(15px, 4vw, env(safe-area-inset-left));
+    padding-right: max(15px, 4vw, env(safe-area-inset-right));
+  }
+  
+  #controlGroup {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Specific fix for iframe rendering in small viewports */
+@media (max-width: 500px) {
+  #timeDisplay {
+    width: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  #weatherDisplay {
+    width: calc(100% - 20px); /* Account for minimum margins */
+    max-width: none;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  #controlGroup {
+    width: 100%;
+    max-width: none;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }

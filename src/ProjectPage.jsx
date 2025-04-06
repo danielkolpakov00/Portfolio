@@ -280,7 +280,7 @@ const ProjectPage = () => {
       <div className="project-demo flex flex-col">
         {selectedProject.demoUrl ? (
           <>
-          <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg mb-4 md:mb-4 relative`}>
+          <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg relative`}>
             <iframe
               ref={iframeRef}
               src={selectedProject.demoUrl}
@@ -366,7 +366,7 @@ const ProjectPage = () => {
         </div>
 
         {/* Demo section with consistent padding */}
-        <div ref={demoSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 flex justify-center items-center">
+        <div ref={demoSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-center items-center">
           {renderProjectDemo()}
         </div>
         
