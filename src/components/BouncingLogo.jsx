@@ -81,7 +81,7 @@ const BouncingLogo = () => {
 		>
 			<img
 				ref={logoRef}
-				src="src/assets/dvd-logo.svg" // Replace with your logo image path
+				src="./assets/dvd-logo.svg" // Using relative path with dot prefix for proper deployment
 				alt="Bouncing Logo"
 				style={{
 					position: 'absolute',
