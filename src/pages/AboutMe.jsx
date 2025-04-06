@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import React, { useState, useEffect, useRef, lazy, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet";
 import confetti from 'canvas-confetti';
@@ -150,12 +150,14 @@ const visualComponents = {
 };
 
 // Replace hardcoded projects with data from JSON
-const projects = projectsData.vanillaProjects.map(project => ({
-  ...project,
-  visual: visualComponents[project.visualComponent],
-  // Ensure category is always set for consistent UI
-  category: project.category || "web"
-}));
+const projects = useMemo(() => {
+  return projectsData.vanillaProjects.map(project => ({
+    ...project,
+    visual: visualComponents[project.visualComponent],
+    // Ensure category is always set for consistent UI
+    category: project.category || "web"
+  }));
+}, [projectsData]);
 
 // Trigger confetti effect
 const triggerConfetti = () => {
@@ -255,7 +257,9 @@ export default function AboutMe() {
         />
         
         {/* Lazy load the larger image */}
-        <img src={aboutContent.landing.imageLarge} loading="lazy" alt="Daniel Kolpakov" style={{ display: 'none' }} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <img src={aboutContent.landing.imageLarge} loading="lazy" alt="Daniel Kolpakov" style={{ display: 'none' }} />
+        </Suspense>
         
         {/* Content Sections */}
         {aboutContent.sections.map((section, sectionIdx) => {

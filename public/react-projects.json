@@ -16,7 +16,8 @@
       "demoUrl": "https://xp.danielkolpakov.com/",
       "isMobileFriendly": false,
       "demoDescriptionComponent": "LastFmDemoDescription",
-      "technologies": ["React", "CSS", "Last.fm API"]
+      "technologies": ["React", "CSS", "Last.fm API"],
+      "image": "/assets/bliss.jpg"
     }
   ]
 }

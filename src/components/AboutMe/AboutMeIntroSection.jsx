@@ -8,7 +8,7 @@ import Balatro from '../../components/ReactBits/Balatro';
 import Iridescence from '../../components/ReactBits/Iridescence';
 
 // Visibility wrapper component
-const VisibilityWrapper = ({ children }) => {
+const VisibilityWrapper = React.memo(({ children }) => {
   const [isVisible, setIsVisible] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -36,7 +36,7 @@ const VisibilityWrapper = ({ children }) => {
       {isVisible && children}
     </div>
   );
-};
+});
 
 // Animation variants with mobile-friendly adjustments
 const cardVariants = {

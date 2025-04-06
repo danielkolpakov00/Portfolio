@@ -20,8 +20,8 @@ import MusicDescription from './components/project-descriptions/MusicDescription
 import MailDescription from './components/project-descriptions/MailDescription';
 import GradientDemoDescription from './components/project-descriptions/GradientDemoDescription';
 import LastFmDemoDescription from './components/project-descriptions/LastFmDemoDescription';
-import IframeCursorRelay from './components/ReactBits/IframeCursorRelay';
 import { useCursorTooltip } from './components/CursorTooltip';
+import IframeProxyCursor from './components/IframeProxyCursor';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -283,25 +283,13 @@ const ProjectPage = () => {
         {selectedProject.demoUrl ? (
           <>
           <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg relative`}>
-            <IframeCursorRelay>
-              <iframe
-                ref={iframeRef}
-                src={selectedProject.demoUrl}
-                title={`${selectedProject.title} Demo`}
-                className="w-full h-full border-0"
-                allow="fullscreen"
-                allowFullScreen
-                style={{ transform: 'scale(1)', transformOrigin: 'center' }}
-              ></iframe>
-            </IframeCursorRelay>
-            <button
-              onClick={handleFullscreen}
-              className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium"
-              aria-label="View fullscreen"
-            >
-              <FontAwesomeIcon icon={faExpand} />
-              <span>Fullscreen</span>
-            </button>
+            <IframeProxyCursor
+              src={selectedProject.demoUrl}
+              title={`${selectedProject.title} Demo`}
+              iframeRef={iframeRef}
+              onFullscreen={handleFullscreen}
+              className="w-full h-full"
+            />
           </div>
           <div className="w-full max-w-6xl p-4 bg-blue2">
             <p className="text-white">

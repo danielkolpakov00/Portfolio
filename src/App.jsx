@@ -1,5 +1,5 @@
 // App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 // import Scene from './Scene'; // Completely disabled as it's unoptimized
@@ -31,6 +31,38 @@ const ParticlesController = () => {
 };
 
 const App = () => {
+  const [isIframeHovered, setIsIframeHovered] = useState(false);
+  const animatedCursorRef = useRef(null);
+  
+  // Effect to detect when an iframe container is hovered
+  useEffect(() => {
+    const handleIframeHover = (e) => {
+      const isHovering = e.type === 'mouseenter';
+      setIsIframeHovered(isHovering);
+      
+      // Toggle animated cursor visibility
+      if (animatedCursorRef.current) {
+        const cursorElements = document.querySelectorAll('.animated-cursor');
+        cursorElements.forEach(el => {
+          el.style.opacity = isHovering ? '0' : '1';
+        });
+      }
+    };
+    
+    // Attach event listeners to iframe containers
+    const iframeContainers = document.querySelectorAll('.iframe-cursor-container');
+    iframeContainers.forEach(container => {
+      container.addEventListener('mouseenter', handleIframeHover);
+      container.addEventListener('mouseleave', handleIframeHover);
+    });
+    
+    return () => {
+      iframeContainers.forEach(container => {
+        container.removeEventListener('mouseenter', handleIframeHover);
+        container.removeEventListener('mouseleave', handleIframeHover);
+      });
+    };
+  }, []);
   
   // Comment out Scene-related state
   /*
@@ -83,6 +115,7 @@ const App = () => {
     <ErrorBoundary>
       <CursorTooltipProvider>
         <AnimatedCursor
+          ref={animatedCursorRef}
           innerSize={8}
           outerSize={35}
           innerScale={1}

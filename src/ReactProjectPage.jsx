@@ -13,8 +13,8 @@ import WeatherDemoDescription from './components/project-descriptions/WeatherDem
 import BedroomDemoDescription from './components/project-descriptions/BedroomDemoDescription';
 import MusicDemoDescription from './components/project-descriptions/MusicDemoDescription';
 import MailDemoDescription from './components/project-descriptions/MailDemoDescription';
-import IframeCursorRelay from './components/ReactBits/IframeCursorRelay';
 import { useCursorTooltip } from './components/CursorTooltip';
+import IframeProxyCursor from './components/IframeProxyCursor';
 
 const ReactProjectPage = () => {
   const { id } = useParams();
@@ -276,21 +276,14 @@ const ReactProjectPage = () => {
         {selectedProject.demoUrl ? (
           <>
           <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg mb-4 md:mb-4 relative`}>
-            <IframeCursorRelay
-              ref={iframeRef}
+            <IframeProxyCursor
               src={selectedProject.demoUrl}
               title={`${selectedProject.title} Demo`}
-              className="w-full h-full border-0"
-              style={{ transform: 'scale(1)', transformOrigin: 'center' }}
+              iframeRef={iframeRef}
+              onFullscreen={handleFullscreen}
+              style={{ width: '100%', height: '100%' }}
+              className="w-full h-full"
             />
-            <button
-              onClick={handleFullscreen}
-              className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium"
-              aria-label="View fullscreen"
-            >
-              <FontAwesomeIcon icon={faExpand} />
-              <span>Fullscreen</span>
-            </button>
           </div>
           <div className="w-full max-w-6xl p-4 bg-blue2">
             <p className="text-white">

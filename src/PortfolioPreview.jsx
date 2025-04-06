@@ -1,9 +1,10 @@
 // src/PortfolioPreview.jsx
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { motion } from "framer-motion";
+import { useInView } from 'react-intersection-observer';
 
 import WeatherPreview from "./WeatherPreview";
 import PlinkoPreview from "./PlinkoPreview";
@@ -15,6 +16,139 @@ import ProjectWidget from "./components/ProjectWidget";
 import { FaReact } from "react-icons/fa";
 import projectsData from "./data/projects.json";
 import Iridescence from "./components/ReactBits/Iridescence";
+// Import Dither with lazy loading to prevent immediate errors
+const Dither = React.lazy(() => import("./components/ReactBits/Dither"));
+
+// Error boundary to catch React reconciliation errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("React Error Boundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div>Something went wrong.</div>;
+    }
+    return this.props.children;
+  }
+}
+
+// Enhanced fallback component with more information
+const DitherFallback = ({ className, errorMessage }) => (
+  <div className={`${className} bg-blue-900/20 flex items-center justify-center flex-col p-2`}>
+    <div className="text-white text-opacity-60 text-center">
+      {errorMessage || "Loading effect..."}
+    </div>
+  </div>
+);
+
+// Create a memoized static component that won't rerender
+const StaticDitherEffect = React.memo(() => {
+  try {
+    return (
+      <Dither 
+        waveSpeed={0.4}
+        waveFrequency={1.5}
+        waveAmplitude={0.15}
+        waveColor={[0.2, 0.4, 0.8]}
+        colorNum={4}
+        pixelSize={2}
+        disableAnimation={false}
+        enableMouseInteraction={false}
+        mouseRadius={0}
+        disableHover={true}
+        preventHoverEvents={true}
+        optimizeRendering={true}
+        forceStatic={true}
+        isolateFromDomEvents={true}
+        shouldComponentUpdate={false}
+      />
+    );
+  } catch (error) {
+    console.error("Error rendering Dither:", error);
+    return null;
+  }
+}, () => true); // Always return true to prevent rerendering
+
+// Updated BlissWithDither component with better error handling
+const BlissWithDither = ({ className }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [ditherError, setDitherError] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1
+  });
+
+  // Handle dither component errors
+  const handleDitherError = useCallback(() => {
+    console.log("Dither component failed to load, falling back to static image");
+    setDitherError(true);
+  }, []);
+
+  // Use a simpler approach that's less likely to cause reconciliation issues
+  return (
+    <div ref={ref} className={`${className} relative w-full h-full overflow-hidden`}>
+      {/* Base bliss.jpg image with increased brightness */}
+      <img
+        src="/assets/bliss.jpg"
+        alt="Windows XP Bliss"
+        onLoad={() => setImageLoaded(true)}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ filter: 'brightness(1.6)' }} // Increased brightness filter
+      />
+      
+      {/* Only attempt to render the Dither component if all conditions are met */}
+      {imageLoaded && inView && !ditherError && (
+        <ErrorBoundary 
+          fallback={
+            <DitherFallback 
+              className="absolute inset-0" 
+              errorMessage="Failed to load special effect" 
+            />
+          }
+          onError={handleDitherError}
+        >
+          <Suspense fallback={<DitherFallback className="absolute inset-0" />}>
+            <div 
+              className="absolute inset-0 z-10 opacity-50 pointer-events-none mix-blend-multiply"
+              style={{
+                pointerEvents: 'none',
+                touchAction: 'none',
+                userSelect: 'none',
+                isolation: 'isolate'
+              }}
+            >
+              {/* Using React.memo with a static component to prevent rerendering */}
+              <StaticDitherEffect />
+            </div>
+          </Suspense>
+        </ErrorBoundary>
+      )}
+      
+      {/* Scanlines - always show these regardless of dither effect */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-20"
+        style={{
+          backgroundImage: 'linear-gradient(transparent 50%, rgba(0, 0, 0, 0.4) 50%)',
+          backgroundSize: '100% 4px',
+          opacity: 0.15
+        }}
+      />
+      
+      {/* Windows XP logo */}
+     
+    </div>
+  );
+};
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -25,6 +159,12 @@ const visualComponents = {
   "MusicPreview": MusicPreview,
   "MailPreview": MailPreview,
 };
+
+// Memoize the Iridescence component to prevent unnecessary re-renders
+const MemoizedIridescence = React.memo(Iridescence);
+
+// Memoize TsParticles to prevent unnecessary re-renders
+const MemoizedTsParticles = React.memo(TsParticles);
 
 const PortfolioPreview = () => {
   const [layouts, setLayouts] = useState(() => {
@@ -57,10 +197,19 @@ const PortfolioPreview = () => {
           if (project.id === "gradient-generator") {
             const GradientVisual = ({ containerRef, containerSize }) => (
               <div className="w-full h-full" style={{ overflow: 'hidden' }}>
-                <Iridescence color={[0.4, 0.4, 1]} speed={0.8} amplitude={0.2} />
+                <MemoizedIridescence color={[0.4, 0.4, 1]} speed={0.8} amplitude={0.2} />
               </div>
             );
             return { ...project, framework: "react", visual: GradientVisual };
+          }
+
+          // Special case for lastfm-app to apply dither effect to bliss.jpg
+          if (project.id === "lastfm-app") {
+            const LastfmVisual = () => {
+              return <BlissWithDither className="w-full h-full" />;
+            };
+
+            return { ...project, framework: "react", visual: LastfmVisual };
           }
 
           const ImageVisual = ({ containerRef, containerSize }) => {
@@ -71,7 +220,7 @@ const PortfolioPreview = () => {
               objectFit: 'cover',
               objectPosition: 'center',
             };
-            
+
             return (
               <div className="w-full h-full flex items-center justify-center bg-gray-800">
                 {project.image ? (
@@ -134,10 +283,10 @@ const PortfolioPreview = () => {
   // Generate fixed layout for the grid
   const generateLayout = useCallback(() => {
     if (!filteredProjects.length) return { lg: [], md: [], sm: [], xs: [], xxs: [] };
-    
+
     const cols = { lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 };
     const layouts = {};
-    
+
     Object.keys(cols).forEach(breakpoint => {
       const colNum = cols[breakpoint];
       layouts[breakpoint] = filteredProjects.map((project, i) => {
@@ -151,7 +300,7 @@ const PortfolioPreview = () => {
         };
       });
     });
-    
+
     return layouts;
   }, [filteredProjects]);
 
@@ -174,7 +323,7 @@ const PortfolioPreview = () => {
 
   return (
     <div className="relative">
-      <TsParticles />
+      <MemoizedTsParticles />
 
       <motion.h2
         className="text-center text-4xl sm:text-5xl md:text-6xl text-blue2 font-bold mb-6 sm:mb-10 mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-4"
@@ -218,8 +367,8 @@ const PortfolioPreview = () => {
               draggableHandle=".drag-handle"
             >
               {filteredProjects.map((project) => (
-                <div 
-                  key={`${project.framework}-${project.id}`} 
+                <div
+                  key={`${project.framework}-${project.id}`}
                   className="project-grid-item"
                 >
                   <ProjectWidget
@@ -232,7 +381,6 @@ const PortfolioPreview = () => {
                         <FaReact className="text-blue-500 flex-shrink-0" size={24} />
                       ) : null
                     }
-                    showDragHandle={true}
                   />
                 </div>
               ))}

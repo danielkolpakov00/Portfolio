@@ -173,7 +173,8 @@ const Hero = ({ isOpen }) => {
         position: 'fixed',
         top: '-5vh', // Position slightly outside the viewport
         left: '-5vw', // Position slightly outside the viewport
-        overflow: 'visible' // Allow particles to render outside container
+        overflow: 'visible',
+        opacity: '10%' 
       }}>
         <Particles
           particleColors={['#1B60FA', '#1B70FA']}
@@ -187,6 +188,7 @@ const Hero = ({ isOpen }) => {
           disableRotation={false}
           cameraDistance={60}
           className="particles-container-deep"
+          
         />
       </div>
       
@@ -201,7 +203,8 @@ const Hero = ({ isOpen }) => {
           position: 'fixed',
           top: '-10vh', // Position outside the viewport
           left: '-10vw', // Position outside the viewport
-          overflow: 'visible'
+          overflow: 'visible',
+          opacity: '30%'
         }}
       >
         <Particles
@@ -230,7 +233,8 @@ const Hero = ({ isOpen }) => {
           position: 'fixed',
           top: '-15vh', // Position outside the viewport
           left: '-15vw', // Position outside the viewport
-          overflow: 'visible'
+          overflow: 'visible',
+          opacity: '50%'
         }}
       >
         <Particles
