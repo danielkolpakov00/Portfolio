@@ -13,6 +13,8 @@ import WeatherDemoDescription from './components/project-descriptions/WeatherDem
 import BedroomDemoDescription from './components/project-descriptions/BedroomDemoDescription';
 import MusicDemoDescription from './components/project-descriptions/MusicDemoDescription';
 import MailDemoDescription from './components/project-descriptions/MailDemoDescription';
+import IframeCursorRelay from './components/ReactBits/IframeCursorRelay';
+import { useCursorTooltip } from './components/CursorTooltip';
 
 const ReactProjectPage = () => {
   const { id } = useParams();
@@ -28,6 +30,7 @@ const ReactProjectPage = () => {
   const demoSectionRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(true);
   const topSectionRef = useRef(null);
+  const { showTooltip, hideTooltip, setTooltipText } = useCursorTooltip();
 
   // Check if device is mobile
   useEffect(() => {
@@ -273,15 +276,13 @@ const ReactProjectPage = () => {
         {selectedProject.demoUrl ? (
           <>
           <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg mb-4 md:mb-4 relative`}>
-            <iframe
+            <IframeCursorRelay
               ref={iframeRef}
               src={selectedProject.demoUrl}
               title={`${selectedProject.title} Demo`}
               className="w-full h-full border-0"
-              allow="fullscreen"
-              allowFullScreen
               style={{ transform: 'scale(1)', transformOrigin: 'center' }}
-            ></iframe>
+            />
             <button
               onClick={handleFullscreen}
               className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium"
@@ -368,6 +369,11 @@ const ReactProjectPage = () => {
             onClick={scrollToDemo}
             className="fixed bottom-8 right-8 bg-blue2 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg z-50 transition-all duration-300 transform hover:scale-110"
             aria-label="Scroll to demo"
+            onMouseEnter={() => {
+              setTooltipText("scroll_down");
+              showTooltip();
+            }}
+            onMouseLeave={hideTooltip}
           >
             <FontAwesomeIcon icon={faArrowDown} className="text-xl" />
           </button>

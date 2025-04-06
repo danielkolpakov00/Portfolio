@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from 'react-router-dom';
+import { useCursorTooltip } from './CursorTooltip';
 
 const ProjectWidget = ({
   title,
@@ -15,6 +16,7 @@ const ProjectWidget = ({
 }) => {
   const visualContainerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const { showTooltip, hideTooltip, setTooltipText } = useCursorTooltip();
   
   // Set up resize observer to track container size
   useEffect(() => {
@@ -45,10 +47,20 @@ const ProjectWidget = ({
     };
   }, []);
   
+  // Handle tooltip display
+  const handleMouseEnter = () => {
+    setTooltipText("drag_me");
+    showTooltip();
+  };
+  
   return (
     <div className="bg-white/10 rounded-xl shadow-lg hover:shadow-[0_8px_12px_-3px_rgba(27,105,250,0.3)] transition-all duration-300 overflow-hidden shine-effect relative flex flex-col h-full cursor-pointer border-2 border-blue1">
       {/* macOS style toolbar with drag handle */}
-      <div className="h-8 bg-gradient-to-r from-blue-600 to-blue-500 flex items-center px-3 shadow-sm drag-handle cursor-move">
+      <div 
+        className="h-8 bg-gradient-to-r from-blue-600 to-blue-500 flex items-center px-3 shadow-sm drag-handle cursor-move"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={hideTooltip}
+      >
         <div className="flex space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>

@@ -1,11 +1,39 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
+import { debounce } from './lib/utils';
 
 const WeatherPreview = ({ containerRef }) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const rendererRef = useRef(null);
+  
+  // Use useCallback to prevent recreation of these functions on each render
+  const handleContainerResize = useCallback((e) => {
+    if (!cameraRef.current || !rendererRef.current) return;
+    
+    const { width, height } = e.detail;
+    
+    // Update camera
+    cameraRef.current.aspect = width / height;
+    cameraRef.current.updateProjectionMatrix();
+    
+    // Update renderer
+    rendererRef.current.setSize(width, height);
+    rendererRef.current.setPixelRatio(window.devicePixelRatio);
+  }, []);
+  
+  const handleWindowResize = useCallback(() => {
+    if (!cameraRef.current || !rendererRef.current || !mountRef.current) return;
+    
+    const container = containerRef?.current || mountRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    cameraRef.current.aspect = width / height;
+    cameraRef.current.updateProjectionMatrix();
+    rendererRef.current.setSize(width, height);
+  }, [containerRef]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -15,15 +43,19 @@ const WeatherPreview = ({ containerRef }) => {
     const scene = new THREE.Scene();
     sceneRef.current = scene;
     
+    // Create a renderer with lower pixel ratio for mobile devices
+    const pixelRatio = Math.min(window.devicePixelRatio, 2); // Limit max pixelRatio to 2
+    
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
     cameraRef.current = camera;
     
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true,
-      alpha: true 
+      alpha: true,
+      powerPreference: 'high-performance' // Prefer GPU performance
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(pixelRatio);
     rendererRef.current = renderer;
     mount.appendChild(renderer.domElement);
 
@@ -214,54 +246,53 @@ const WeatherPreview = ({ containerRef }) => {
       renderer.render(scene, camera);
     };
     const animateId = requestAnimationFrame(animate);
-
-    // Handle container resize with the custom event
-    const handleContainerResize = (e) => {
-      if (!cameraRef.current || !rendererRef.current) return;
-      
-      const { width, height } = e.detail;
-      
-      // Update camera
-      cameraRef.current.aspect = width / height;
-      cameraRef.current.updateProjectionMatrix();
-      
-      // Update renderer
-      rendererRef.current.setSize(width, height);
-      rendererRef.current.setPixelRatio(window.devicePixelRatio);
-    };
+    
+    // Apply debounce to resize handlers
+    const debouncedWindowResize = debounce(handleWindowResize, 150);
     
     // Listen for the custom resize event dispatched by ProjectWidget
     if (containerRef?.current) {
       containerRef.current.addEventListener('container-resize', handleContainerResize);
     }
 
-    // Also handle standard window resize as a fallback
-    const handleWindowResize = () => {
-      if (!cameraRef.current || !rendererRef.current || !mount) return;
-      
-      const width = container.clientWidth;
-      const height = container.clientHeight;
-      
-      cameraRef.current.aspect = width / height;
-      cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(width, height);
-    };
-    window.addEventListener('resize', handleWindowResize);
+    // Use debounced window resize handler
+    window.addEventListener('resize', debouncedWindowResize);
 
-    // Cleanup on unmount
+    // Cleanup on unmount - properly dispose THREE.js resources
     return () => {
       cancelAnimationFrame(animateId);
-      window.removeEventListener('resize', handleWindowResize);
+      
+      // Remove event listeners
+      window.removeEventListener('resize', debouncedWindowResize);
       if (containerRef?.current) {
         containerRef.current.removeEventListener('container-resize', handleContainerResize);
       }
-      if (mount && rendererRef.current?.domElement) {
-        mount.removeChild(rendererRef.current.domElement);
+      
+      // Dispose meshes and materials
+      scene.traverse((object) => {
+        if (object.geometry) object.geometry.dispose();
+        
+        if (object.material) {
+          // Handle both array of materials and single material
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      });
+      
+      // Dispose renderer
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        if (mount && rendererRef.current.domElement) {
+          mount.removeChild(rendererRef.current.domElement);
+        }
       }
     };
-  }, [containerRef]);
+  }, [containerRef, handleContainerResize, handleWindowResize]);
 
   return <div ref={mountRef} style={{ width: '100%', height: '100%', borderRadius: '8px', overflow: 'hidden' }} />;
 };
 
-export default WeatherPreview;
+export default React.memo(WeatherPreview); // Memoize component to prevent unnecessary re-renders

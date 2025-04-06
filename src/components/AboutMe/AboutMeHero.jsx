@@ -1,8 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaReact, FaJs, FaHtml5, FaCss3Alt, FaGitAlt } from "react-icons/fa";
+import { useCursorTooltip } from '../../components/CursorTooltip';
 
 const AboutMeHero = ({ landingContent, scrollToSection, sectionRef }) => {
+  const { showTooltip, hideTooltip, setTooltipText } = useCursorTooltip();
+  
   return (
     <section 
       ref={sectionRef}
@@ -83,12 +86,22 @@ const AboutMeHero = ({ landingContent, scrollToSection, sectionRef }) => {
               <button 
                 onClick={() => scrollToSection("contact")}
                 className="bg-blue2 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+                onMouseEnter={() => {
+                  setTooltipText("contact_me");
+                  showTooltip();
+                }}
+                onMouseLeave={hideTooltip}
               >
                 Get in Touch
               </button>
               <button 
                 onClick={() => scrollToSection("portfolio")}
                 className="bg-white hover:bg-gray-100 text-blue2 border-2 border-blue2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+                onMouseEnter={() => {
+                  setTooltipText("view_portfolio");
+                  showTooltip();
+                }}
+                onMouseLeave={hideTooltip}
               >
                 View My Work
               </button>

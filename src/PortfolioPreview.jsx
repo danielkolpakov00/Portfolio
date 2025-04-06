@@ -232,6 +232,7 @@ const PortfolioPreview = () => {
                         <FaReact className="text-blue-500 flex-shrink-0" size={24} />
                       ) : null
                     }
+                    showDragHandle={true}
                   />
                 </div>
               ))}

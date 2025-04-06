@@ -20,7 +20,8 @@ import MusicDescription from './components/project-descriptions/MusicDescription
 import MailDescription from './components/project-descriptions/MailDescription';
 import GradientDemoDescription from './components/project-descriptions/GradientDemoDescription';
 import LastFmDemoDescription from './components/project-descriptions/LastFmDemoDescription';
-
+import IframeCursorRelay from './components/ReactBits/IframeCursorRelay';
+import { useCursorTooltip } from './components/CursorTooltip';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -36,6 +37,7 @@ const ProjectPage = () => {
   const demoSectionRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(true);
   const topSectionRef = useRef(null);
+  const { showTooltip, hideTooltip, setTooltipText } = useCursorTooltip();
 
   // Check if device is mobile
   useEffect(() => {
@@ -281,15 +283,17 @@ const ProjectPage = () => {
         {selectedProject.demoUrl ? (
           <>
           <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg relative`}>
-            <iframe
-              ref={iframeRef}
-              src={selectedProject.demoUrl}
-              title={`${selectedProject.title} Demo`}
-              className="w-full h-full border-0"
-              allow="fullscreen"
-              allowFullScreen
-              style={{ transform: 'scale(1)', transformOrigin: 'center' }}
-            ></iframe>
+            <IframeCursorRelay>
+              <iframe
+                ref={iframeRef}
+                src={selectedProject.demoUrl}
+                title={`${selectedProject.title} Demo`}
+                className="w-full h-full border-0"
+                allow="fullscreen"
+                allowFullScreen
+                style={{ transform: 'scale(1)', transformOrigin: 'center' }}
+              ></iframe>
+            </IframeCursorRelay>
             <button
               onClick={handleFullscreen}
               className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium"
@@ -422,6 +426,11 @@ const ProjectPage = () => {
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="sticky left-[calc(100%-2.5rem)] bottom-2 bg-gray-800 hover:bg-gray-700 rounded-full p-2 transition-colors duration-200"
                 title={isExpanded ? "Collapse" : "Expand"}
+                onMouseEnter={() => {
+                  setTooltipText("expand");
+                  showTooltip();
+                }}
+                onMouseLeave={hideTooltip}
               >
                 <FontAwesomeIcon
                   icon={faCaretDown}
@@ -441,6 +450,11 @@ const ProjectPage = () => {
             onClick={scrollToDemo}
             className="fixed bottom-8 right-8 bg-blue2 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg z-50 transition-all duration-300 transform hover:scale-110"
             aria-label="Scroll to demo"
+            onMouseEnter={() => {
+              setTooltipText("scroll_down");
+              showTooltip();
+            }}
+            onMouseLeave={hideTooltip}
           >
             <FontAwesomeIcon icon={faArrowDown} className="text-xl" />
           </button>

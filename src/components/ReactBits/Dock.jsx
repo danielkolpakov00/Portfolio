@@ -34,6 +34,8 @@ function DockItem({
   setActiveItem,
   magnification,
   baseItemSize,
+  onMouseEnter: customMouseEnter,
+  onMouseLeave: customMouseLeave
 }) {
   const isHovered = useMotionValue(0);
   const responsiveMagnification = getResponsiveValue(magnification);
@@ -43,10 +45,12 @@ function DockItem({
   const handleMouseEnter = () => {
     setActiveItem(index);
     isHovered.set(1);
+    if (customMouseEnter) customMouseEnter();
   };
   
   const handleMouseLeave = () => {
     isHovered.set(0);
+    if (customMouseLeave) customMouseLeave();
   };
 
   // Calculate size based on whether item is active
@@ -198,9 +202,11 @@ export default function Dock({
               baseItemSize={baseItemSize}
               activeItem={activeItem}
               setActiveItem={setActiveItem}
+              onMouseEnter={item.onMouseEnter}
+              onMouseLeave={item.onMouseLeave}
             >
               <DockIcon>{item.icon}</DockIcon>
-              <DockLabel>{item.label}</DockLabel>
+              {/* Label removed in favor of tooltips */}
             </DockItem>
           ))}
         </div>

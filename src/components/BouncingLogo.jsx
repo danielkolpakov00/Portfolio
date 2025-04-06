@@ -9,6 +9,8 @@ const BouncingLogo = () => {
 	const [logoSize, setLogoSize] = useState(getLogoSize());
 	const [speedScale, setSpeedScale] = useState(getSpeedScale());
 	const prevBounceRef = useRef({ horizontal: false, vertical: false });
+	const keySequenceRef = useRef([]);
+	const isCornerModeRef = useRef(false);
 	
 	// Function to determine logo size based on screen width
 	function getLogoSize() {
@@ -21,9 +23,9 @@ const BouncingLogo = () => {
 	// Function to determine speed scale based on screen width
 	function getSpeedScale() {
 		const width = window.innerWidth;
-		if (width <= 480) return 0.3; // Slower on mobile
-		if (width <= 768) return 0.4; // Slightly slower on tablet
-		return 0.6; // Normal speed on desktop
+		if (width <= 480) return 0.1; // Slower on mobile
+		if (width <= 768) return 0.2; // Slightly slower on tablet
+		return 0.4; // Normal speed on desktop
 	}
 	
 	// Update velocity with scaled speed
@@ -90,6 +92,74 @@ const BouncingLogo = () => {
 			});
 		}, 250);
 	};
+	
+	// Function to direct logo to nearest corner
+	const directToNearestCorner = () => {
+		if (!containerRef.current || !logoRef.current) return;
+		
+		const containerWidth = containerRef.current.offsetWidth;
+		const containerHeight = containerRef.current.offsetHeight;
+		const logoWidth = logoRef.current.offsetWidth;
+		const logoHeight = logoRef.current.offsetHeight;
+		
+		const currentX = posRef.current.x;
+		const currentY = posRef.current.y;
+		
+		// Determine nearest corner
+		const isCloserToRightSide = currentX > containerWidth / 2;
+		const isCloserToBottomSide = currentY > containerHeight / 2;
+		
+		// Target coordinates (corner position)
+		const targetX = isCloserToRightSide ? (containerWidth - logoWidth) : 0;
+		const targetY = isCloserToBottomSide ? (containerHeight - logoHeight) : 0;
+		
+		// Calculate vector to corner
+		const vectorX = targetX - currentX;
+		const vectorY = targetY - currentY;
+		
+		// Normalize the vector and set velocity
+		const magnitude = Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+		const normalizedSpeed = 3 * speedScale; // maintain reasonable speed
+		
+		velRef.current = {
+			x: (vectorX / magnitude) * normalizedSpeed,
+			y: (vectorY / magnitude) * normalizedSpeed
+		};
+		
+
+		
+		// Set flag to indicate corner-seeking mode
+		isCornerModeRef.current = true;
+	};
+	
+	// Handle key sequence for Easter egg
+	const handleKeySequence = (e) => {
+		if (isCornerModeRef.current) return; // Ignore keys when already in corner mode
+		
+		const key = e.key.toLowerCase();
+		
+		// Map arrow keys and WASD
+		let mappedKey = null;
+		if (key === 'arrowleft' || key === 'a') mappedKey = 'left';
+		else if (key === 'arrowright' || key === 'd') mappedKey = 'right';
+		else if (key === 'arrowup' || key === 'w') mappedKey = 'up';
+		else if (key === 'arrowdown' || key === 's') mappedKey = 'down';
+		
+		if (!mappedKey) return;
+		
+		// Add key to sequence and keep only the last 4 keys
+		keySequenceRef.current.push(mappedKey);
+		if (keySequenceRef.current.length > 4) {
+			keySequenceRef.current.shift();
+		}
+		
+		// Check if sequence matches "left left right right"
+		const sequence = keySequenceRef.current.join(' ');
+		if (sequence === 'left left right right') {
+			directToNearestCorner();
+			keySequenceRef.current = []; // Reset sequence
+		}
+	};
 
 	useEffect(() => {
 		// Set initial color
@@ -102,6 +172,8 @@ const BouncingLogo = () => {
 		};
 		
 		window.addEventListener('resize', handleResize);
+		// Add keyboard event listener for Easter egg
+		window.addEventListener('keydown', handleKeySequence);
 		
 		const animate = () => {
 			if (!logoRef.current || !containerRef.current) return;
@@ -123,7 +195,9 @@ const BouncingLogo = () => {
 				velRef.current.x = -velRef.current.x;
 				newX = Math.max(0, Math.min(newX, containerWidth - logoWidth));
 				// Change color to #1b69fa when bouncing off horizontal walls
-				changeSvgColor('#1b69fa');
+				if (!isCornerModeRef.current) {
+					changeSvgColor('#1b69fa');
+				}
 				isBouncingHorizontal = true;
 			}
 			
@@ -131,7 +205,9 @@ const BouncingLogo = () => {
 				velRef.current.y = -velRef.current.y;
 				newY = Math.max(0, Math.min(newY, containerHeight - logoHeight));
 				// Change color to #1b44fa when bouncing off vertical walls
-				changeSvgColor('#1b44fa');
+				if (!isCornerModeRef.current) {
+					changeSvgColor('#1b44fa');
+				}
 				isBouncingVertical = true;
 			}
 
@@ -149,6 +225,16 @@ const BouncingLogo = () => {
 				
 				// Trigger confetti from the corner
 				triggerConfetti({ x: originX, y: originY });
+				
+				// Reset corner mode if it was active
+				if (isCornerModeRef.current) {
+					isCornerModeRef.current = false;
+					// Reset to normal speed
+					velRef.current = {
+						x: (Math.random() > 0.5 ? 1 : -1) * 2 * speedScale,
+						y: (Math.random() > 0.5 ? 1 : -1) * 1 * speedScale
+					};
+				}
 			}
 			
 			// Store bounce state for next frame (to detect near-simultaneous bounces)
@@ -174,6 +260,7 @@ const BouncingLogo = () => {
 		
 		return () => {
 			window.removeEventListener('resize', handleResize);
+			window.removeEventListener('keydown', handleKeySequence);
 		};
 	}, []);
 
@@ -185,7 +272,7 @@ const BouncingLogo = () => {
 		>
 			<img
 				ref={logoRef}
-				src="./assets/dvd-logo.svg" // Using relative path with dot prefix for proper deployment
+				src="./assets/dkolpport.svg" // Using relative path with dot prefix for proper deployment
 				alt="Bouncing Logo"
 				style={{
 					position: 'absolute',

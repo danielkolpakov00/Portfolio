@@ -104,7 +104,7 @@ const AboutMeIntroSection = ({ section, sectionRef }) => {
                 scaleOnHover={1.02}
                 rotateAmplitude={8}
                 showMobileWarning={false}
-                captionText={box.heading}
+                showTooltip={false}
                 displayOverlayContent={true}
                 overlayContent={
                   <div className="w-full h-2/3 flex flex-col justify-center items-center bg-gradient-to-b from-[#1B69FA]/95 to-[#1B44FA]/95 backdrop-blur-md p-3 sm:p-4 md:p-6 rounded-[15px]">
