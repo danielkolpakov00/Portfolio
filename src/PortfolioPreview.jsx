@@ -1,5 +1,6 @@
 // src/PortfolioPreview.jsx
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import ReactDOM from 'react-dom/client';
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -16,8 +17,129 @@ import ProjectWidget from "./components/ProjectWidget";
 import { FaReact } from "react-icons/fa";
 import projectsData from "./data/projects.json";
 import Iridescence from "./components/ReactBits/Iridescence";
+import LoadingScreen from "./components/LoadingScreen"; // Import LoadingScreen component
 // Import Dither with lazy loading to prevent immediate errors
-const Dither = React.lazy(() => import("./components/ReactBits/Dither"));
+import Dither from "./components/ReactBits/Dither";
+
+// Enhanced global reference to track Dither component loading with more reliable loading detection
+const ditherLoadingState = {
+  isLoaded: false,
+  isInitialized: false,
+  isRendered: false,
+  callbacks: []
+};
+
+// Signal to the main component that the Dither effect has been initialized
+window.ditherInitialized = () => {
+  console.log('Dither shader initialized and ready!');
+  ditherLoadingState.isInitialized = true;
+  
+  // Check if we're fully loaded
+  if (ditherLoadingState.isRendered) {
+    ditherLoadingState.isLoaded = true;
+    // Call any registered callbacks
+    if (ditherLoadingState.callbacks.length > 0) {
+      console.log('Calling registered callbacks after initialization');
+      ditherLoadingState.callbacks.forEach(cb => cb());
+      ditherLoadingState.callbacks = [];
+    }
+  }
+};
+
+// Signal that Dither has fully rendered a frame
+window.ditherRendered = () => {
+  console.log('Dither effect rendered first frame!');
+  ditherLoadingState.isRendered = true;
+  
+  // Mark as fully loaded when both initialized and rendered
+  if (ditherLoadingState.isInitialized) {
+    ditherLoadingState.isLoaded = true;
+    if (ditherLoadingState.callbacks.length > 0) {
+      console.log('Calling registered callbacks after render');
+      ditherLoadingState.callbacks.forEach(cb => cb());
+      ditherLoadingState.callbacks = [];
+    }
+  }
+};
+
+// Improved preload Dither component function
+const preloadDither = () => {
+  return new Promise((resolve) => {
+    if (ditherLoadingState.isLoaded) {
+      resolve();
+      return;
+    }
+
+    ditherLoadingState.callbacks.push(resolve);
+    
+    // Create a hidden container for preloading
+    const preloadContainer = document.createElement('div');
+    preloadContainer.id = 'dither-preload-container';
+    preloadContainer.style.position = 'fixed';
+    preloadContainer.style.top = '-9999px';
+    preloadContainer.style.left = '-9999px';
+    preloadContainer.style.width = '300px'; // Larger for better initialization
+    preloadContainer.style.height = '300px';
+    preloadContainer.style.opacity = '0.01'; // Almost invisible but still rendered
+    preloadContainer.style.pointerEvents = 'none';
+    preloadContainer.style.zIndex = '-1000';
+    document.body.appendChild(preloadContainer);
+    
+    // Create a real Dither component with callbacks
+    const ditherProps = {
+      waveSpeed: 0.1,
+      waveFrequency: 1.0,
+      waveAmplitude: 0.1,
+      colorNum: 2,
+      pixelSize: 8, // Larger pixels for faster loading
+      disableAnimation: false, // Need animation for proper initialization
+      enableMouseInteraction: false,
+      className: "w-full h-full",
+      onInitialize: () => window.ditherInitialized(),
+      onFirstRender: () => window.ditherRendered()
+    };
+    
+    try {
+      // Add the Dither component to our hidden container
+      const root = ReactDOM.createRoot(preloadContainer);
+      root.render(
+        <Suspense fallback={null}>
+          <ModifiedDither {...ditherProps} />
+        </Suspense>
+      );
+      
+      // Failsafe: mark as loaded after a maximum timeout
+      setTimeout(() => {
+        if (!ditherLoadingState.isLoaded) {
+          console.log('Dither preload timeout reached - forcing completion');
+          ditherLoadingState.isLoaded = true;
+          ditherLoadingState.callbacks.forEach(cb => cb());
+          ditherLoadingState.callbacks = [];
+        }
+        
+        // Try to clean up container but don't remove it right away to ensure rendering completes
+        setTimeout(() => {
+          try {
+            if (document.body.contains(preloadContainer)) {
+              document.body.removeChild(preloadContainer);
+            }
+          } catch (e) {
+            console.log('Error cleaning up preload container', e);
+          }
+        }, 2000);
+      }, 8000); // Increase timeout to ensure it has enough time
+    } catch (err) {
+      console.error('Error preloading Dither:', err);
+      
+      // Mark as loaded anyway after a delay
+      setTimeout(() => {
+        ditherLoadingState.isLoaded = true;
+        ditherLoadingState.callbacks.forEach(cb => cb());
+        ditherLoadingState.callbacks = [];
+      }, 2000);
+    }
+  });
+};
 
 // Error boundary to catch React reconciliation errors
 class ErrorBoundary extends React.Component {
@@ -53,6 +175,14 @@ const DitherFallback = ({ className, errorMessage }) => (
 
 // Create a memoized static component that won't rerender
 const StaticDitherEffect = React.memo(() => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    // Mark as loaded when the component mounts successfully
+    setIsLoaded(true);
+    ditherLoadingState.isLoaded = true;
+  }, []);
+  
   try {
     return (
       <Dither 
@@ -79,7 +209,32 @@ const StaticDitherEffect = React.memo(() => {
   }
 }, () => true); // Always return true to prevent rerendering
 
-// Updated BlissWithDither component with better error handling
+// Modified Dither component with callbacks for initialization and rendering
+const ModifiedDither = React.memo((props) => {
+  const [frameRendered, setFrameRendered] = useState(false);
+  
+  useEffect(() => {
+    // Signal initialization
+    if (props.onInitialize) {
+      // Short delay to ensure component is mounted
+      setTimeout(props.onInitialize, 200);
+    }
+    
+    // Signal first render after a reasonable delay for shaders to compile
+    if (props.onFirstRender && !frameRendered) {
+      const timer = setTimeout(() => {
+        setFrameRendered(true);
+        props.onFirstRender();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [props, frameRendered]);
+  
+  return <Dither {...props} />;
+});
+
+// Updated BlissWithDither component with better error handling and preloading support
 const BlissWithDither = ({ className }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [ditherError, setDitherError] = useState(false);
@@ -176,9 +331,25 @@ const PortfolioPreview = () => {
   const [activeFrameworkFilter, setActiveFrameworkFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [loadedVisuals, setLoadedVisuals] = useState(new Set());
+  const [totalVisuals, setTotalVisuals] = useState(0);
+  const [ditherPreloaded, setDitherPreloaded] = useState(false);
+
+  // Handle visual loading completion
+  const handleVisualLoaded = useCallback((id) => {
+    setLoadedVisuals(prev => {
+      const newSet = new Set(prev);
+      newSet.add(id);
+      return newSet;
+    });
+  }, []);
 
   // Load and map projects
   useEffect(() => {
+    // Skip the preloadDither function completely and set ditherPreloaded directly
+    setDitherPreloaded(true);
+    console.log('Setting ditherPreloaded to true immediately');
+
     // Map vanilla projects and attach their visual component and framework
     const vanillaProjects = projectsData.vanillaProjects.map((project) => ({
       ...project,
@@ -194,25 +365,51 @@ const PortfolioPreview = () => {
         const data = await response.json();
 
         const reactProjects = data.projects.map((project) => {
-          if (project.id === "gradient-generator") {
-            const GradientVisual = ({ containerRef, containerSize }) => (
-              <div className="w-full h-full" style={{ overflow: 'hidden' }}>
-                <MemoizedIridescence color={[0.4, 0.4, 1]} speed={0.8} amplitude={0.2} />
-              </div>
-            );
-            return { ...project, framework: "react", visual: GradientVisual };
-          }
-
           // Special case for lastfm-app to apply dither effect to bliss.jpg
           if (project.id === "lastfm-app") {
-            const LastfmVisual = () => {
+            const LastfmVisual = ({ onLoad }) => {
+              // Force immediate load signal
+              React.useEffect(() => {
+                if (onLoad) {
+                  console.log('LastFM visual mounted, signaling load');
+                  onLoad();
+                }
+              }, []);
+              
               return <BlissWithDither className="w-full h-full" />;
             };
 
             return { ...project, framework: "react", visual: LastfmVisual };
           }
 
-          const ImageVisual = ({ containerRef, containerSize }) => {
+          if (project.id === "gradient-generator") {
+            const GradientVisual = ({ containerRef, containerSize, onLoad }) => {
+              // Force immediate load signal
+              React.useEffect(() => {
+                if (onLoad) {
+                  console.log('Gradient generator visual mounted, signaling load');
+                  onLoad();
+                }
+              }, []);
+              
+              return (
+                <div className="w-full h-full" style={{ overflow: 'hidden' }}>
+                  <MemoizedIridescence color={[0.4, 0.4, 1]} speed={0.8} amplitude={0.2} />
+                </div>
+              );
+            };
+            return { ...project, framework: "react", visual: GradientVisual };
+          }
+
+          const ImageVisual = ({ containerRef, containerSize, onLoad }) => {
+            // Force immediate load signal
+            React.useEffect(() => {
+              if (onLoad) {
+                console.log(`Image visual for ${project.id} mounted, signaling load`);
+                onLoad();
+              }
+            }, []);
+            
             // Calculate object-fit style based on container size
             const imgStyle = {
               width: '100%',
@@ -232,7 +429,10 @@ const PortfolioPreview = () => {
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-blue-600 to-blue-900">
-                    <FaReact className="text-white" size={containerSize.width ? Math.min(60, containerSize.width / 4) : 40} />
+                    <FaReact 
+                      className="text-white" 
+                      size={containerSize.width ? Math.min(60, containerSize.width / 4) : 40} 
+                    />
                   </div>
                 )}
               </div>
@@ -242,17 +442,62 @@ const PortfolioPreview = () => {
           return { ...project, framework: "react", visual: ImageVisual };
         });
 
-        setAllProjects([...vanillaProjects, ...reactProjects]);
+        // First, put React projects first, then find NodeMailer project and move it to second position
+        let allProjectsArray = [...reactProjects, ...vanillaProjects];
+        
+        // Find the NodeMailer project index
+        const nodeMailerIndex = allProjectsArray.findIndex(p => 
+          p.title && p.title.includes("NodeMailer")
+        );
+        
+        // If NodeMailer exists and it's not already in the second position
+        if (nodeMailerIndex !== -1 && nodeMailerIndex !== 1) {
+          // Remove NodeMailer from its current position
+          const nodeMailerProject = allProjectsArray.splice(nodeMailerIndex, 1)[0];
+          
+          // Insert NodeMailer at position 1 (second element)
+          allProjectsArray.splice(1, 0, nodeMailerProject);
+        }
+        
+        setAllProjects(allProjectsArray);
       } catch (error) {
         console.error("Error fetching projects:", error);
         setAllProjects(vanillaProjects);
       } finally {
-        setIsLoading(false);
+        // Simplified check that doesn't depend on ditherPreloaded
+        setTimeout(() => {
+          console.log('Hiding loading screen after timeout');
+          setIsLoading(false);
+        }, 2000);
       }
     };
 
     fetchReactProjects();
   }, []);
+
+  // Update loading state when all visuals are loaded
+  useEffect(() => {
+    if (allProjects.length > 0) {
+      // Count projects with visual components
+      const projectsWithVisuals = allProjects.filter(project => project.visual).length;
+      setTotalVisuals(projectsWithVisuals);
+      
+      console.log(`Tracking visuals: ${loadedVisuals.size}/${projectsWithVisuals} loaded`);
+      
+      // Check if all visuals are loaded
+      if ((loadedVisuals.size >= projectsWithVisuals && projectsWithVisuals > 0) || projectsWithVisuals === 0) {
+        console.log('All visuals loaded, dispatching event');
+        setIsLoading(false);
+        
+        // Dispatch custom event to notify that all visuals are loaded
+        const visualsLoadedEvent = new Event('visualsLoaded');
+        window.dispatchEvent(visualsLoadedEvent);
+        
+        // Store in localStorage for future reference
+        localStorage.setItem('visualsLoaded', 'true');
+      }
+    }
+  }, [allProjects, loadedVisuals]);
 
   // Set mounted after initial render to avoid SSR issues with measurements
   useEffect(() => {
@@ -309,16 +554,32 @@ const PortfolioPreview = () => {
     return generateLayout();
   }, [generateLayout]);
 
+  // Pass the visual loading handler to each ProjectWidget
+  const renderProjectWidgets = () => {
+    return filteredProjects.map((project) => (
+      <div
+        key={`${project.framework}-${project.id}`}
+        className="project-grid-item"
+      >
+        <ProjectWidget
+          {...project}
+          buttonText={project.buttonText || "View Project"}
+          routePrefix={project.framework === "react" ? "/react-projects" : "/projects"}
+          showCategory={true}
+          onVisualLoad={handleVisualLoaded}
+          titleExtra={
+            project.framework === "react" ? (
+              <FaReact className="text-blue-500 flex-shrink-0" size={24} />
+            ) : null
+          }
+        />
+      </div>
+    ));
+  };
+
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-blue-600">Loading projects...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen isLoading={true} message="Loading projects..." />;
   }
 
   return (
@@ -326,7 +587,7 @@ const PortfolioPreview = () => {
       <MemoizedTsParticles />
 
       <motion.h2
-        className="text-center text-4xl sm:text-5xl md:text-6xl text-blue2 font-bold mb-6 sm:mb-10 mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-4"
+        className="text-center text-4xl sm:text-5xl md:text-6xl text-blue2 font-bold mb-6 sm:mb-10 mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-6 md:px-12"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -349,7 +610,7 @@ const PortfolioPreview = () => {
       </motion.h2>
 
       {/* Portfolio grid layout */}
-      <div className="px-4 py-10">
+      <div className="px-6 md:px-12 lg:px-16 py-10">
         {filteredProjects.length > 0 ? (
           mounted && (
             <ResponsiveGridLayout
@@ -361,29 +622,12 @@ const PortfolioPreview = () => {
               breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
               cols={{ lg: 4, md: 4, sm: 2, xs: 1, xxs: 1 }}
               rowHeight={240}
-              margin={[20, 20]}
-              containerPadding={[20, 20]}
+              margin={[12, 16]}
+              containerPadding={[24, 24]}
               useCSSTransforms={true}
               draggableHandle=".drag-handle"
             >
-              {filteredProjects.map((project) => (
-                <div
-                  key={`${project.framework}-${project.id}`}
-                  className="project-grid-item"
-                >
-                  <ProjectWidget
-                    {...project}
-                    buttonText={project.buttonText || "View Project"}
-                    routePrefix={project.framework === "react" ? "/react-projects" : "/projects"}
-                    showCategory={true}
-                    titleExtra={
-                      project.framework === "react" ? (
-                        <FaReact className="text-blue-500 flex-shrink-0" size={24} />
-                      ) : null
-                    }
-                  />
-                </div>
-              ))}
+              {renderProjectWidgets()}
             </ResponsiveGridLayout>
           )
         ) : (
@@ -398,6 +642,7 @@ const PortfolioPreview = () => {
           height: auto !important;
           overflow-x: hidden !important;
           overflow-y: auto !important;
+          padding: 0 0.5rem;
         }
 
         .layout {

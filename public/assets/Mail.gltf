@@ -1,0 +1,197 @@
+{
+    "asset": {
+        "copyright": "2024 (c) Adobe Inc.",
+        "generator": "Adobe Substance 3D Stager - 522bab3571c29d3cf2b1b071f74e2d9861da2e41",
+        "version": "2.0"
+    },
+    "accessors": [
+        {
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": 399,
+            "type": "VEC3",
+            "max": [
+                0.10749998688697815,
+                0.1550000011920929,
+                0.007499999832361937
+            ],
+            "min": [
+                -0.10749998688697815,
+                0.0,
+                -0.007499999832361937
+            ]
+        },
+        {
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 399,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 2,
+            "componentType": 5126,
+            "count": 399,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 3,
+            "componentType": 5126,
+            "count": 399,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 4,
+            "componentType": 5125,
+            "count": 615,
+            "type": "SCALAR",
+            "max": [
+                398.0
+            ],
+            "min": [
+                0.0
+            ]
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 4788,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 4788,
+            "byteLength": 4788,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 9576,
+            "byteLength": 6384,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 15960,
+            "byteLength": 3192,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 19152,
+            "byteLength": 2460,
+            "target": 34963
+        }
+    ],
+    "buffers": [
+        {
+            "byteLength": 21612,
+            "uri": "Mail_binary.bin"
+        }
+    ],
+    "images": [
+        {
+            "name": "texture8949",
+            "uri": "Mail_images/texture8949.jpg",
+            "mimeType": "image/jpeg"
+        }
+    ],
+    "materials": [
+        {
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {
+                    "index": 0
+                },
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.4000000059604645
+            },
+            "name": "Envelope_Icon_Mat_material",
+            "doubleSided": true,
+            "extensions": {
+                "KHR_materials_ior": {
+                    "ior": 1.600000023841858
+                }
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "name": "Envelope_Icon_n3d2",
+            "primitives": [
+                {
+                    "attributes": {
+                        "TANGENT": 2,
+                        "NORMAL": 1,
+                        "POSITION": 0,
+                        "TEXCOORD_0": 3
+                    },
+                    "indices": 4,
+                    "material": 0
+                }
+            ]
+        },
+        {
+            "name": "Envelope_Icon_n3d",
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                        "TANGENT": 2,
+                        "TEXCOORD_0": 3
+                    },
+                    "indices": 4,
+                    "material": 0
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "name": "working_cam_n3d"
+        },
+        {
+            "mesh": 0,
+            "name": "Envelope_Icon_n3d2"
+        },
+        {
+            "translation": [
+                2.0765764108254815e-10,
+                0.0,
+                -0.010274839587509632
+            ],
+            "rotation": [
+                0.0,
+                1.0,
+                0.0,
+                4.377216100692749e-8
+            ],
+            "mesh": 1,
+            "name": "Envelope_Icon_n3d"
+        }
+    ],
+    "samplers": [
+        {}
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                1,
+                2
+            ],
+            "name": "scene"
+        }
+    ],
+    "textures": [
+        {
+            "name": "tmp_image_pie_cd31_df49_ea83",
+            "sampler": 0,
+            "source": 0
+        }
+    ],
+    "scene": 0,
+    "extensionsUsed": [
+        "KHR_materials_ior"
+    ]
+}

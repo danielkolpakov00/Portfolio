@@ -13,6 +13,7 @@ const ProjectWidget = ({
   category,
   showCategory = false,
   titleExtra,
+  onVisualLoad,
 }) => {
   const visualContainerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -46,11 +47,36 @@ const ProjectWidget = ({
       }
     };
   }, []);
+
+  // Handle visual loading and notify parent component
+  useEffect(() => {
+    // If there's no visual component, consider it loaded immediately
+    if (!Visual) {
+      console.log(`No visual for project ${id}, marking as loaded`);
+      if (onVisualLoad) onVisualLoad(id);
+      return;
+    }
+    
+    // Always mark all components as loaded after a timeout
+    // This prevents the loading screen from getting stuck if a visual component fails to trigger onLoad
+    const timer = setTimeout(() => {
+      console.log(`Forcing load completion for project ${id} after timeout`);
+      if (onVisualLoad) onVisualLoad(id);
+    }, 3000); // 3 second timeout
+    
+    return () => clearTimeout(timer);
+  }, [Visual, id, onVisualLoad]);
   
   // Handle tooltip display
   const handleMouseEnter = () => {
     setTooltipText("drag_me");
     showTooltip();
+  };
+
+  // Handle visual load
+  const handleVisualLoad = () => {
+    console.log(`Visual for project ${id} completed loading`);
+    if (onVisualLoad) onVisualLoad(id);
   };
   
   return (
@@ -78,22 +104,28 @@ const ProjectWidget = ({
         ref={visualContainerRef}
         className="relative overflow-hidden bg-transparent flex-shrink-0 flex items-center justify-center"
         style={{ 
-          height: "200px",
-          maxHeight: "250px"
+          height: "180px",  // Reduced from 200px
+          maxHeight: "220px" // Reduced from 250px
         }}
       >
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-          {Visual && <Visual containerRef={visualContainerRef} containerSize={containerSize} />}
+          {Visual && (
+            <Visual 
+              containerRef={visualContainerRef} 
+              containerSize={containerSize} 
+              onLoad={handleVisualLoad} 
+            />
+          )}
         </div>
       </div>
       
       {/* Content area */}
-      <div className="p-4 sm:p-6 border-t border-blue-500/30 flex flex-col flex-grow">
-        <h3 className="text-xl sm:text-2xl md:text-3xl font-georama leading-tight mb-2 sm:mb-3 text-blue2 line-clamp-2 flex items-center">
+      <div className="p-4 sm:p-5 border-t border-blue-500/30 flex flex-col flex-grow">
+        <h3 className="text-lg sm:text-xl md:text-2xl font-georama leading-tight mb-2 text-blue2 line-clamp-2 flex items-center">
           {title}
           {titleExtra && <span className="ml-2">{titleExtra}</span>}
         </h3>
-        <p className="text-gray-600 mb-3 sm:mb-4 leading-relaxed font-georama flex-grow overflow-hidden line-clamp-4 sm:line-clamp-3 text-xs sm:text-sm md:text-base">
+        <p className="text-gray-600 mb-2 leading-relaxed font-georama flex-grow overflow-hidden line-clamp-3 sm:line-clamp-2 text-xs sm:text-sm">
           {description}
         </p>
       </div>
@@ -121,6 +153,7 @@ ProjectWidget.propTypes = {
   category: PropTypes.string,
   showCategory: PropTypes.bool,
   titleExtra: PropTypes.node,
+  onVisualLoad: PropTypes.func,
 };
 
 ProjectWidget.defaultProps = {

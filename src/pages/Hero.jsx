@@ -24,6 +24,8 @@ const Hero = ({ isOpen }) => {
   const portfolioButtonRef = useRef(null);
   const [init, setInit] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  // Track if this is the first load or if we navigated to this page
+  const [hasDispatchedVisualsLoaded, setHasDispatchedVisualsLoaded] = useState(false);
 
   // Track mouse position for parallax effect
   useEffect(() => {
@@ -144,25 +146,39 @@ const Hero = ({ isOpen }) => {
     return () => window.removeEventListener('keydown', handleSequenceKey);
   }, []);
 
-  // Particle options
-  // const options = useMemo(() => ({
-  //   background: { color: { value: "#f5fdff" } },
-  //   fpsLimit: 120,
-  //   interactivity: {
-  //     events: { onClick: { enable: true, mode: "push" }, onHover: { enable: true, mode: "repulse" } },
-  //     modes: { push: { quantity: 3 }, repulse: { distance: 150, duration: 0.4 } }
-  //   },
-  //   particles: {
-  //     color: { value: "#1B69FA" },
-  //     links: { color: "#1B44FA", distance: 150, enable: true, opacity: 0.3, width: 1 },
-  //     move: { enable: true, outModes: { default: "bounce" }, speed: 2 },
-  //     number: { density: { enable: true, area: 800 }, value: 100 },
-  //     opacity: { value: 0.4 },
-  //     shape: { type: "circle" },
-  //     size: { value: { min: 2, max: 3 } }
-  //   },
-  //   detectRetina: true,
-  // }), []);
+  // Dispatch visualsLoaded event after a slight delay
+  // This is the key part that we need to reset when using the back button
+  useEffect(() => {
+    // Skip if we've already dispatched the event during this component lifecycle
+    if (hasDispatchedVisualsLoaded) return;
+    
+    // Small delay to ensure components have time to render
+    const timer = setTimeout(() => {
+      console.log('Dispatching visualsLoaded event');
+      window.dispatchEvent(new Event('visualsLoaded'));
+      localStorage.setItem('visualsLoaded', 'true');
+      setHasDispatchedVisualsLoaded(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [hasDispatchedVisualsLoaded]);
+  
+  // Listen for navigation events to reset the visualsLoaded state
+  useEffect(() => {
+    const handleNavigation = () => {
+      console.log('Navigation detected, resetting visuals loaded state');
+      setHasDispatchedVisualsLoaded(false);
+    };
+    
+    window.addEventListener('navigation', handleNavigation);
+    window.addEventListener('popstate', handleNavigation);
+    
+    return () => {
+      window.removeEventListener('navigation', handleNavigation);
+      window.removeEventListener('popstate', handleNavigation);
+    };
+  }, []);
+
 
   return (
     <div className={`relative flex flex-col items-center justify-center min-h-screen bg-offwhite p-0 overflow-hidden ${isOpen ? 'border-4 border-blue2' : ''}`}>

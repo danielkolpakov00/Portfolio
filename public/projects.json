@@ -14,6 +14,19 @@
     "demoDescriptionComponent": "WeatherDemoDescription"
   },
   {
+    "id": 5,
+    "title": "NodeMailer + Mongo Mail Backend",
+    "description": "I made a simple backend for an email form with Express.js and Nodemailer",
+    "buttonText": "Check it out!",
+    "color": "#284af7",
+    "visualComponent": "MailPreview",
+    "demoUrl": "https://glitch.com/edit/#!/detailed-different-coyote",
+    "stack": "backend",
+    "framework": "vanilla",
+    "isMobileFriendly": true,
+    "demoDescriptionComponent": "MailDemoDescription"
+  },
+  {
     "id": 2,
     "title": "Plinko Game",
     "description": "A physics-based Plinko game built with Matter.js physics engine.",
@@ -54,18 +67,5 @@
     "threejs": "A JavaScript 3D library used here to create visual effects that respond to audio analysis.",
     "isMobileFriendly": false,
     "demoDescriptionComponent": "MusicDemoDescription"
-  },
-  {
-    "id": 5,
-    "title": "NodeMailer + Mongo Mail Backend",
-    "description": "I made a simple backend for an email form with Express.js and Nodemailer",
-    "buttonText": "Check it out!",
-    "color": "#284af7",
-    "visualComponent": "MailPreview",
-    "demoUrl": "https://glitch.com/edit/#!/detailed-different-coyote",
-    "stack": "backend",
-    "framework": "vanilla",
-    "isMobileFriendly": true,
-    "demoDescriptionComponent": "MailDemoDescription"
   }
 ]

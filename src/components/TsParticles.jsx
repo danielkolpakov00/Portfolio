@@ -3,7 +3,7 @@ import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import { memo } from 'react';
 
-const TsParticles = () => {
+const TsParticles = ({ onLoaded }) => {
   const [init, setInit] = useState(false);
   const [engine, setEngine] = useState(null);
   
@@ -24,6 +24,11 @@ const TsParticles = () => {
         if (isMounted) {
           console.log("TsParticles engine initialized successfully");
           setInit(true);
+          
+          // Notify parent component that particles are initialized
+          if (onLoaded && typeof onLoaded === 'function') {
+            onLoaded();
+          }
         }
       } catch (error) {
         console.error("Failed to initialize particles:", error);
@@ -45,10 +50,19 @@ const TsParticles = () => {
         // Any necessary cleanup for the engine
       }
     };
-  }, []);
+  }, [onLoaded]);
 
   const particlesLoaded = (container) => {
     console.log("Particles container loaded:", container);
+    
+    // Additional callback when particles are rendered
+    if (onLoaded && typeof onLoaded === 'function') {
+      // We already called onLoaded when engine was initialized,
+      // but this ensures it's also called if engine was already initialized
+      if (init) {
+        console.log("Particles fully loaded and rendered");
+      }
+    }
   };
 
   const options = useMemo(() => ({

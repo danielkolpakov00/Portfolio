@@ -1,12 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OutlineEffect } from 'three/examples/jsm/effects/OutlineEffect';
 
 const MailPreview = ({ containerRef }) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const rendererRef = useRef(null);
+  const outlineEffectRef = useRef(null);
 
   useEffect(() => {
     // Make sure mount exists before proceeding
@@ -27,38 +29,63 @@ const MailPreview = ({ containerRef }) => {
     );
     cameraRef.current = camera;
     camera.position.z = 0.3;
-    camera.position.y = +0.1;
+    camera.position.y = 0;
     
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true,
-      alpha: true  // Match PlinkoPreview's alpha setting
+      alpha: true,  // Match PlinkoPreview's alpha setting
+      preserveDrawingBuffer: true
     });
     rendererRef.current = renderer;
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputEncoding = THREE.sRGBEncoding; // Add this to preserve colors
+    renderer.physicallyCorrectLights = true; // Better lighting for PBR materials
     mount.appendChild(renderer.domElement);
     
     // Add lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
     
+    // Add directional light to make outlines more visible
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+    
     // Load the 3D model
     let mailModel;
     const loader = new GLTFLoader();
     
     loader.load(
-      '/assets/Mail.glb', // Check if this path is correct
+      '/assets/Mail.gltf', // Check if this path is correct
       (gltf) => {
         mailModel = gltf.scene;
         mailModel.scale.set(1, 1, 1);
+        
+        // Ensure materials are properly applied
+        gltf.scene.traverse((child) => {
+          if (child.isMesh) {
+            // Ensure the material is properly configured
+            if (child.material) {
+              child.material.needsUpdate = true;
+              // If the material has a map/texture
+              if (child.material.map) {
+                child.material.map.encoding = THREE.sRGBEncoding;
+              }
+            }
+          }
+        });
+        
         scene.add(mailModel);
-        console.log('Mail model loaded successfully');
+        
         // Center the model
         const box = new THREE.Box3().setFromObject(mailModel);
         const center = box.getCenter(new THREE.Vector3());
         mailModel.position.sub(center);
-        // Store the initial rotation for the notification bell shake
-        mailModel.initialRotation = mailModel.rotation.z;
+        
+        // Add a slight tilt for better visibility
+        mailModel.rotation.x = 0.2;
+        
         console.log('Mail model loaded successfully');
       },
       (xhr) => {
@@ -74,21 +101,18 @@ const MailPreview = ({ containerRef }) => {
       requestAnimationFrame(animate);
       
       if (mailModel) {
-        const t = performance.now() / 1000; // seconds
-        const cycleDuration = 2; // total cycle period: shake then pause
-        const shakeDuration = 1; // shake for first 1 second, then pause
-        const cycleTime = t % cycleDuration;
-        let shakeAngle = 0;
-        if (cycleTime < shakeDuration) {
-          const fastFrequency = 5; // fast shake frequency
-          const u = cycleTime / shakeDuration; // normalized time [0, 1]
-          const envelope = Math.sin(Math.PI * u); // easing: 0 at start/end, 1 mid-shake
-          shakeAngle = 0.1 * envelope * Math.sin(2 * Math.PI * fastFrequency * cycleTime);
-        }
-        mailModel.rotation.z = mailModel.initialRotation + shakeAngle;
+        // Continuous rotation - only rotate around Y axis
+        mailModel.rotation.y += 0.01;
+        
+        // Removed shake effect code
       }
       
-      renderer.render(scene, camera);
+      // Use OutlineEffect for rendering instead of regular renderer
+      if (outlineEffectRef.current) {
+        outlineEffectRef.current.render(scene, camera);
+      } else {
+        renderer.render(scene, camera);
+      }
     };
     
     const animateId = requestAnimationFrame(animate);

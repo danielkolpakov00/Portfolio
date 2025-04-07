@@ -1,15 +1,6 @@
 {
   "projects": [
     {
-      "id": "gradient-generator",
-      "title": "Gradient Generator",
-      "description": "A dynamic gradient generator built with React and Tailwind CSS.",
-      "demoUrl": "https://color.danielkolpakov.com/",
-      "isMobileFriendly": true,
-      "demoDescriptionComponent": "GradientDemoDescription",
-      "technologies": ["React", "Tailwind CSS", "GLSL"]
-    },
-    {
       "id": "lastfm-app",
       "title": "Last.fm App",
       "description": "An interactive Windows App with Last.fm API integration.",
@@ -18,6 +9,15 @@
       "demoDescriptionComponent": "LastFmDemoDescription",
       "technologies": ["React", "CSS", "Last.fm API"],
       "image": "/assets/bliss.jpg"
+    },
+    {
+      "id": "gradient-generator",
+      "title": "Gradient Generator",
+      "description": "A dynamic gradient generator built with React and Tailwind CSS.",
+      "demoUrl": "https://color.danielkolpakov.com/",
+      "isMobileFriendly": true,
+      "demoDescriptionComponent": "GradientDemoDescription",
+      "technologies": ["React", "Tailwind CSS", "GLSL"]
     }
   ]
 }

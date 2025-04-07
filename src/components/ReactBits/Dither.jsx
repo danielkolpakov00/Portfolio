@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Effect } from "postprocessing";
+import { setDitherRendered } from "../../hooks/useLoadingState";
 
 // Skip EffectComposer import and implement a direct shader material approach
 // This avoids compatibility issues with EffectComposer
@@ -228,33 +229,6 @@ const DitherShader = ({
   );
 };
 
-// Update the ErrorBoundary component
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("React Error Boundary caught an error:", error, errorInfo);
-    // Call the onError prop if it exists
-    if (this.props.onError && typeof this.props.onError === 'function') {
-      this.props.onError(error);
-    }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <div>Something went wrong.</div>;
-    }
-    return this.props.children;
-  }
-}
-
 // Exported component with default props
 export default function Dither({
   waveSpeed = 0.01,
@@ -269,6 +243,16 @@ export default function Dither({
   className = "",
   style = {}
 }) {
+  // Signal that the dither component has rendered
+  useEffect(() => {
+    // Small timeout to ensure the Canvas has fully initialized
+    const timer = setTimeout(() => {
+      setDitherRendered();
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className={`${className} w-full h-full`} style={style}>
       <Canvas
