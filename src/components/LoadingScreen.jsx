@@ -71,7 +71,7 @@ const LoadingScreen = ({ isLoading: propIsLoading, message = "Loading..." }) => 
     <AnimatePresence>
       {localLoading && (
         <motion.div 
-          className="fixed inset-0 flex items-center justify-center bg-gradient-to-b from-blue2 to-blue1 bg-opacity-10 z-50"
+          className="fixed inset-0 flex items-center justify-center bg-gradient-to-b from-blue2 to-blue1 bg-opacity-10 z-[1000]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
