@@ -108,6 +108,7 @@ export default defineConfig({
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
+      
     }
   },
   optimizeDeps: {

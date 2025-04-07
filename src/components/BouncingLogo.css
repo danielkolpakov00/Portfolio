@@ -1,0 +1,11 @@
+.bouncing-logo {
+  filter: drop-shadow(0 0 3px var(--logo-color, #1b69fa));
+}
+
+.bouncing-logo path,
+.bouncing-logo polygon,
+.bouncing-logo rect,
+.bouncing-logo circle,
+.bouncing-logo ellipse {
+  fill: var(--logo-color, #1b69fa);
+}

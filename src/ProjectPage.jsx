@@ -282,35 +282,30 @@ const ProjectPage = () => {
       <div className="project-demo flex flex-col relative">
       {selectedProject.demoUrl ? (
         <>
-         <div className="iframe-cursor-container w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] overflow-hidden shadow-lg relative">
+         <div className="iframe-cursor-container w-full max-w-6xl mx-auto aspect-video h-[75vh] overflow-hidden shadow-lg mb-6 rounded-md relative">
+            {/* The actual iframe */}
+            <BasicIframe
+              ref={iframeRef}
+              src={selectedProject.demoUrl}
+              title={`${selectedProject.title} Demo`}
+              className="w-full h-full border-0 relative z-10"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              loading="lazy"
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            />
 
-{/* 👇 Tinted background layer */}
-<div className="absolute inset-0 bg-red-900 bg-opacity-50 z-0 pointer-events-none"></div>
-
-{/* 👇 The actual iframe */}
-<BasicIframe
-  ref={iframeRef}
-  src={selectedProject.demoUrl}
-  title={`${selectedProject.title} Demo`}
-  className="w-full h-full border-0 relative z-10"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-  loading="lazy"
-  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-/>
-
-{/* 👇 Fullscreen button - needs to stay above iframe */}
-<button
-  onClick={handleFullscreen}
-  className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium z-50"
-  aria-label="View fullscreen"
->
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
-  </svg>
-  <span>Fullscreen</span>
-</button>
-</div>
-
+            {/* Fullscreen button - needs to stay above iframe */}
+            <button
+              onClick={handleFullscreen}
+              className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium z-50"
+              aria-label="View fullscreen"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+              </svg>
+              <span>Fullscreen</span>
+            </button>
+          </div>
       <div className="w-full max-w-6xl p-4 bg-blue2 z-50">
       <p className="text-white">
       {/* Display the custom demo description or the last paragraph */}

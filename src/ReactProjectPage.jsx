@@ -275,7 +275,7 @@ const ReactProjectPage = () => {
       <div className="project-demo flex flex-col">
         {selectedProject.demoUrl ? (
           <>
-          <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg mb-4 md:mb-4 relative`}>
+          <div className={`iframe-cursor-container w-full max-w-6xl mx-auto aspect-video h-[75vh] overflow-hidden shadow-lg mb-6 rounded-md relative`}>
             <BasicIframe
               ref={iframeRef}
               src={selectedProject.demoUrl}

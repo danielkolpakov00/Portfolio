@@ -20,6 +20,7 @@ import useNavigationTracker from './hooks/useNavigationTracker';
 import ErrorBoundary from './components/ErrorBoundary';
 import AnimatedCursor from "react-animated-cursor"
 import { CursorTooltipProvider } from './components/CursorTooltip';
+import RelayedCursor from './components/MouseTracker';
 
 
 // Create a component that conditionally renders TsParticles based on the current route
@@ -34,12 +35,24 @@ const AppContent = () => {
   const [isIframeHovered, setIsIframeHovered] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [useCustomCursor, setUseCustomCursor] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const animatedCursorRef = useRef(null);
   const location = useLocation();
   
   // Use our enhanced navigation tracking hook
   const { isNavigating, currentPath, prevPath } = useNavigationTracker();
   
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // SAFETY MECHANISM: Force hide loading screen after a specific timeout
   const [forceHideLoading, setForceHideLoading] = useState(false);
   
@@ -71,22 +84,39 @@ const AppContent = () => {
     return () => clearTimeout(forceHideTimer);
   }, [currentPath]); // Reset timer on path change
   
+  // Add CSS for animated cursor elements
+  const cursorStyles = `
+    .animated-cursor {
+      transition: opacity 0.2s ease-out !important;
+    }
+  `;
+
   // Effect to detect when an iframe container is hovered
   useEffect(() => {
     const handleIframeHover = (e) => {
       const isHovering = e.type === 'mouseenter';
       setIsIframeHovered(isHovering);
-
+      
       // Toggle between animated cursor and relayed cursor
       setUseCustomCursor(!isHovering);
       
-      // Toggle animated cursor visibility when hovering iframe
-      if (animatedCursorRef.current) {
-        const cursorElements = document.querySelectorAll('.animated-cursor');
-        cursorElements.forEach(el => {
+      // More aggressive targeting of all cursor elements with a slight delay
+      setTimeout(() => {
+        const allCursorElements = document.querySelectorAll('.animated-cursor, .react-animated-cursor, div[data-cursor="true"]');
+        allCursorElements.forEach(el => {
           el.style.opacity = isHovering ? '0' : '1';
+          el.style.visibility = isHovering ? 'hidden' : 'visible';
+          el.style.display = isHovering ? 'none' : 'block';
         });
-      }
+        
+        // Handle specific outer cursor elements that might have different class names
+        const outerCursors = document.querySelectorAll('.animated-cursor-outer');
+        outerCursors.forEach(el => {
+          el.style.opacity = isHovering ? '0' : '1';
+          el.style.visibility = isHovering ? 'hidden' : 'visible';
+          el.style.display = isHovering ? 'none' : 'block';
+        });
+      }, 50);
     };
     
     // Attach event listeners to iframe containers
@@ -120,6 +150,7 @@ const AppContent = () => {
           content="web developer vancouver, daniel kolpakov, react.js developer, front end development, ui/ux designer, daniel kolpakov portfolio, daniel kolpakov projects, bcit new media"
         />
       </Helmet>
+      <style>{cursorStyles}</style>
       <>
         <Navbar isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
         {/* Conditionally render TsParticles based on route */}
@@ -141,8 +172,8 @@ const AppContent = () => {
         </div>
       </>
       
-      {/* Conditional cursor rendering based on iframe hover state */}
-      {!isIframeHovered ? (
+      {/* Only render cursor components on non-mobile devices */}
+      {!isMobile && !isIframeHovered ? (
         <AnimatedCursor
           ref={animatedCursorRef}
           innerSize={8}
@@ -223,7 +254,7 @@ const AppContent = () => {
             }
           ]}
         />
-      ) : (
+      ) : !isMobile && (
         /* Use RelayedCursor when hovering over iframes for seamless cursor tracking */
         <RelayedCursor 
           targetSelector=".iframe-cursor-container"

@@ -5,12 +5,13 @@ const BouncingLogo = () => {
 	const logoRef = useRef(null);
 	const containerRef = useRef(null);
 	const posRef = useRef({ x: 50, y: 50 });
-	const velRef = useRef({ x: 2, y: 1 }); // Moved back here to fix the reference error
+	const velRef = useRef({ x: 2, y: 1 });
 	const [logoSize, setLogoSize] = useState(getLogoSize());
 	const [speedScale, setSpeedScale] = useState(getSpeedScale());
 	const prevBounceRef = useRef({ horizontal: false, vertical: false });
 	const keySequenceRef = useRef([]);
 	const isCornerModeRef = useRef(false);
+	const [logoColor, setLogoColor] = useState('#1b69fa');
 	
 	// Function to determine logo size based on screen width
 	function getLogoSize() {
@@ -36,32 +37,10 @@ const BouncingLogo = () => {
 		};
 	}, [speedScale]);
 
-	// Function to change SVG color
+	// Replace the changeSvgColor function with this simpler version
 	const changeSvgColor = (color) => {
-		if (logoRef.current) {
-			// For external SVG loaded as an image, we need to load the SVG document
-			fetch(logoRef.current.src)
-				.then(response => response.text())
-				.then(svgText => {
-					// Create a temporary div to hold the SVG
-					const div = document.createElement('div');
-					div.innerHTML = svgText;
-					
-					// Find all SVG elements that need color
-					const svgElements = div.querySelectorAll('path, polygon, rect, circle, ellipse');
-					svgElements.forEach(el => {
-						el.setAttribute('fill', color);
-					});
-					
-					// Convert back to string and create a blob URL
-					const modifiedSvg = div.innerHTML;
-					const blob = new Blob([modifiedSvg], { type: 'image/svg+xml' });
-					const url = URL.createObjectURL(blob);
-					
-					// Update the image source
-					logoRef.current.src = url;
-				})
-				.catch(error => console.error('Error modifying SVG:', error));
+		if (color !== logoColor) {
+			setLogoColor(color);
 		}
 	};
 
@@ -211,14 +190,15 @@ const BouncingLogo = () => {
 				isBouncingVertical = true;
 			}
 
-			// If we're bouncing in both directions in the same frame or close to it, we hit a corner!
-			if ((isBouncingHorizontal && isBouncingVertical) || 
+			// Detect corner hits - either simultaneous bounces or bounces that happen very close in time
+			const cornerHit = (isBouncingHorizontal && isBouncingVertical) || 
 				(isBouncingHorizontal && prevBounceRef.current.vertical) || 
-				(isBouncingVertical && prevBounceRef.current.horizontal)) {
+				(isBouncingVertical && prevBounceRef.current.horizontal);
 				
+			if (cornerHit) {
 				// Calculate corner position for confetti origin
-				let originX = (newX < containerWidth / 2) ? 0.1 : 0.9; // Left or right corner
-				let originY = (newY < containerHeight / 2) ? 0.1 : 0.9; // Top or bottom corner
+				const originX = (newX < containerWidth / 2) ? 0.1 : 0.9;
+				const originY = (newY < containerHeight / 2) ? 0.1 : 0.9;
 				
 				// Change to a special corner color
 				changeSvgColor('#ff44fa'); // Purple for corner hits
@@ -234,20 +214,27 @@ const BouncingLogo = () => {
 						x: (Math.random() > 0.5 ? 1 : -1) * 2 * speedScale,
 						y: (Math.random() > 0.5 ? 1 : -1) * 1 * speedScale
 					};
+					}
+				
+				// Reset bounce memory to avoid triggering confetti multiple times for same corner hit
+				prevBounceRef.current = { horizontal: false, vertical: false };
+			} else {
+				// Store bounce state for next frame (to detect near-simultaneous bounces)
+				if (isBouncingHorizontal) {
+					prevBounceRef.current.horizontal = true;
+					// Reset horizontal bounce detection after a short delay
+					setTimeout(() => {
+						prevBounceRef.current.horizontal = false;
+					}, 150); // Increased time window to detect corner hits (was 100ms)
 				}
-			}
-			
-			// Store bounce state for next frame (to detect near-simultaneous bounces)
-			prevBounceRef.current = { 
-				horizontal: isBouncingHorizontal,
-				vertical: isBouncingVertical 
-			};
-			
-			// Reset previous bounce flags after a short delay to avoid false corner detections
-			if (isBouncingHorizontal || isBouncingVertical) {
-				setTimeout(() => {
-					prevBounceRef.current = { horizontal: false, vertical: false };
-				}, 100);
+				
+				if (isBouncingVertical) {
+					prevBounceRef.current.vertical = true;
+					// Reset vertical bounce detection after a short delay
+					setTimeout(() => {
+						prevBounceRef.current.vertical = false;
+					}, 150); // Increased time window to detect corner hits (was 100ms)
+				}
 			}
 
 			posRef.current = { x: newX, y: newY };
@@ -264,22 +251,29 @@ const BouncingLogo = () => {
 		};
 	}, []);
 
+	// Create a CSS custom property for the SVG fill color
+	const svgStyle = {
+		'--logo-color': logoColor,
+		filter: `blur(0 0 3px ${logoColor})`
+	};
+
 	return (
 		<div
 			className="bouncing-logo-container"
 			ref={containerRef}
-			style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden' }}
+			style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden', opacity: 0.5, filter: `drop-shadow(0 0 3px ${logoColor})` }}
 		>
 			<img
 				ref={logoRef}
-				src="./assets/dkolpport.svg" // Using relative path with dot prefix for proper deployment
+				src={import.meta.env.BASE_URL + 'assets/dkolpport.svg'}
 				alt="Bouncing Logo"
 				style={{
 					position: 'absolute',
-					left: 0, // Initial positioning handled by transform
-					top: 0,  // Initial positioning handled by transform
+					left: 0,
+					top: 0,
 					width: `${logoSize}px`,
 					height: `${logoSize}px`,
+					...svgStyle
 				}}
 			/>
 		</div>
