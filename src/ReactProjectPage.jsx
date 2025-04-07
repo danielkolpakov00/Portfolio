@@ -14,7 +14,7 @@ import BedroomDemoDescription from './components/project-descriptions/BedroomDem
 import MusicDemoDescription from './components/project-descriptions/MusicDemoDescription';
 import MailDemoDescription from './components/project-descriptions/MailDemoDescription';
 import { useCursorTooltip } from './components/CursorTooltip';
-import IframeProxyCursor from './components/IframeProxyCursor';
+import BasicIframe from './components/BasicIframe';
 
 const ReactProjectPage = () => {
   const { id } = useParams();
@@ -276,14 +276,26 @@ const ReactProjectPage = () => {
         {selectedProject.demoUrl ? (
           <>
           <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg mb-4 md:mb-4 relative`}>
-            <IframeProxyCursor
+            <BasicIframe
+              ref={iframeRef}
               src={selectedProject.demoUrl}
               title={`${selectedProject.title} Demo`}
-              iframeRef={iframeRef}
-              onFullscreen={handleFullscreen}
-              style={{ width: '100%', height: '100%' }}
-              className="w-full h-full"
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              loading="lazy" 
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
             />
+            {/* Fullscreen button */}
+            <button
+              onClick={handleFullscreen}
+              className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium z-20"
+              aria-label="View fullscreen"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+              </svg>
+              <span>Fullscreen</span>
+            </button>
           </div>
           <div className="w-full max-w-6xl p-4 bg-blue2">
             <p className="text-white">

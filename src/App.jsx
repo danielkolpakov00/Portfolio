@@ -21,6 +21,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import AnimatedCursor from "react-animated-cursor"
 import { CursorTooltipProvider } from './components/CursorTooltip';
 
+
 // Create a component that conditionally renders TsParticles based on the current route
 const ParticlesController = () => {
   const location = useLocation();
@@ -32,6 +33,7 @@ const ParticlesController = () => {
 const AppContent = () => {
   const [isIframeHovered, setIsIframeHovered] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [useCustomCursor, setUseCustomCursor] = useState(true);
   const animatedCursorRef = useRef(null);
   const location = useLocation();
   
@@ -74,8 +76,11 @@ const AppContent = () => {
     const handleIframeHover = (e) => {
       const isHovering = e.type === 'mouseenter';
       setIsIframeHovered(isHovering);
+
+      // Toggle between animated cursor and relayed cursor
+      setUseCustomCursor(!isHovering);
       
-      // Toggle animated cursor visibility
+      // Toggle animated cursor visibility when hovering iframe
       if (animatedCursorRef.current) {
         const cursorElements = document.querySelectorAll('.animated-cursor');
         cursorElements.forEach(el => {
@@ -97,7 +102,7 @@ const AppContent = () => {
         container.removeEventListener('mouseleave', handleIframeHover);
       });
     };
-  }, []);
+  }, [location.pathname]); // Re-run when path changes to catch newly rendered iframes
 
   // Combine all loading states - initial load, navigation, and force hide override
   const showLoadingScreen = (isLoadingAssets || isNavigating) && !forceHideLoading;
@@ -135,86 +140,104 @@ const AppContent = () => {
           </main>
         </div>
       </>
-      <AnimatedCursor
-        ref={animatedCursorRef}
-        innerSize={8}
-        outerSize={35}
-        innerScale={1}
-        outerScale={1.7}
-        outerAlpha={0}
-        hasBlendMode={true}
-        innerStyle={{
-          backgroundColor: '#ff2d00'
-        }}
-        outerStyle={{
-          border: '3px solid #ff2d00'
-        }}
-        clickables={[
-          'a',
-          'button',
-          '.link',
-          '.project-card',
-          '.clickable',
-          '.nav-item',
-          'input[type="text"]',
-          'input[type="email"]',
-          'input[type="number"]',
-          'input[type="submit"]',
-          'textarea',
-          'select',
-          'label[for]',
-          '.social-icon',
-          'iframe'
-        ]}
-        trailingSpeed={8}
-        showSystemCursor={false}
-        
-        // Add custom cursor behaviors
-        customCursors={[
-          {
-            selector: '.draggable, [draggable="true"], .slider, .resize-handle',
-            style: {
-              innerColor: '#4cf7c3',
-              outerColor: '#4cf7c3',
-              innerScale: 1.2,
-              outerScale: 2,
-              innerSize: 8,
-              outerSize: 25,
-              outerAlpha: 0.3,
-              mixBlendMode: 'exclusion',
-              text: "+ drag"
+      
+      {/* Conditional cursor rendering based on iframe hover state */}
+      {!isIframeHovered ? (
+        <AnimatedCursor
+          ref={animatedCursorRef}
+          innerSize={8}
+          outerSize={35}
+          innerScale={1}
+          outerScale={1.7}
+          outerAlpha={0}
+          hasBlendMode={true}
+          innerStyle={{
+            backgroundColor: '#ff2d00'
+          }}
+          outerStyle={{
+            border: '3px solid #ff2d00'
+          }}
+          clickables={[
+            'a',
+            'button',
+            '.link',
+            '.project-card',
+            '.clickable',
+            '.nav-item',
+            'input[type="text"]',
+            'input[type="email"]',
+            'input[type="number"]',
+            'input[type="submit"]',
+            'textarea',
+            'select',
+            'label[for]',
+            '.social-icon',
+            'iframe'
+          ]}
+          trailingSpeed={8}
+          showSystemCursor={false}
+          
+          // Add custom cursor behaviors
+          customCursors={[
+            {
+              selector: '.draggable, [draggable="true"], .slider, .resize-handle',
+              style: {
+                innerColor: '#4cf7c3',
+                outerColor: '#4cf7c3',
+                innerScale: 1.2,
+                outerScale: 2,
+                innerSize: 8,
+                outerSize: 25,
+                outerAlpha: 0.3,
+                mixBlendMode: 'exclusion',
+                text: "+ drag"
+              }
+            },
+            {
+              selector: 'button, .button, input[type="submit"]',
+              style: {
+                innerColor: '#ffdd40',
+                outerColor: '#ffdd40',
+                innerScale: 1.5,
+                outerScale: 1.2
+              }
+            },
+            {
+              selector: 'a, .link, .nav-item',
+              style: {
+                innerColor: '#61dafb',
+                outerColor: '#61dafb',
+                innerScale: 1.5,
+                outerScale: 1.2
+              }
+            },
+            {
+              selector: 'input, textarea, select',
+              style: {
+                innerColor: '#ffffff',
+                outerColor: '#ffffff',
+                innerScale: 1.2,
+                outerScale: 1.5,
+                text: "type"
+              }
             }
-          },
-          {
-            selector: 'button, .button, input[type="submit"]',
-            style: {
-              innerColor: '#ffdd40',
-              outerColor: '#ffdd40',
-              innerScale: 1.5,
-              outerScale: 1.2
-            }
-          },
-          {
-            selector: 'a, .link, .nav-item',
-            style: {
-              innerColor: '#61dafb',
-              outerColor: '#61dafb',
-              innerScale: 1.5,
-              outerScale: 1.2
-            }
-          },
-          {
-            selector: 'input, textarea, select',
-            style: {
-              innerColor: '#ffffff',
-              outerColor: '#ffffff',
-              innerScale: 1.2,
-              outerScale: 1.5,
-              text: "type"
-            }
-          }
-        ]}
-      />
+          ]}
+        />
+      ) : (
+        /* Use RelayedCursor when hovering over iframes for seamless cursor tracking */
+        <RelayedCursor 
+          targetSelector=".iframe-cursor-container"
+          innerColor="#ff2d00"
+          outerColor="#ff2d00"
+          innerSize={8}
+          outerSize={35}
+          outerAlpha={0.3}
+          innerScale={1.2}
+          outerScale={1.7}
+          enableTooltips={true}
+          debugMode={false}
+        />
+      )}
     </>
   );
 };

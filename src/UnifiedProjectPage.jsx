@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import BasicIframe from './components/BasicIframe';
 
 const UnifiedProjectPage = () => {
   const { id } = useParams();
@@ -71,12 +72,13 @@ const UnifiedProjectPage = () => {
         <h2 className="text-3xl font-semibold text-blue-600 mb-6">View Live</h2>
         <div className="relative border rounded-lg overflow-hidden shadow-md">
           {projectData.demoUrl ? (
-            <iframe
+            <BasicIframe
               src={projectData.demoUrl}
               title="Live Demo"
               className="w-full h-96 border-0"
+              loading="lazy"
               allowFullScreen
-            ></iframe>
+            />
           ) : (
             <p className="text-center text-gray-500 py-4">Demo not available</p>
           )}

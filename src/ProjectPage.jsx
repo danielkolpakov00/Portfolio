@@ -21,7 +21,7 @@ import MailDescription from './components/project-descriptions/MailDescription';
 import GradientDemoDescription from './components/project-descriptions/GradientDemoDescription';
 import LastFmDemoDescription from './components/project-descriptions/LastFmDemoDescription';
 import { useCursorTooltip } from './components/CursorTooltip';
-import IframeProxyCursor from './components/IframeProxyCursor';
+import BasicIframe from './components/BasicIframe';
 
 const ProjectPage = () => {
   const { id } = useParams();
@@ -279,59 +279,79 @@ const ProjectPage = () => {
 
     // Otherwise show the iframe
     return (
-      <div className="project-demo flex flex-col">
-        {selectedProject.demoUrl ? (
-          <>
-          <div className={`w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] ${isMobile ? 'lg:h-[500px]' : 'lg:h-[600px]'} overflow-hidden shadow-lg relative`}>
-            <IframeProxyCursor
-              src={selectedProject.demoUrl}
-              title={`${selectedProject.title} Demo`}
-              iframeRef={iframeRef}
-              onFullscreen={handleFullscreen}
-              className="w-full h-full"
-            />
-          </div>
-          <div className="w-full max-w-6xl p-4 bg-blue2">
-            <p className="text-white">
-              {/* Display the custom demo description or the last paragraph */}
-              {selectedProject.demoDescriptionComponent ? (
-                  (() => {
-                      const DescriptionComponent = descriptionComponents[selectedProject.demoDescriptionComponent];
-                      if (DescriptionComponent) {
-                          return <DescriptionComponent />;
-                      }
-                      return null;
-                  })()
-              ) : DescriptionComponent && (
-                (() => {
-                  const Description = DescriptionComponent();
-                  if (Description && Description.props && Description.props.children) {
-                    const childrenArray = React.Children.toArray(Description.props.children);
-                    
-                    // Find the last paragraph
-                    let lastParagraph = null;
-                    for (let i = childrenArray.length - 1; i >= 0; i--) {
-                      const child = childrenArray[i];
-                      if (child && child.type === 'p') {
-                        lastParagraph = child;
-                        break;
-                      }
-                    }
-                    
-                    // Render the last paragraph
-                    return lastParagraph;
-                  }
-                  return null;
-                })()
-              )}
-            </p>
-          </div>
-        </>
-        ) : (
-          <div className="h-[1200px] flex items-center justify-center bg-blue2/40">
-            <p className="text-white">Demo not available</p>
-          </div>
-        )}
+      <div className="project-demo flex flex-col relative">
+      {selectedProject.demoUrl ? (
+        <>
+         <div className="iframe-cursor-container w-full max-w-6xl aspect-[4/4] md:aspect-[16/9] overflow-hidden shadow-lg relative">
+
+{/* 👇 Tinted background layer */}
+<div className="absolute inset-0 bg-red-900 bg-opacity-50 z-0 pointer-events-none"></div>
+
+{/* 👇 The actual iframe */}
+<BasicIframe
+  ref={iframeRef}
+  src={selectedProject.demoUrl}
+  title={`${selectedProject.title} Demo`}
+  className="w-full h-full border-0 relative z-10"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+  loading="lazy"
+  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+/>
+
+{/* 👇 Fullscreen button - needs to stay above iframe */}
+<button
+  onClick={handleFullscreen}
+  className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 font-medium z-50"
+  aria-label="View fullscreen"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+  </svg>
+  <span>Fullscreen</span>
+</button>
+</div>
+
+      <div className="w-full max-w-6xl p-4 bg-blue2 z-50">
+      <p className="text-white">
+      {/* Display the custom demo description or the last paragraph */}
+      {selectedProject.demoDescriptionComponent ? (
+      (() => {
+      const DescriptionComponent = descriptionComponents[selectedProject.demoDescriptionComponent];
+      if (DescriptionComponent) {
+      return <DescriptionComponent />;
+      }
+      return null;
+      })()
+      ) : DescriptionComponent && (
+      (() => {
+      const Description = DescriptionComponent();
+      if (Description && Description.props && Description.props.children) {
+      const childrenArray = React.Children.toArray(Description.props.children);
+      
+      // Find the last paragraph
+      let lastParagraph = null;
+      for (let i = childrenArray.length - 1; i >= 0; i--) {
+      const child = childrenArray[i];
+      if (child && child.type === 'p') {
+      lastParagraph = child;
+      break;
+      }
+      }
+      
+      // Render the last paragraph
+      return lastParagraph;
+      }
+      return null;
+      })()
+      )}
+      </p>
+      </div>
+      </>
+      ) : (
+      <div className="h-[1200px] flex items-center justify-center bg-blue2/40">
+      <p className="text-white">Demo not available</p>
+      </div>
+      )}
       </div>
     );
   };

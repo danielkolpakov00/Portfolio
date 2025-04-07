@@ -4,70 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Content Security Policy to allow iframe content from various sources -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src 'self' https://*.glitch.com https://*.danielkolpakov.com https://*.github.io https://*.vercel.app https://*.netlify.app https: data:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
     <title>Daniel Kolpakov | Web Developer</title>
-    
-    <!-- Meta description for SEO and performance -->
-    <meta name="description" content="Web Developer based in North Vancouver, British Columbia. Specializing in React.js and front end development." />
-    
-    <!-- Disable FLoC for performance and privacy -->
-    <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
-    
-    <!-- Preconnect to origins for faster resource loading -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- DNS prefetch for external resources -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    
-    <!-- Preload critical fonts with display=swap for better performance -->
+    <!-- Preload critical fonts -->
     <link rel="preload" href="./src/assets/fonts/Georama-Variable.ttf" as="font" type="font/ttf" crossorigin="anonymous">
-    
-    <!-- Preload critical CSS -->
-    <link rel="preload" href="./src/App.css" as="style">
-    <link rel="preload" href="./src/index.css" as="style">
-    
-    <!-- Add content security policy to improve security -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;">
-    
-    <!-- Prevent iOS from detecting phone numbers which hurts performance -->
-    <meta name="format-detection" content="telephone=no">
-    
-    <!-- Improve page rendering performance -->
-    <meta name="color-scheme" content="dark light">
-    <meta name="theme-color" content="#000000">
-    
-    <!-- Add critical CSS inline for faster first paint -->
-   
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./src/main.jsx"></script>
-    
-    <!-- Inline script to detect JS support and handle initial loading -->
-    <script>
-      // Mark as JS enabled
-      document.documentElement.classList.remove('no-js');
-      document.documentElement.classList.add('js');
-      
-      // Check for returning visitor to optimize loading experience
-      try {
-        if (localStorage.getItem('hasVisitedBefore') === 'true') {
-          document.documentElement.classList.add('returning-visitor');
-        }
-      } catch (e) {}
-      
-      // Save current viewport size for consistent loading
-      document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
-    </script>
-    
-    <!-- Add passive event listeners for better scroll performance -->
-    <script>
-      // Passive event listeners for better performance
-      window.addEventListener('load', function() {
-        // Add passive scroll handling
-        document.addEventListener('touchstart', function() {}, { passive: true });
-        document.addEventListener('touchmove', function() {}, { passive: true });
-        document.addEventListener('wheel', function() {}, { passive: true });
-      });
-    </script>
   </body>
 </html>
