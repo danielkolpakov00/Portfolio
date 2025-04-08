@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import confetti from 'canvas-confetti';
 import "../index.css";
 import "../App.css";
-import TsParticles from "@/components/TsParticles";
+import TsParticles from "../components/TsParticles";
 // Import AboutMe components
 import AboutMeHero from "../components/AboutMe/AboutMeHero";
 import AboutMeIntroSection from "../components/AboutMe/AboutMeIntroSection";
@@ -21,7 +21,7 @@ import projectsData from '../data/projects.json';
 // Import visual components directly
 import WeatherPreview from "../WeatherPreview";
 import PlinkoPreview from "../PlinkoPreview";
-import BedroomPreview from "../BedroomScenePreview";
+import BedroomScenePreview from "../BedroomScenePreview";
 import MusicPreview from "../MusicPreview";
 
 // Import ProjectWidget (update this import)
@@ -145,7 +145,7 @@ const aboutContent = {
 const visualComponents = {
   "WeatherPreview": WeatherPreview,
   "PlinkoPreview": PlinkoPreview,
-  "BedroomPreview": BedroomPreview,
+  "BedroomPreview": BedroomScenePreview,
   "MusicPreview": MusicPreview
 };
 

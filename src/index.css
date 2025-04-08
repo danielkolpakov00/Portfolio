@@ -7,12 +7,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hide default cursor throughout the application */
+/* Force cursor visibility across the site */
+html, body, * {
+  cursor: auto !important;
+}
+
+/* Remove the rule that was hiding the cursor */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  cursor: none !important;
+  /* cursor: none !important; */ /* Removed to restore default cursor */
 }
 
 /* Only show cursor for iframes, where custom cursor can't work */

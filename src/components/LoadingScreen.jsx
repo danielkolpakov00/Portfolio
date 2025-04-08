@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { grid } from 'ldrs';
 import { useLoadingState, shouldHideLoading } from '../hooks/useLoadingState';
+import { useLocation } from 'react-router-dom';
 
 // Collection of fun facts to display randomly
 const funFacts = [
@@ -32,6 +33,8 @@ const LoadingScreen = ({ isLoading: propIsLoading, message = "Loading..." }) => 
   const globalLoadingState = useLoadingState();
   const [localLoading, setLocalLoading] = useState(true);
   const [randomFact, setRandomFact] = useState('');
+  const maxLoadingTimeRef = useRef(null);
+  const location = useLocation();
   
   useEffect(() => {
     grid.register();
@@ -46,7 +49,24 @@ const LoadingScreen = ({ isLoading: propIsLoading, message = "Loading..." }) => 
       console.log('LoadingScreen: Global loading state says we should hide immediately');
       setLocalLoading(false);
     }
-  }, []);
+    
+    // Hard maximum loading time - no matter what, the loading screen 
+    // will disappear after this time to prevent it from getting stuck
+    const isLastFmApp = location.pathname.includes('lastfm') || location.pathname.includes('react-projects/lastfm');
+    const maxTime = isLastFmApp ? 4000 : 8000; // Use shorter timeout for LastFm app
+    
+    maxLoadingTimeRef.current = setTimeout(() => {
+      console.log('Maximum loading time reached, forcing hide of loading screen');
+      setLocalLoading(false);
+      sessionStorage.setItem('visualsLoaded', 'true');
+    }, maxTime);
+    
+    return () => {
+      if (maxLoadingTimeRef.current) {
+        clearTimeout(maxLoadingTimeRef.current);
+      }
+    };
+  }, [location.pathname]);
   
   // Update local loading state when props or global state changes
   useEffect(() => {

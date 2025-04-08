@@ -22,6 +22,9 @@ const useLoadingState = () => {
           if (isMounted && isLoading) {
             console.log('Fallback: Loading timeout reached. Hiding loading screen.');
             setIsLoading(false);
+            
+            // Also set sessionStorage to prevent loading screen from showing again
+            sessionStorage.setItem('visualsLoaded', 'true');
           }
         }, 1500); // Reduced timeout for better UX
       }
@@ -32,6 +35,18 @@ const useLoadingState = () => {
 
     // Event listener for when everything is loaded
     window.addEventListener('load', checkDocumentLoaded);
+
+    // Additional safety fallback for Last.fm app specifically
+    if (location.pathname.includes('lastfm-app') || location.pathname.includes('lastfm')) {
+      console.log('Last.fm app detected, setting additional fallback timeout');
+      setTimeout(() => {
+        if (isMounted && isLoading) {
+          console.log('Last.fm specific fallback triggered. Forcing loading screen to hide.');
+          setIsLoading(false);
+          sessionStorage.setItem('visualsLoaded', 'true');
+        }
+      }, 3000); // Slightly longer timeout for Last.fm app
+    }
 
     // Cleanup
     return () => {

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import viteCompression from 'vite-plugin-compression'; // Import the compression plugin
+import viteCompression from 'vite-plugin-compression'; 
 import { splitVendorChunkPlugin } from 'vite';
 import viteImagemin from 'vite-plugin-imagemin';
 
@@ -88,46 +88,9 @@ export default defineConfig({
     rollupOptions: {
       input: './index.html',
       output: {
-        // Improved chunking strategy
-        manualChunks: (id) => {
-          // If the id is not a string, return undefined
-          if (typeof id !== 'string') return undefined;
-
-          // Check for specific modules
-          if (id.includes('node_modules/react/') || 
-              id.includes('node_modules/react-dom/') || 
-              id.includes('node_modules/react-router-dom/')) {
-            return 'react-vendor';
-          }
-          
-          if (id.includes('node_modules/framer-motion/') || 
-              id.includes('node_modules/tailwindcss/')) {
-            return 'ui-framework';
-          }
-          
-          if (id.includes('node_modules/three/build/')) {
-            return 'three-core';
-          }
-          
-          if (id.includes('node_modules/three/examples/jsm/')) {
-            return 'three-addons';
-          }
-          
-          if (id.includes('node_modules/gsap/')) {
-            return 'gsap';
-          }
-
-          // Handle potentially problematic packages separately
-          if (id.includes('node_modules/react-animated-cursor/')) {
-            return 'cursor-vendor';
-          }
-
-          if (id.includes('node_modules/@tsparticles/') || 
-              id.includes('node_modules/tsparticles/') ||
-              id.includes('node_modules/react-tsparticles/')) {
-            return 'particles-vendor';
-          }
-        },
+        // Disable manualChunks to let Vite handle chunking automatically
+        // This avoids potential issues with dependencies
+        manualChunks: undefined,
         // Larger chunks get their own files, which helps with caching
         chunkSizeWarningLimit: 800,
         // Use content hash for better caching
@@ -168,13 +131,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'framer-motion', 'gsap', 'three'],
-    esbuildOptions: {
-      target: 'es2020', // Change from esnext to es2020 for better compatibility
-    },
+    exclude: ['react-animated-cursor'], // Exclude problematic dependencies
   },
-  // Add esbuild options for better tree-shaking
+  // Use safer options for esbuild
   esbuild: {
-    target: 'es2020', // Change from esnext to es2020 for better compatibility
+    target: 'es2018', // More compatible target
     legalComments: 'none', // Remove license comments to decrease bundle size
     treeShaking: true,
   },

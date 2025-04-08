@@ -9,9 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import '../components/DialogueBox.css'; // Dialogue styles
-import { Coolshape } from "coolshapes-react";
 import DKModelComponent from '../components/DKModelComponent'; // Import the new component
-import BouncingLogo from '@/components/BouncingLogo';
+import BouncingLogo from '../components/BouncingLogo';
 import Particles from '../components/ReactBits/Particles';
 
 const Hero = ({ isOpen }) => {

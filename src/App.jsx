@@ -17,6 +17,7 @@ import 'vite/modulepreload-polyfill';
 import useLoadingState from './hooks/useLoadingState';
 import useNavigationTracker from './hooks/useNavigationTracker';
 import { isLowPerformanceDevice } from './utils/performanceUtils';
+import featureFlags from './utils/featureFlags';
 
 // Lazy load heavy components
 const Hero = lazy(() => import('./pages/Hero'));
@@ -26,13 +27,24 @@ const PortfolioPreview = lazy(() => import('./PortfolioPreview'));
 const ProjectPage = lazy(() => import('./ProjectPage'));
 const ReactProjectPage = lazy(() => import('./ReactProjectPage'));
 const UnifiedProjectPage = lazy(() => import('./UnifiedProjectPage'));
-const TsParticles = lazy(() => import('./components/TsParticles'));
-// Replace AnimatedCursor with SafeCursor
-const SafeCursor = lazy(() => import('./components/SafeCursor'));
+
+// Conditionally load potentially problematic components
+const TsParticles = featureFlags.enableParticles 
+  ? lazy(() => import('./components/TsParticles')) 
+  : () => null;
+
+// Comment out the cursor components to prevent them from loading
+// const SafeCursor = featureFlags.enableAnimatedCursor 
+//   ? lazy(() => import('./components/SafeCursor')) 
+//   : () => null;
+
 const RelayedCursor = lazy(() => import('./components/MouseTracker'));
 
-// Custom cursor styles
+// Custom cursor styles - UPDATED to include default cursor style
 const cursorStyles = `
+  body {
+    cursor: auto !important; /* Force default cursor */
+  }
   .custom-cursor {
     position: fixed;
     pointer-events: none;
@@ -58,6 +70,9 @@ const cursorStyles = `
 
 // Create a component that conditionally renders TsParticles based on the current route
 const ConditionalParticles = ({ pathname }) => {
+  // Only render particles on specific routes if enabled
+  if (!featureFlags.enableParticles) return null;
+  
   // Only render particles on specific routes
   // Exclude hero page ('/'), project pages, and react project pages
   const showParticles = pathname !== '/' && 
@@ -174,7 +189,8 @@ const AppContent = () => {
         
         <CursorTooltipProvider>
           <ErrorBoundary>
-            {!isMobile && (
+            {/* Completely disable the animated cursor component */}
+            {/* {!isMobile && featureFlags.enableAnimatedCursor && (
               <Suspense fallback={null}>
                 <ErrorBoundary fallback={<div className="hidden">Cursor error</div>}>
                   {typeof window !== 'undefined' && document.body && (
@@ -189,7 +205,8 @@ const AppContent = () => {
                   )}
                 </ErrorBoundary>
               </Suspense>
-            )}
+            )} */}
+            
             <main>
               <Suspense fallback={<LoadingScreen isLoading={true} />}>
                 <Routes>
