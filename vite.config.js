@@ -3,11 +3,14 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression'; // Import the compression plugin
+import { splitVendorChunkPlugin } from 'vite';
+import viteImagemin from 'vite-plugin-imagemin';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    splitVendorChunkPlugin(), // Split vendor chunks for better caching
     // Bundle analysis in production build (generates stats.html)
     process.env.ANALYZE && visualizer({
       open: true,
@@ -25,6 +28,34 @@ export default defineConfig({
       algorithm: 'brotliCompress',
       ext: '.br',
       threshold: 10240,
+    }),
+    // Optimize images
+    viteImagemin({
+      gifsicle: {
+        optimizationLevel: 7,
+        interlaced: false,
+      },
+      optipng: {
+        optimizationLevel: 7,
+      },
+      mozjpeg: {
+        quality: 80,
+      },
+      pngquant: {
+        quality: [0.7, 0.8],
+        speed: 4,
+      },
+      svgo: {
+        plugins: [
+          {
+            name: 'removeViewBox',
+          },
+          {
+            name: 'removeEmptyAttrs',
+            active: false,
+          },
+        ],
+      },
     }),
   ],
   base: './', // Ensures relative paths
@@ -60,28 +91,22 @@ export default defineConfig({
         // Improved chunking strategy
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-libs': ['framer-motion', 'gsap', '@gsap/react'],
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          'particles': ['tsparticles', '@tsparticles/react', '@tsparticles/slim'],
+          'ui-framework': ['framer-motion', 'tailwindcss'],
+          'three-core': ['three'],
+          'three-addons': [/three\/examples\/jsm/],
+          'gsap': ['gsap'],
         },
-        // Simplified asset naming scheme
+        // Larger chunks get their own files, which helps with caching
+        chunkSizeWarningLimit: 800,
+        // Use content hash for better caching
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          let extType = info[info.length - 1];
-          
-          if (/\.(woff|woff2|ttf|otf)$/.test(assetInfo.name)) {
-            return 'assets/fonts/[name][extname]';
+          let extType = assetInfo.name.split('.').at(1);
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            extType = 'img';
+          } else if (/woff|woff2|ttf|otf/i.test(extType)) {
+            extType = 'fonts';
           }
-          
-          if (/\.(png|jpe?g|gif|svg|webp)$/.test(assetInfo.name)) {
-            return 'assets/images/[name]-[hash][extname]';
-          }
-          
-          if (/\.(glb|gltf)$/.test(assetInfo.name)) {
-            return 'assets/models/[name]-[hash][extname]';
-          }
-          
-          return `assets/[name]-[hash][extname]`;
+          return `assets/${extType}/[name]-[hash][extname]`;
         },
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
@@ -102,13 +127,11 @@ export default defineConfig({
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.glb', '.gltf']
   },
-  // Remove or update development server settings that won't apply in production
   server: {
     // These CORS settings only affect development
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      
     }
   },
   optimizeDeps: {
@@ -121,5 +144,6 @@ export default defineConfig({
   esbuild: {
     target: 'esnext',
     legalComments: 'none', // Remove license comments to decrease bundle size
+    treeShaking: true,
   },
 });

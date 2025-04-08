@@ -7,303 +7,88 @@ import "react-resizable/css/styles.css";
 import { motion } from "framer-motion";
 import { useInView } from 'react-intersection-observer';
 
-import WeatherPreview from "./WeatherPreview";
-import PlinkoPreview from "./PlinkoPreview";
-import BedroomPreview from "./BedroomScenePreview";
-import MusicPreview from "./MusicPreview";
-import MailPreview from "./MailPreview";
+// Lazy load heavyweight components
+const WeatherPreview = React.lazy(() => import("./WeatherPreview"));
+const PlinkoPreview = React.lazy(() => import("./PlinkoPreview"));
+const BedroomPreview = React.lazy(() => import("./BedroomScenePreview"));
+const MusicPreview = React.lazy(() => import("./MusicPreview"));
+const MailPreview = React.lazy(() => import("./MailPreview"));
 import TsParticles from "./components/TsParticles";
 import ProjectWidget from "./components/ProjectWidget";
 import { FaReact } from "react-icons/fa";
 import projectsData from "./data/projects.json";
-import Iridescence from "./components/ReactBits/Iridescence";
-import LoadingScreen from "./components/LoadingScreen"; // Import LoadingScreen component
+// Lazy load non-essential components
+const Iridescence = React.lazy(() => import("./components/ReactBits/Iridescence"));
+import LoadingScreen from "./components/LoadingScreen";
+import ErrorBoundary from "./components/ErrorBoundary";
 // Import Dither with lazy loading to prevent immediate errors
-import Dither from "./components/ReactBits/Dither";
+const Dither = React.lazy(() => import("./components/ReactBits/Dither"));
 
-// Enhanced global reference to track Dither component loading with more reliable loading detection
-const ditherLoadingState = {
+// Simplified loading state tracking - reduced complexity
+const loadingState = {
   isLoaded: false,
-  isInitialized: false,
-  isRendered: false,
   callbacks: []
 };
+
+// Create the BlissWithDither component that was missing
+const BlissWithDither = React.memo(({ className = "" }) => {
+  return (
+    <div className={`relative w-full h-full ${className}`}>
+      <img 
+        src="/assets/bliss.jpg" 
+        alt="Windows XP Bliss Wallpaper" 
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 z-10 opacity-60">
+        <Suspense fallback={null}>
+          <Dither 
+            waveSpeed={0.2}
+            waveFrequency={1.2}
+            waveAmplitude={0.1}
+            posterizeSteps={8}
+            className="w-full h-full"
+          />
+        </Suspense>
+      </div>
+    </div>
+  );
+});
+
+BlissWithDither.displayName = 'BlissWithDither';
 
 // Signal to the main component that the Dither effect has been initialized
 window.ditherInitialized = () => {
   console.log('Dither shader initialized and ready!');
-  ditherLoadingState.isInitialized = true;
   
-  // Check if we're fully loaded
-  if (ditherLoadingState.isRendered) {
-    ditherLoadingState.isLoaded = true;
-    // Call any registered callbacks
-    if (ditherLoadingState.callbacks.length > 0) {
-      console.log('Calling registered callbacks after initialization');
-      ditherLoadingState.callbacks.forEach(cb => cb());
-      ditherLoadingState.callbacks = [];
-    }
+  // Mark as loaded and trigger callbacks
+  loadingState.isLoaded = true;
+  if (loadingState.callbacks.length > 0) {
+    console.log('Calling registered callbacks after initialization');
+    loadingState.callbacks.forEach(cb => cb());
+    loadingState.callbacks = [];
   }
 };
-
-// Signal that Dither has fully rendered a frame
-window.ditherRendered = () => {
-  console.log('Dither effect rendered first frame!');
-  ditherLoadingState.isRendered = true;
-  
-  // Mark as fully loaded when both initialized and rendered
-  if (ditherLoadingState.isInitialized) {
-    ditherLoadingState.isLoaded = true;
-    if (ditherLoadingState.callbacks.length > 0) {
-      console.log('Calling registered callbacks after render');
-      ditherLoadingState.callbacks.forEach(cb => cb());
-      ditherLoadingState.callbacks = [];
-    }
-  }
-};
-
-// Improved preload Dither component function
-const preloadDither = () => {
-  return new Promise((resolve) => {
-    if (ditherLoadingState.isLoaded) {
-      resolve();
-      return;
-    }
-
-    ditherLoadingState.callbacks.push(resolve);
-    
-    // Create a hidden container for preloading
-    const preloadContainer = document.createElement('div');
-    preloadContainer.id = 'dither-preload-container';
-    preloadContainer.style.position = 'fixed';
-    preloadContainer.style.top = '-9999px';
-    preloadContainer.style.left = '-9999px';
-    preloadContainer.style.width = '300px'; // Larger for better initialization
-    preloadContainer.style.height = '300px';
-    preloadContainer.style.opacity = '0.01'; // Almost invisible but still rendered
-    preloadContainer.style.pointerEvents = 'none';
-    preloadContainer.style.zIndex = '-1000';
-    document.body.appendChild(preloadContainer);
-    
-    // Create a real Dither component with callbacks
-    const ditherProps = {
-      waveSpeed: 0.1,
-      waveFrequency: 1.0,
-      waveAmplitude: 0.1,
-      colorNum: 2,
-      pixelSize: 8, // Larger pixels for faster loading
-      disableAnimation: false, // Need animation for proper initialization
-      enableMouseInteraction: false,
-      className: "w-full h-full",
-      onInitialize: () => window.ditherInitialized(),
-      onFirstRender: () => window.ditherRendered()
-    };
-    
-    try {
-      // Add the Dither component to our hidden container
-      const root = ReactDOM.createRoot(preloadContainer);
-      root.render(
-        <Suspense fallback={null}>
-          <ModifiedDither {...ditherProps} />
-        </Suspense>
-      );
-      
-      // Failsafe: mark as loaded after a maximum timeout
-      setTimeout(() => {
-        if (!ditherLoadingState.isLoaded) {
-          console.log('Dither preload timeout reached - forcing completion');
-          ditherLoadingState.isLoaded = true;
-          ditherLoadingState.callbacks.forEach(cb => cb());
-          ditherLoadingState.callbacks = [];
-        }
-        
-        // Try to clean up container but don't remove it right away to ensure rendering completes
-        setTimeout(() => {
-          try {
-            if (document.body.contains(preloadContainer)) {
-              document.body.removeChild(preloadContainer);
-            }
-          } catch (e) {
-            console.log('Error cleaning up preload container', e);
-          }
-        }, 2000);
-      }, 8000); // Increase timeout to ensure it has enough time
-    } catch (err) {
-      console.error('Error preloading Dither:', err);
-      
-      // Mark as loaded anyway after a delay
-      setTimeout(() => {
-        ditherLoadingState.isLoaded = true;
-        ditherLoadingState.callbacks.forEach(cb => cb());
-        ditherLoadingState.callbacks = [];
-      }, 2000);
-    }
-  });
-};
-
-// Error boundary to catch React reconciliation errors
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("React Error Boundary caught an error:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <div>Something went wrong.</div>;
-    }
-    return this.props.children;
-  }
-}
-
-// Enhanced fallback component with more information
-const DitherFallback = ({ className, errorMessage }) => (
-  <div className={`${className} bg-blue-900/20 flex items-center justify-center flex-col p-2`}>
-    <div className="text-white text-opacity-60 text-center">
-      {errorMessage || "Loading effect..."}
-    </div>
-  </div>
-);
 
 // Create a memoized static component that won't rerender
 const StaticDitherEffect = React.memo(() => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  
   useEffect(() => {
     // Mark as loaded when the component mounts successfully
-    setIsLoaded(true);
-    ditherLoadingState.isLoaded = true;
+    setTimeout(() => {
+      loadingState.isLoaded = true;
+      window.dispatchEvent(new Event('visualsLoaded'));
+    }, 500);
   }, []);
   
-  try {
-    return (
-      <Dither 
-        waveSpeed={0.4}
-        waveFrequency={1.5}
-        waveAmplitude={0.15}
-        waveColor={[0.2, 0.4, 0.8]}
-        colorNum={4}
-        pixelSize={2}
-        disableAnimation={false}
-        enableMouseInteraction={false}
-        mouseRadius={0}
-        disableHover={true}
-        preventHoverEvents={true}
-        optimizeRendering={true}
-        forceStatic={true}
-        isolateFromDomEvents={true}
-        shouldComponentUpdate={false}
-      />
-    );
-  } catch (error) {
-    console.error("Error rendering Dither:", error);
-    return null;
-  }
-}, () => true); // Always return true to prevent rerendering
-
-// Modified Dither component with callbacks for initialization and rendering
-const ModifiedDither = React.memo((props) => {
-  const [frameRendered, setFrameRendered] = useState(false);
-  
-  useEffect(() => {
-    // Signal initialization
-    if (props.onInitialize) {
-      // Short delay to ensure component is mounted
-      setTimeout(props.onInitialize, 200);
-    }
-    
-    // Signal first render after a reasonable delay for shaders to compile
-    if (props.onFirstRender && !frameRendered) {
-      const timer = setTimeout(() => {
-        setFrameRendered(true);
-        props.onFirstRender();
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [props, frameRendered]);
-  
-  return <Dither {...props} />;
-});
-
-// Updated BlissWithDither component with better error handling and preloading support
-const BlissWithDither = ({ className }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [ditherError, setDitherError] = useState(false);
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-
-  // Handle dither component errors
-  const handleDitherError = useCallback(() => {
-    console.log("Dither component failed to load, falling back to static image");
-    setDitherError(true);
-  }, []);
-
-  // Use a simpler approach that's less likely to cause reconciliation issues
   return (
-    <div ref={ref} className={`${className} relative w-full h-full overflow-hidden`}>
-      {/* Base bliss.jpg image with increased brightness */}
-      <img
-        src="/assets/bliss.jpg"
-        alt="Windows XP Bliss"
-        onLoad={() => setImageLoaded(true)}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: 'brightness(1.6)' }} // Increased brightness filter
-      />
-      
-      {/* Only attempt to render the Dither component if all conditions are met */}
-      {imageLoaded && inView && !ditherError && (
-        <ErrorBoundary 
-          fallback={
-            <DitherFallback 
-              className="absolute inset-0" 
-              errorMessage="Failed to load special effect" 
-            />
-          }
-          onError={handleDitherError}
-        >
-          <Suspense fallback={<DitherFallback className="absolute inset-0" />}>
-            <div 
-              className="absolute inset-0 z-10 opacity-50 pointer-events-none mix-blend-multiply"
-              style={{
-                pointerEvents: 'none',
-                touchAction: 'none',
-                userSelect: 'none',
-                isolation: 'isolate'
-              }}
-            >
-              {/* Using React.memo with a static component to prevent rerendering */}
-              <StaticDitherEffect />
-            </div>
-          </Suspense>
-        </ErrorBoundary>
-      )}
-      
-      {/* Scanlines - always show these regardless of dither effect */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-20"
-        style={{
-          backgroundImage: 'linear-gradient(transparent 50%, rgba(0, 0, 0, 0.4) 50%)',
-          backgroundSize: '100% 4px',
-          opacity: 0.15
-        }}
-      />
-      
-      {/* Windows XP logo */}
-     
-    </div>
+    <Dither 
+      waveSpeed={0.4}
+      waveFrequency={1.5}
+      waveAmplitude={0.15}
+      posterizeSteps={5}
+      className="w-full h-full"
+    />
   );
-};
+}, () => true); // Never re-render this component
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

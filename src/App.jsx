@@ -1,140 +1,150 @@
 // App.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-// import Scene from './Scene'; // Completely disabled as it's unoptimized
-import Hero from './pages/Hero';
-import AboutMe from './pages/AboutMe';
-import Contact from './Contact';
-import PortfolioPreview from './PortfolioPreview';
-import ProjectPage from './ProjectPage';
-import ReactProjectPage from './ReactProjectPage';
+
+// Core components that are needed immediately
 import Navbar from './Navbar';
-import TsParticles from './components/TsParticles';
 import LoadingScreen from './components/LoadingScreen';
-// add the beginning of your app entry
-import 'vite/modulepreload-polyfill'
-import axios from 'axios';
+import ErrorBoundary from './components/ErrorBoundary';
+import { CursorTooltipProvider } from './components/CursorTooltip';
+import PreloadAssets from './components/PreloadAssets';
+
+// Add polyfill for older browsers
+import 'vite/modulepreload-polyfill';
+
+// Utilities
 import useLoadingState from './hooks/useLoadingState';
 import useNavigationTracker from './hooks/useNavigationTracker';
-import ErrorBoundary from './components/ErrorBoundary';
-import AnimatedCursor from "react-animated-cursor"
-import { CursorTooltipProvider } from './components/CursorTooltip';
-import RelayedCursor from './components/MouseTracker';
+import { isLowPerformanceDevice } from './utils/performanceUtils';
 
+// Lazy load heavy components
+const Hero = lazy(() => import('./pages/Hero'));
+const AboutMe = lazy(() => import('./pages/AboutMe'));
+const Contact = lazy(() => import('./Contact'));
+const PortfolioPreview = lazy(() => import('./PortfolioPreview'));
+const ProjectPage = lazy(() => import('./ProjectPage'));
+const ReactProjectPage = lazy(() => import('./ReactProjectPage'));
+const UnifiedProjectPage = lazy(() => import('./UnifiedProjectPage'));
+const TsParticles = lazy(() => import('./components/TsParticles'));
+const AnimatedCursor = lazy(() => import("react-animated-cursor"));
+const RelayedCursor = lazy(() => import('./components/MouseTracker'));
+
+// Custom cursor styles
+const cursorStyles = `
+  .custom-cursor {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: transform 0.15s ease;
+  }
+  .cursor-inner {
+    width: 6px;
+    height: 6px;
+    background-color: #fff;
+    border-radius: 50%;
+    opacity: 1;
+  }
+  .cursor-outer {
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+`;
 
 // Create a component that conditionally renders TsParticles based on the current route
-const ParticlesController = () => {
-  const location = useLocation();
-  // Only render TsParticles if we're not on the Hero page (home route)
-  return location.pathname !== '/' ? <TsParticles /> : null;
+const ConditionalParticles = ({ pathname }) => {
+  // Only render particles on specific routes
+  // Exclude hero page ('/'), project pages, and react project pages
+  const showParticles = pathname !== '/' && 
+                       !pathname.includes('/projects/') && 
+                       !pathname.includes('/react-projects/');
+  
+  // Check if we're on a low performance device
+  const isLowPerformance = isLowPerformanceDevice();
+  
+  // Don't render particles on low-performance devices
+  if (isLowPerformance) return null;
+  
+  return showParticles ? (
+    <ErrorBoundary fallback={<div className="hidden">Particles error</div>}>
+      <Suspense fallback={null}>
+        <TsParticles />
+      </Suspense>
+    </ErrorBoundary>
+  ) : null;
 };
 
-// Main app content with navigation and loading functionality
+// Main app content with route-specific logic
 const AppContent = () => {
-  const [isIframeHovered, setIsIframeHovered] = useState(false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
-  const [useCustomCursor, setUseCustomCursor] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  const animatedCursorRef = useRef(null);
   const location = useLocation();
+  const { currentPath, prevPath, isNavigating } = useNavigationTracker();
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [forceHideLoading, setForceHideLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Use our enhanced navigation tracking hook
-  const { isNavigating, currentPath, prevPath } = useNavigationTracker();
-  
-  // Check if device is mobile
+  // Custom loading state hook
+  const isLoadingAssets = useLoadingState();
+
+  // Check mobile device
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // SAFETY MECHANISM: Force hide loading screen after a specific timeout
-  const [forceHideLoading, setForceHideLoading] = useState(false);
   
-  // Use our custom hook for comprehensive loading state
-  const isLoadingAssets = useLoadingState();
-
-  // Reset force hide loading when navigation occurs
+  // Safety mechanism: Force hide loading screen after timeout
   useEffect(() => {
     if (prevPath !== null && prevPath !== currentPath) {
       // Reset force hide loading state on each navigation
       setForceHideLoading(false);
-      
       // Clear the visualsLoaded flag from localStorage
       localStorage.removeItem('visualsLoaded');
-      
-      // This will force the components to fully reload their visuals
+      // Force components to reload visuals
       window.dispatchEvent(new Event('navigation'));
     }
   }, [currentPath, prevPath]);
   
   useEffect(() => {
-    // Absolute failsafe: Hide loading screen after 6 seconds no matter what
+    // Absolute failsafe: Hide loading screen after 5 seconds
     const forceHideTimer = setTimeout(() => {
       console.log('FAILSAFE ACTIVATED: Forcing loading screen to hide');
       setForceHideLoading(true);
-    }, 6000);
+    }, 5000);
     
-    // Reset the timer when navigation occurs
     return () => clearTimeout(forceHideTimer);
-  }, [currentPath]); // Reset timer on path change
-  
-  // Add CSS for animated cursor elements
-  const cursorStyles = `
-    .animated-cursor {
-      transition: opacity 0.2s ease-out !important;
-    }
-  `;
+  }, [location.pathname]);
 
-  // Effect to detect when an iframe container is hovered
+  // Setup iframe mouse tracking
   useEffect(() => {
-    const handleIframeHover = (e) => {
-      const isHovering = e.type === 'mouseenter';
-      setIsIframeHovered(isHovering);
+    document.querySelectorAll('iframe').forEach(iframe => {
+      // Skip iframes that are from other domains (security)
+      if (!iframe.src.includes(window.location.hostname)) return;
       
-      // Toggle between animated cursor and relayed cursor
-      setUseCustomCursor(!isHovering);
+      const container = iframe.parentElement;
+      if (!container) return;
       
-      // More aggressive targeting of all cursor elements with a slight delay
-      setTimeout(() => {
-        const allCursorElements = document.querySelectorAll('.animated-cursor, .react-animated-cursor, div[data-cursor="true"]');
-        allCursorElements.forEach(el => {
-          el.style.opacity = isHovering ? '0' : '1';
-          el.style.visibility = isHovering ? 'hidden' : 'visible';
-          el.style.display = isHovering ? 'none' : 'block';
-        });
-        
-        // Handle specific outer cursor elements that might have different class names
-        const outerCursors = document.querySelectorAll('.animated-cursor-outer');
-        outerCursors.forEach(el => {
-          el.style.opacity = isHovering ? '0' : '1';
-          el.style.visibility = isHovering ? 'hidden' : 'visible';
-          el.style.display = isHovering ? 'none' : 'block';
-        });
-      }, 50);
-    };
-    
-    // Attach event listeners to iframe containers
-    const iframeContainers = document.querySelectorAll('.iframe-cursor-container');
-    iframeContainers.forEach(container => {
+      const handleIframeHover = () => {
+        document.dispatchEvent(new CustomEvent('iframe-hover'));
+      };
+      
       container.addEventListener('mouseenter', handleIframeHover);
       container.addEventListener('mouseleave', handleIframeHover);
-    });
-    
-    return () => {
-      iframeContainers.forEach(container => {
+      
+      return () => {
         container.removeEventListener('mouseenter', handleIframeHover);
         container.removeEventListener('mouseleave', handleIframeHover);
-      });
-    };
-  }, [location.pathname]); // Re-run when path changes to catch newly rendered iframes
+      };
+    });
+  }, [location.pathname]);
 
-  // Combine all loading states - initial load, navigation, and force hide override
+  // Combine loading states
   const showLoadingScreen = (isLoadingAssets || isNavigating) && !forceHideLoading;
 
   return (
@@ -149,142 +159,63 @@ const AppContent = () => {
           name="keywords"
           content="web developer vancouver, daniel kolpakov, react.js developer, front end development, ui/ux designer, daniel kolpakov portfolio, daniel kolpakov projects, bcit new media"
         />
+        {/* Preconnect to essential domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Add preload hints for critical assets */}
+        <link rel="preload" as="image" href="/assets/images/previewreact1.jpg" />
       </Helmet>
+      <PreloadAssets />
       <style>{cursorStyles}</style>
       <>
         <Navbar isOpen={isNavOpen} setIsOpen={setIsNavOpen} />
-        {/* Conditionally render TsParticles based on route */}
-        <ParticlesController />
-        <div id="page-wrap" className={`${isNavOpen ? 'relative animate-marchingAnts rounded-xl' : ''}`}>
-          <main className="relative">
-            {/* Use our loading screen with combined loading states */}
-            <LoadingScreen isLoading={showLoadingScreen} message="One sec.." />
-            <Routes>
-              <Route path="/" element={<Hero key={currentPath} />} />
-              <Route path="/about" element={<AboutMe key={currentPath} />} />
-              <Route path="/portfolio" element={<PortfolioPreview key={currentPath} />} />
-              <Route path="/contact" element={<Contact key={currentPath} />} />
-              <Route path="/projects/:id" element={<ProjectPage key={currentPath} />} />
-              <Route path="/react-projects/:id" element={<ReactProjectPage key={currentPath} />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </main>
-        </div>
+        <ConditionalParticles pathname={location.pathname} />
+        
+        <CursorTooltipProvider>
+          <ErrorBoundary>
+            {!isMobile && (
+              <Suspense fallback={null}>
+                <AnimatedCursor
+                  innerSize={8}
+                  outerSize={24}
+                  outerAlpha={0.3}
+                  innerScale={0.7}
+                  outerScale={2}
+                  trailingSpeed={7}
+                />
+              </Suspense>
+            )}
+            <main>
+              <Suspense fallback={<LoadingScreen isLoading={true} />}>
+                <Routes>
+                  <Route path="/" element={<Hero isOpen={isNavOpen} />} />
+                  <Route path="/about" element={<AboutMe />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/portfolio" element={<PortfolioPreview />} />
+                  <Route path="/projects/:id" element={<ProjectPage />} />
+                  <Route path="/react-projects/:id" element={<ReactProjectPage />} />
+                  <Route path="/unified-projects/:id" element={<UnifiedProjectPage />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </Suspense>
+            </main>
+          </ErrorBoundary>
+        </CursorTooltipProvider>
       </>
-      
-      {/* Only render cursor components on non-mobile devices */}
-      {!isMobile && !isIframeHovered ? (
-        <AnimatedCursor
-          ref={animatedCursorRef}
-          innerSize={8}
-          outerSize={35}
-          innerScale={1}
-          outerScale={1.7}
-          outerAlpha={0}
-          hasBlendMode={true}
-          innerStyle={{
-            backgroundColor: '#ff2d00'
-          }}
-          outerStyle={{
-            border: '3px solid #ff2d00'
-          }}
-          clickables={[
-            'a',
-            'button',
-            '.link',
-            '.project-card',
-            '.clickable',
-            '.nav-item',
-            'input[type="text"]',
-            'input[type="email"]',
-            'input[type="number"]',
-            'input[type="submit"]',
-            'textarea',
-            'select',
-            'label[for]',
-            '.social-icon',
-            'iframe'
-          ]}
-          trailingSpeed={8}
-          showSystemCursor={false}
-          
-          // Add custom cursor behaviors
-          customCursors={[
-            {
-              selector: '.draggable, [draggable="true"], .slider, .resize-handle',
-              style: {
-                innerColor: '#4cf7c3',
-                outerColor: '#4cf7c3',
-                innerScale: 1.2,
-                outerScale: 2,
-                innerSize: 8,
-                outerSize: 25,
-                outerAlpha: 0.3,
-                mixBlendMode: 'exclusion',
-                text: "+ drag"
-              }
-            },
-            {
-              selector: 'button, .button, input[type="submit"]',
-              style: {
-                innerColor: '#ffdd40',
-                outerColor: '#ffdd40',
-                innerScale: 1.5,
-                outerScale: 1.2
-              }
-            },
-            {
-              selector: 'a, .link, .nav-item',
-              style: {
-                innerColor: '#61dafb',
-                outerColor: '#61dafb',
-                innerScale: 1.5,
-                outerScale: 1.2
-              }
-            },
-            {
-              selector: 'input, textarea, select',
-              style: {
-                innerColor: '#ffffff',
-                outerColor: '#ffffff',
-                innerScale: 1.2,
-                outerScale: 1.5,
-                text: "type"
-              }
-            }
-          ]}
-        />
-      ) : !isMobile && (
-        /* Use RelayedCursor when hovering over iframes for seamless cursor tracking */
-        <RelayedCursor 
-          targetSelector=".iframe-cursor-container"
-          innerColor="#ff2d00"
-          outerColor="#ff2d00"
-          innerSize={8}
-          outerSize={35}
-          outerAlpha={0.3}
-          innerScale={1.2}
-          outerScale={1.7}
-          enableTooltips={true}
-          debugMode={false}
-        />
-      )}
+      <LoadingScreen isLoading={showLoadingScreen} />
     </>
   );
 };
 
-const App = () => {
+// Main App component
+function App() {
   return (
-    <ErrorBoundary>
-      <CursorTooltipProvider>
-        <Router>
-          <div id="outer-container" className="relative min-h-screen bg-transparent z-10">
-            <AppContent />
-          </div>
-        </Router>
-      </CursorTooltipProvider>
-    </ErrorBoundary>
+    <Router>
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+    </Router>
   );
-};
+}
 
 export default App;

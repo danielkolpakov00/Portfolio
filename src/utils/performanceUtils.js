@@ -37,7 +37,7 @@ export const isLowPerformanceDevice = () => {
   }
   
   return false;
-};
+}
 
 /**
  * Schedules a task to run when the browser is idle
