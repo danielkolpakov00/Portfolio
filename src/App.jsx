@@ -27,7 +27,8 @@ const ProjectPage = lazy(() => import('./ProjectPage'));
 const ReactProjectPage = lazy(() => import('./ReactProjectPage'));
 const UnifiedProjectPage = lazy(() => import('./UnifiedProjectPage'));
 const TsParticles = lazy(() => import('./components/TsParticles'));
-const AnimatedCursor = lazy(() => import("react-animated-cursor"));
+// Replace AnimatedCursor with SafeCursor
+const SafeCursor = lazy(() => import('./components/SafeCursor'));
 const RelayedCursor = lazy(() => import('./components/MouseTracker'));
 
 // Custom cursor styles
@@ -175,14 +176,18 @@ const AppContent = () => {
           <ErrorBoundary>
             {!isMobile && (
               <Suspense fallback={null}>
-                <AnimatedCursor
-                  innerSize={8}
-                  outerSize={24}
-                  outerAlpha={0.3}
-                  innerScale={0.7}
-                  outerScale={2}
-                  trailingSpeed={7}
-                />
+                <ErrorBoundary fallback={<div className="hidden">Cursor error</div>}>
+                  {typeof window !== 'undefined' && document.body && (
+                    <SafeCursor
+                      innerSize={8}
+                      outerSize={24}
+                      outerAlpha={0.3}
+                      innerScale={0.7}
+                      outerScale={2}
+                      trailingSpeed={7}
+                    />
+                  )}
+                </ErrorBoundary>
               </Suspense>
             )}
             <main>

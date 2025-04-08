@@ -186,12 +186,20 @@ const IframeProxyCursor = ({
       setIsHovered(true);
       updateIframePosition(); // Update position on enter
 
-      // Make react-animated-cursor follow into the overlay
-      const animatedCursor = document.querySelector('.animated-cursor');
-      if (animatedCursor) {
-        // Ensure cursor is visible
-        animatedCursor.style.opacity = '1';
-        animatedCursor.style.pointerEvents = 'none';
+      // Make react-animated-cursor follow into the overlay - SAFE IMPLEMENTATION
+      try {
+        const animatedCursor = document.querySelector('.animated-cursor');
+        if (animatedCursor && typeof animatedCursor === 'object') {
+          // Ensure cursor is visible and protect against potential null references
+          requestAnimationFrame(() => {
+            if (animatedCursor.style) {
+              animatedCursor.style.opacity = '1';
+              animatedCursor.style.pointerEvents = 'none';
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Error handling cursor visibility:', err);
       }
     };
 

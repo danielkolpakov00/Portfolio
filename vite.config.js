@@ -90,6 +90,9 @@ export default defineConfig({
       output: {
         // Improved chunking strategy
         manualChunks: (id) => {
+          // If the id is not a string, return undefined
+          if (typeof id !== 'string') return undefined;
+
           // Check for specific modules
           if (id.includes('node_modules/react/') || 
               id.includes('node_modules/react-dom/') || 
@@ -112,6 +115,17 @@ export default defineConfig({
           
           if (id.includes('node_modules/gsap/')) {
             return 'gsap';
+          }
+
+          // Handle potentially problematic packages separately
+          if (id.includes('node_modules/react-animated-cursor/')) {
+            return 'cursor-vendor';
+          }
+
+          if (id.includes('node_modules/@tsparticles/') || 
+              id.includes('node_modules/tsparticles/') ||
+              id.includes('node_modules/react-tsparticles/')) {
+            return 'particles-vendor';
           }
         },
         // Larger chunks get their own files, which helps with caching
@@ -155,12 +169,12 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'framer-motion', 'gsap', 'three'],
     esbuildOptions: {
-      target: 'esnext', // Optimize for modern browsers
+      target: 'es2020', // Change from esnext to es2020 for better compatibility
     },
   },
   // Add esbuild options for better tree-shaking
   esbuild: {
-    target: 'esnext',
+    target: 'es2020', // Change from esnext to es2020 for better compatibility
     legalComments: 'none', // Remove license comments to decrease bundle size
     treeShaking: true,
   },
