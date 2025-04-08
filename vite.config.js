@@ -89,12 +89,30 @@ export default defineConfig({
       input: './index.html',
       output: {
         // Improved chunking strategy
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-framework': ['framer-motion', 'tailwindcss'],
-          'three-core': ['three'],
-          'three-addons': [/three\/examples\/jsm/],
-          'gsap': ['gsap'],
+        manualChunks: (id) => {
+          // Check for specific modules
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/') || 
+              id.includes('node_modules/react-router-dom/')) {
+            return 'react-vendor';
+          }
+          
+          if (id.includes('node_modules/framer-motion/') || 
+              id.includes('node_modules/tailwindcss/')) {
+            return 'ui-framework';
+          }
+          
+          if (id.includes('node_modules/three/build/')) {
+            return 'three-core';
+          }
+          
+          if (id.includes('node_modules/three/examples/jsm/')) {
+            return 'three-addons';
+          }
+          
+          if (id.includes('node_modules/gsap/')) {
+            return 'gsap';
+          }
         },
         // Larger chunks get their own files, which helps with caching
         chunkSizeWarningLimit: 800,
