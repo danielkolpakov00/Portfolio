@@ -1,68 +1,30 @@
 import { useEffect, useMemo, useState } from 'react';
-import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { Particles } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import { memo } from 'react';
 
 const TsParticles = ({ onLoaded }) => {
   const [init, setInit] = useState(false);
-  const [engine, setEngine] = useState(null);
   
-  useEffect(() => {
-    let isMounted = true;
-    
-    const initializeEngine = async () => {
-      try {
-        console.log("Initializing TsParticles engine...");
-        
-        await initParticlesEngine(async (engineInstance) => {
-          await loadSlim(engineInstance);
-          if (isMounted) {
-            setEngine(engineInstance);
-          }
-        });
-        
-        if (isMounted) {
-          console.log("TsParticles engine initialized successfully");
-          setInit(true);
-          
-          // Notify parent component that particles are initialized
-          if (onLoaded && typeof onLoaded === 'function') {
-            onLoaded();
-          }
-        }
-      } catch (error) {
-        console.error("Failed to initialize particles:", error);
-        // Try to reinitialize after a delay
-        setTimeout(initializeEngine, 1500);
+  // Initialize the tsParticles instance
+  const particlesInit = async (engine) => {
+    try {
+      console.log("Initializing TsParticles engine...");
+      await loadSlim(engine);
+      console.log("TsParticles engine initialized successfully");
+      setInit(true);
+      
+      // Notify parent component that particles are initialized
+      if (onLoaded && typeof onLoaded === 'function') {
+        onLoaded();
       }
-    };
-    
-    initializeEngine();
-    
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      console.log("TsParticles component unmounted, cleaning up");
-      setInit(false);
-      // Release engine resources if needed
-      if (engine) {
-        console.log("Cleaning up TsParticles engine");
-        // Any necessary cleanup for the engine
-      }
-    };
-  }, [onLoaded]);
+    } catch (error) {
+      console.error("Failed to initialize particles:", error);
+    }
+  };
 
   const particlesLoaded = (container) => {
     console.log("Particles container loaded:", container);
-    
-    // Additional callback when particles are rendered
-    if (onLoaded && typeof onLoaded === 'function') {
-      // We already called onLoaded when engine was initialized,
-      // but this ensures it's also called if engine was already initialized
-      if (init) {
-        console.log("Particles fully loaded and rendered");
-      }
-    }
   };
 
   const options = useMemo(() => ({
@@ -161,14 +123,14 @@ const TsParticles = ({ onLoaded }) => {
       pointerEvents: 'none', // Ensures that mouse events pass through to elements below
       willChange: 'transform', // Optimization for fixed elements
     }}>
-      {init && engine && (
-        <Particles
-          id="tsparticles"
-          particlesLoaded={particlesLoaded}
-          options={options}
-          className="particles-canvas" // Added class for potential CSS optimizations
-        />
-      )}
+      {/* Simplified render condition to avoid unnecessary checks */}
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        loaded={particlesLoaded}
+        options={options}
+        className="particles-canvas"
+      />
     </div>
   );
 };
