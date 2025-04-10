@@ -1,10 +1,10 @@
-// Update imports to use import map paths
-import * as THREE from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
-import { gsap } from 'gsap';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
+import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { SVGLoader } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/SVGLoader.js';
+import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.11.0/index.js';
+
 
 // Console logging to help troubleshoot loading
 console.log("Weather module initialization starting");

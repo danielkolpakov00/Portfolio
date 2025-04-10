@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, Suspense, useState, useMemo } from 'react';
+import React, { useEffect, useRef, Suspense, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import VerticalMarquee from '../components/VerticalMarquee';
 import { gsap } from 'gsap';
@@ -18,7 +18,6 @@ const Hero = ({ isOpen }) => {
   const canvasContainerRef = useRef();
   const dialogueBoxRef = useRef(null);
   const portfolioButtonRef = useRef(null);
-  const [init, setInit] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   // Track if this is the first load or if we navigated to this page
   const [hasDispatchedVisualsLoaded, setHasDispatchedVisualsLoaded] = useState(false);
@@ -34,13 +33,6 @@ const Hero = ({ isOpen }) => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
-
-  // Apply parallax effect to elements - removing dialogue box and portfolio button from parallax
-  useEffect(() => {
-    // Removing the dialogue box and portfolio button transformations
-    // We're keeping the empty useEffect to maintain the component structure
-    // and allow for future additions of other parallax elements if needed
-  }, [mousePosition]);
 
   // Dialogue state and logic
   const [displayedText, setDisplayedText] = useState("Hello! I'm Daniel. I am a web designer looking to kickstart my career.");
@@ -117,15 +109,6 @@ const Hero = ({ isOpen }) => {
       tl.fromTo(".title-area", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1.5, ease: "power3.out" }, "-=0.5");
     }
   }, []);
-
-  // // Initialize particles
-  // useEffect(() => {
-  //   initParticlesEngine(async (engine) => {
-  //     await loadSlim(engine);
-  //   }).then(() => {
-  //     setInit(true);
-  //   });
-  // }, []);
 
   // Easter egg keyboard sequence for backflip
   useEffect(() => {
@@ -219,19 +202,7 @@ const Hero = ({ isOpen }) => {
           opacity: '30%'
         }}
       >
-        <Particles
-          particleColors={['#1B44FA', '#1B69FA']}
-          particleCount={40}
-          particleSpread={18}
-          speed={0.08}
-          particleBaseSize={400}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.5}
-          alphaParticles={true}
-          disableRotation={false}
-          cameraDistance={40}
-          className="particles-container-back"
-        />
+        {/* Empty div - previously had particles */}
       </div>
       
       {/* Middle particles layer - adds depth */}
