@@ -317,11 +317,11 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function initAudio() {
     audio = new Audio();
-    audio.src = 'assets/Demo_Track.wav';
+    audio.src = 'assets/AReallyCoolSong.mp3';
     audio.crossOrigin = 'anonymous';
   
     // Update song title to match initial song
-    songTitle.textContent = 'Demo Track (AI)';
+    songTitle.textContent = 'Totally Cool Song';
   
     // Fix: Ensure audio context is created properly
     if (!audioContext) {
