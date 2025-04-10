@@ -103,7 +103,7 @@ const aboutContent = {
         {
           heading: "Building Cool Stuff",
           icon: "briefcase",
-          description: "From sleek websites to interactive apps, I've worked on projects that push creativity and functionality. Always experimenting, always leveling up!",
+          description: "From sleek websites to interactive apps, I've worked on projects that push creativity and functionality. I always like to experiment with new ideas.",
          className: "bg-gradient-to-br from-white to-offwhite"
         },
         {
