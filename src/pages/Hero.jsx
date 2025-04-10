@@ -190,7 +190,7 @@ const Hero = ({ isOpen }) => {
       }}>
         <Particles
           particleColors={['#1B60FA', '#1B70FA']}
-          particleCount={40}
+          particleCount={20}
           particleSpread={25}
           speed={0.05}
           particleBaseSize={300}
@@ -221,7 +221,7 @@ const Hero = ({ isOpen }) => {
       >
         <Particles
           particleColors={['#1B44FA', '#1B69FA']}
-          particleCount={60}
+          particleCount={40}
           particleSpread={18}
           speed={0.08}
           particleBaseSize={400}

@@ -1,35 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-const fullMarqueeText = "dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · ";
+const fullMarqueeText =
+  "dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · dkolp · web design · web development · react.js · three.js · tailwind · design · figma · git · seo · branding · adobe suite · ";
 
 const VerticalMarquee = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const marqueeRef = useRef(null);
-  
-  // Initial load delay
+
+  // Optimized initial load delay
   useEffect(() => {
-    const initialRender = () => setIsLoaded(true);
-    
+    const handleLoad = () => setIsLoaded(true);
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(initialRender, { timeout: 2000 });
+      window.requestIdleCallback(handleLoad, { timeout: 2000 });
     } else {
-      const timeoutId = setTimeout(initialRender, 1000);
+      const timeoutId = setTimeout(handleLoad, 1000);
       return () => clearTimeout(timeoutId);
     }
   }, []);
 
-  const containerStyle = {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    zIndex: 100,
-    display: 'flex',
-    alignItems: 'center',
-    pointerEvents: 'none',
-    // Remove the contain property that might be causing issues
-    visibility: isLoaded ? 'visible' : 'hidden',
-  };
+  // Memoized container style to avoid recalculating on every render
+  const containerStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      zIndex: 100,
+      display: 'flex',
+      alignItems: 'center',
+      pointerEvents: 'none',
+      visibility: isLoaded ? 'visible' : 'hidden',
+    }),
+    [isLoaded]
+  );
 
   const textStyle = {
     transform: 'rotate(90deg)',
@@ -39,25 +42,28 @@ const VerticalMarquee = () => {
     color: '#808080',
     overflow: 'visible',
     width: '100vw',
-    opacity: '0.5',
+    opacity: 0.5,
   };
 
-  const marqueeWrapperStyle = {
-    display: 'inline-block',
-    animation: isLoaded ? 'marquee 120s linear infinite' : 'none',
-    animationDelay: '-10s',
-    height: '100%',
-    // Only use willChange without the other performance optimizations that might be causing issues
-    willChange: isLoaded ? 'transform' : 'auto',
-  };
+  // Memoized marquee style to improve performance
+  const marqueeWrapperStyle = useMemo(
+    () => ({
+      display: 'inline-block',
+      animation: isLoaded ? 'marquee 120s linear infinite' : 'none',
+      animationDelay: '-10s',
+      height: '100%',
+      willChange: isLoaded ? 'transform' : 'auto',
+    }),
+    [isLoaded]
+  );
 
-  // If not loaded yet, return null
   if (!isLoaded) {
     return null;
   }
 
   return (
     <div style={containerStyle}>
+      {/* Moved keyframes to a CSS block */}
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -65,12 +71,9 @@ const VerticalMarquee = () => {
         }
       `}</style>
       <div style={textStyle}>
-        <div 
-          style={marqueeWrapperStyle}
-          ref={marqueeRef}
-        >
+        <div style={marqueeWrapperStyle} ref={marqueeRef}>
           <span>{fullMarqueeText}</span>
-          {/* Add a duplicate span to ensure continuous looping */}
+          {/* Duplicate span for continuous looping */}
           <span>{fullMarqueeText}</span>
         </div>
       </div>

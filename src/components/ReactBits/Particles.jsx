@@ -100,25 +100,15 @@ const Particles = ({
     container.appendChild(gl.canvas);
     gl.clearColor(0, 0, 0, 0);
 
-    // Create a camera with wider field of view to prevent clipping
-    const camera = new Camera(gl, { fov: 25 }); // Increased FOV from 15 to 25
-    camera.position.set(0, 0, cameraDistance * 1.2); // Move camera further back
+    const camera = new Camera(gl, { fov: 15 });
+    camera.position.set(0, 0, cameraDistance);
 
     const resize = () => {
-      // Add extra padding to the canvas size to prevent clipping
-      const width = container.clientWidth * 1.2;  // 20% extra width
-      const height = container.clientHeight * 1.2;  // 20% extra height
-      
+      const width = container.clientWidth;
+      const height = container.clientHeight;
       renderer.setSize(width, height);
-      
-      // Adjust the viewport to center the extra canvas area
-      const xOffset = (width - container.clientWidth) / 2;
-      const yOffset = (height - container.clientHeight) / 2;
-      gl.viewport(-xOffset, -yOffset, width, height);
-      
-      camera.perspective({ aspect: width / height });
+      camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
     };
-
     window.addEventListener("resize", resize, false);
     resize();
 
@@ -139,16 +129,15 @@ const Particles = ({
     const colors = new Float32Array(count * 3);
     const palette = particleColors && particleColors.length > 0 ? particleColors : defaultColors;
 
-    // Generate particles in a wider sphere to allow for more movement without clipping
     for (let i = 0; i < count; i++) {
       let x, y, z, len;
       do {
-        x = Math.random() * 1.6 - 0.8; // Wider distribution (-0.8 to 0.8 instead of -1 to 1)
-        y = Math.random() * 1.6 - 0.8;
-        z = Math.random() * 1.6 - 0.8;
+        x = Math.random() * 2 - 1;
+        y = Math.random() * 2 - 1;
+        z = Math.random() * 2 - 1;
         len = x * x + y * y + z * z;
       } while (len > 1 || len === 0);
-      const r = Math.cbrt(Math.random()) * 0.8; // Reduce the radius slightly
+      const r = Math.cbrt(Math.random());
       positions.set([x * r, y * r, z * r], i * 3);
       randoms.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
       const col = hexToRgb(palette[Math.floor(Math.random() * palette.length)]);
@@ -166,7 +155,7 @@ const Particles = ({
       fragment,
       uniforms: {
         uTime: { value: 0 },
-        uSpread: { value: particleSpread * 0.9 }, // Slightly reduced spread to prevent clipping
+        uSpread: { value: particleSpread },
         uBaseSize: { value: particleBaseSize },
         uSizeRandomness: { value: sizeRandomness },
         uAlphaParticles: { value: alphaParticles ? 1 : 0 },
@@ -190,21 +179,17 @@ const Particles = ({
       program.uniforms.uTime.value = elapsed * 0.001;
 
       if (moveParticlesOnHover) {
-        // Limit mouse movement influence to prevent extreme values that cause clipping
-        const limitedX = Math.max(-1.5, Math.min(1.5, mouseRef.current.x));
-        const limitedY = Math.max(-1.5, Math.min(1.5, mouseRef.current.y));
-        particles.position.x = -limitedX * (particleHoverFactor * 0.9);
-        particles.position.y = -limitedY * (particleHoverFactor * 0.9);
+        particles.position.x = -mouseRef.current.x * particleHoverFactor;
+        particles.position.y = -mouseRef.current.y * particleHoverFactor;
       } else {
         particles.position.x = 0;
         particles.position.y = 0;
       }
 
       if (!disableRotation) {
-        // Reduce rotation amplitude slightly to prevent particles from moving too far
-        particles.rotation.x = Math.sin(elapsed * 0.0002) * 0.08;
-        particles.rotation.y = Math.cos(elapsed * 0.0005) * 0.12;
-        particles.rotation.z += 0.008 * speed;
+        particles.rotation.x = Math.sin(elapsed * 0.0002) * 0.1;
+        particles.rotation.y = Math.cos(elapsed * 0.0005) * 0.15;
+        particles.rotation.z += 0.01 * speed;
       }
 
       renderer.render({ scene: particles, camera });
@@ -239,14 +224,7 @@ const Particles = ({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full overflow-hidden ${className}`}
-      style={{ 
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%' 
-      }}
+      className={`relative w-full h-full ${className}`}
     />
   );
 };
